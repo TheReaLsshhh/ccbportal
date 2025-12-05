@@ -1,0 +1,787 @@
+/* Loading, Error, and Empty States */
+html, body {
+  overflow-x: hidden;
+}
+.loading-container,
+.error-container,
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #2d5a2d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p,
+.empty-state-container p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 1.1rem;
+  margin: 0;
+  background: #fef2f2;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+/* Faculty & Staff Page Specific Styles */
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Faculty & Staff Page Header */
+.faculty-staff-header {
+    background-image: url('../public/images/ccb.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 120px 0 80px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 445px !important;
+}
+
+.faculty-staff-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(19, 34, 19, 0.6);
+  z-index: 1;
+}
+
+.faculty-staff-header .container {
+  position: relative;
+  z-index: 2;
+}
+
+.faculty-staff-header .hero-content {
+  max-width: 800px;
+  margin: -100px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -100px;
+}
+
+.faculty-staff-header .hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.faculty-staff-header .hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0.3s;
+}
+
+.faculty-staff-header .hero-motto {
+  font-size: 1.1rem;
+  font-style: italic;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0.5s;
+}
+
+/* Faculty & Staff Sections */
+.faculty-staff-section {
+  padding: 20px 0;
+}
+
+.faculty-staff-section .section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #2d5a2d;
+}
+
+.faculty-staff-section .section-subtitle {
+  font-size: 1.1rem;
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 3rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Directory Section */
+.directory-section {
+  background-color: #f8fafc;
+}
+
+.directory-content {
+  margin-top: 2rem;
+}
+
+.departments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.department-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e5e7eb;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.department-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.department-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.department-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.department-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.department-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #2d5a2d;
+}
+
+.department-icon {
+  color: #2d5a2d;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.department-card:hover .department-icon {
+  color: #ff8c00;
+}
+
+.department-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d5a2d;
+  text-align: center;
+}
+
+.department-info {
+  margin-bottom: 1.5rem;
+}
+
+.department-info p {
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.department-info strong {
+  color: #2d5a2d;
+}
+
+.faculty-list {
+  margin-bottom: 1.5rem;
+}
+
+.faculty-list h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #2d5a2d;
+}
+
+.faculty-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.faculty-list li {
+  padding: 0.25rem 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.faculty-list li:last-child {
+  border-bottom: none;
+}
+
+.contact-btn {
+  background: linear-gradient(135deg, #2d5a2d 0%, #1e3d1e 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.contact-btn:hover {
+  box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+  background: linear-gradient(135deg, #ff8c00 0%, #ff9f1a 100%);
+}
+
+/* Administrative Offices */
+.administrative-offices {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+  animation-delay: 0.5s;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.administrative-offices h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d5a2d;
+  text-align: center;
+}
+
+.offices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.office-card {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.office-card:hover {
+  background-color: #f1f5f9;
+  border-color: #2d5a2d;
+}
+
+.office-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d5a2d;
+}
+
+.office-card p {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.office-card strong {
+  color: #2d5a2d;
+}
+
+/* HR Section */
+.hr-section {
+  background-color: white;
+}
+
+.hr-content {
+  margin-top: 2rem;
+}
+
+.policies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.policy-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.policy-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #2d5a2d;
+}
+
+.policy-icon {
+  color: #2d5a2d;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.policy-card:hover .policy-icon {
+  color: #ff8c00;
+}
+
+.policy-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d5a2d;
+}
+
+.policy-card p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.download-btn {
+  background: linear-gradient(135deg, #2d5a2d 0%, #1e3d1e 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+  box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+  background: linear-gradient(135deg, #ff8c00 0%, #ff9f1a 100%);
+}
+
+/* Forms Section */
+.forms-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.forms-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d5a2d;
+  text-align: center;
+}
+
+.forms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.form-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.form-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #2d5a2d;
+}
+
+.form-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #2d5a2d;
+}
+
+.form-card p {
+  color: #6b7280;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.form-btn {
+  background: linear-gradient(135deg, #2d5a2d 0%, #1e3d1e 100%);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.form-btn:hover {
+  box-shadow: 0 3px 10px rgba(255, 140, 0, 0.3);
+  background: linear-gradient(135deg, #ff8c00 0%, #ff9f1a 100%);
+}
+
+/* Resources Section */
+.resources-section {
+  background-color: #f8fafc;
+}
+
+.resources-content {
+  margin-top: 2rem;
+}
+
+.teaching-resources {
+  margin-bottom: 3rem;
+}
+
+.teaching-resources h3 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d5a2d;
+  text-align: center;
+}
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.3s ease-out;
+}
+
+.resources-grid.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.resource-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.resource-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #2d5a2d;
+}
+
+.resource-icon {
+  color: #2d5a2d;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.resource-card:hover .resource-icon {
+  color: #ff8c00;
+}
+
+.resource-card h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d5a2d;
+  text-align: center;
+}
+
+.resource-card p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.resource-card ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.resource-card li {
+  padding: 0.5rem 0;
+  color: #4b5563;
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.resource-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #059669;
+  font-weight: bold;
+}
+
+.resource-btn {
+  background: linear-gradient(135deg, #2d5a2d 0%, #1e3d1e 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.resource-btn:hover {
+  box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+  background: linear-gradient(135deg, #ff8c00 0%, #ff9f1a 100%);
+}
+
+/* Administrative Resources */
+.admin-resources h3 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d5a2d;
+  text-align: center;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.3s ease-out;
+}
+
+.admin-grid.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.admin-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #2d5a2d;
+}
+
+.admin-card h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d5a2d;
+  text-align: center;
+}
+
+.admin-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.admin-link {
+  color: #2d5a2d;
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-link:hover {
+  background: #2d5a2d;
+  color: white;
+}
+
+.faculty-staff-footer .footer {
+  background-color: #2d5a2d;
+  color: #fff;
+  padding: 0 0 20px;
+  margin-top: 60px;
+}
+
+/* Custom wave colors for Admissions page footer */
+.faculty-staff-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
+.faculty-staff-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
+.faculty-staff-page .footer-wave .shape-fill-3 { fill: rgba(255, 255, 254, 1); }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .faculty-staff-header .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .faculty-staff-header .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .faculty-staff-section .section-title {
+    font-size: 2rem;
+  }
+  
+  .departments-grid,
+  .policies-grid,
+  .forms-grid,
+  .resources-grid,
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .offices-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  
+  .faculty-staff-section {
+    padding: 60px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .faculty-staff-header {
+    padding: 100px 0 60px;
+  }
+  
+  .faculty-staff-header .hero-title {
+    font-size: 2rem;
+  }
+  
+  .department-card,
+  .policy-card,
+  .form-card,
+  .resource-card,
+  .admin-card {
+    padding: 1.5rem;
+  }
+  
+  .administrative-offices,
+  .forms-section {
+    padding: 1.5rem;
+  }
+}
+
+/* Container styles to match existing design */
+.faculty-staff-section .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Footer styles to match existing design */

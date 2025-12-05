@@ -1,0 +1,532 @@
+/* CCB Logo Page Styles */
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero Section */
+.ccb-hero {
+  background-image: url('../public/images/ccb.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  padding: 120px 0 80px;
+  text-align: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 445px !important;
+}
+
+.ccb-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(19, 34, 19, 0.6);
+  z-index: 1;
+}
+
+.ccb-hero .container {
+  position: relative;
+  z-index: 2;
+}
+
+.ccb-hero .hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.ccb-hero .hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0.3s;
+}
+
+.ccb-hero .hero-motto {
+  font-size: 1.1rem;
+  font-style: italic;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0.5s;
+}
+
+.ccb-content-section {
+  padding-top: 30px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 60vh;
+}
+
+.ccb-content-section.navbar-collapsed {
+  padding-top: 60px;
+}
+
+.ccb-content {
+  display: grid;
+  grid-template-columns: auto 1fr 2fr;
+  gap: 40px;
+  align-items: start;
+  position: relative;
+}
+
+/* Timeline Component */
+.timeline-container {
+  position: relative;
+  width: 20px;
+  height: 850px; /* Increased height to reach seals */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 20px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    #2d5a2d 0%,
+    #ff8c00 20%,
+    #ff8c00 80%,
+    #2d5a2d 100%
+  );
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  background: #2d5a2d;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(45, 90, 45, 0.3);
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Position dots to align with left column sections */
+.timeline-dot-1 {
+  top: 80px; /* Aligns with center of profile card */
+}
+
+.timeline-dot-2 {
+  top: 410px; /* Aligns with center of contact section */
+}
+
+.timeline-dot-3 {
+  top: 620px; /* Aligns with first seal item (Philippine Transparency Seal) */
+}
+
+.timeline-dot-4 {
+  top: 740px; /* Aligns with second seal item (Freedom of Information) */
+}
+
+.timeline-dot-5 {
+  display: none; /* Hide the 5th dot as we only need 4 */
+}
+
+/* Left Column */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Profile Card */
+.profile-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.3s ease-out;
+}
+
+.profile-card.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.profile-image {
+  margin-bottom: 20px;
+}
+
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #2d5a2d;
+}
+
+.profile-info h3 {
+  color: #2d5a2d;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.profile-title {
+  color: #ff8c00;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Contact Section - Specific to CCB logo page only */
+.ccb-content-section .contact-section {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: 10px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.3s ease-out;
+}
+
+.ccb-content-section .contact-section.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ccb-content-section .contact-section h4 {
+  margin-top: -5px;
+  color: #2d5a2d;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.contact-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.contact-item span {
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Seals Section */
+.seals-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.3s ease-out;
+}
+
+.seals-section.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.seal-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.seal-icon {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.philippine-seal {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #2d5a2d;
+}
+
+.foi-seal {
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+}
+
+.seal-item span {
+  color: #2d5a2d;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  flex: 1;
+}
+
+/* Right Column */
+.right-column {
+  background: #fff;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logo-section h2 {
+  color: #2d5a2d;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.logo-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #2d5a2d, #ff8c00);
+  border-radius: 2px;
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ccb-logo {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #2d5a2d;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.ccb-logo.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ccb-logo:hover {
+  transform: scale(1.05);
+  border-color: #2d5a2d;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Logo Explanation */
+.logo-explanation {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.3s ease-out;
+}
+
+.logo-explanation.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.explanation-item {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #2d5a2d;
+  transition: all 0.3s ease;
+}
+
+.explanation-item:hover {
+  background: #e9ecef;
+  border-left-color: #2d5a2d;
+  transform: translateX(5px);
+}
+
+.explanation-item h4 {
+  color: #2d5a2d;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.explanation-item p {
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ccb-hero {
+    padding: 100px 0 60px;
+    height: 445px !important;
+  }
+
+  .ccb-hero .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .ccb-hero .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .ccb-hero .hero-motto {
+    font-size: 1rem;
+  }
+  
+  .ccb-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .timeline-container {
+    display: none;
+  }
+  
+  .left-column {
+    order: 2;
+  }
+  
+  .right-column {
+    order: 1;
+  }
+  
+  .profile-card,
+  .ccb-content-section .contact-section,
+  .seal-item,
+  .right-column {
+    padding: 20px;
+  }
+  
+  .ccb-logo {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .logo-section h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ccb-hero {
+    padding: 100px 0 60px;
+    height: 445px !important;
+  }
+  
+  .ccb-hero .hero-title {
+    font-size: 2rem;
+  }
+  
+  .ccb-hero .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .ccb-hero .hero-motto {
+    font-size: 0.9rem;
+  }
+  
+  .profile-card,
+  .ccb-content-section .contact-section,
+  .seal-item,
+  .right-column {
+    padding: 15px;
+  }
+  
+  .ccb-logo {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .container {
+    padding: 0 15px;
+  }
+  
+  .explanation-item {
+    padding: 15px;
+  }
+}
+
+/* Dedicated Wave Footer Styles for CCB Logo Page */
+.ccb-logo-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
+.ccb-logo-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
+.ccb-logo-page .footer-wave .shape-fill-3 { fill: rgba(230, 236, 236, 1); }
