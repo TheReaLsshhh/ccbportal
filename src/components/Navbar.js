@@ -321,6 +321,10 @@ const Navbar = ({ isTopBarVisible = true }) => {
               <div className="brand-tagline">Honus et Excellentia Ad Summum Bonum</div>
             </div>
           </div>
+          {/* Date Display - Mobile Only */}
+          <div className="header-date-display">
+            <span className="date-text">Today is {getCurrentDate()}</span>
+          </div>
         </div>
       </div>
 
@@ -349,6 +353,37 @@ const Navbar = ({ isTopBarVisible = true }) => {
 
           {/* Navigation Links */}
           <div className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""}`}>
+            {/* Secondary Navigation - Mobile Only */}
+            <div className="mobile-secondary-nav">
+              <a
+                href="/students"
+                className={getActiveNavClass("/students")}
+                onClick={handleNavLinkClick}
+              >
+                STUDENTS
+              </a>
+              <a
+                href="/faculty"
+                className={getActiveNavClass("/faculty")}
+                onClick={handleNavLinkClick}
+              >
+                FACULTY & STAFF
+              </a>
+              <a
+                href="/about"
+                className={getActiveNavClass("/about")}
+                onClick={handleNavLinkClick}
+              >
+                ABOUT US
+              </a>
+              <a
+                href="/contact"
+                className={getActiveNavClass("/contact")}
+                onClick={handleNavLinkClick}
+              >
+                CONTACT US
+              </a>
+            </div>
             {/* Main Navigation */}
             <a
               href="/"
@@ -374,21 +409,47 @@ const Navbar = ({ isTopBarVisible = true }) => {
             {/* Services Dropdown */}
             <div 
               className="services-dropdown-container"
-              onMouseEnter={() => setIsServicesDropdownOpen(true)}
-              onMouseLeave={() => setIsServicesDropdownOpen(false)}
+              onMouseEnter={() => {
+                if (window.innerWidth > 1024) {
+                  setIsServicesDropdownOpen(true);
+                }
+              }}
+              onMouseLeave={() => {
+                if (window.innerWidth > 1024) {
+                  setIsServicesDropdownOpen(false);
+                }
+              }}
             >
               <a
                 href="#"
                 className="nav-link services-nav-link"
-                onMouseEnter={() => setIsServicesDropdownOpen(true)}
+                onClick={(e) => {
+                  if (window.innerWidth <= 1024) {
+                    e.preventDefault();
+                    setIsServicesDropdownOpen(!isServicesDropdownOpen);
+                  }
+                }}
+                onMouseEnter={() => {
+                  if (window.innerWidth > 1024) {
+                    setIsServicesDropdownOpen(true);
+                  }
+                }}
               >
                 SERVICES
-                <span className="dropdown-arrow">▼</span>
+                <span className={`dropdown-arrow ${isServicesDropdownOpen ? 'open' : ''}`}>▼</span>
               </a>
               <div 
                 className={`services-dropdown ${isServicesDropdownOpen ? 'dropdown-open' : ''}`}
-                onMouseEnter={() => setIsServicesDropdownOpen(true)}
-                onMouseLeave={() => setIsServicesDropdownOpen(false)}
+                onMouseEnter={() => {
+                  if (window.innerWidth > 1024) {
+                    setIsServicesDropdownOpen(true);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (window.innerWidth > 1024) {
+                    setIsServicesDropdownOpen(false);
+                  }
+                }}
               >
                 <a
                   href="https://sites.google.com/view/ccblearningresourcecenter/home?authuser=0"
