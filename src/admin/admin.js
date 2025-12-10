@@ -362,8 +362,8 @@ const AdminPage = () => {
             setAcademicPrograms(prev => [...prev, result.program]);
           }
           break;
-        case 'events': {
-          // Prepare multipart FormData for events (supports image upload/removal)
+        case 'events':
+          // Prepare FormData to support image upload
           const eventFormData = new FormData();
           eventFormData.append('title', formData.title || '');
           eventFormData.append('description', formData.description || '');
@@ -380,7 +380,7 @@ const AdminPage = () => {
           if (formData.remove_image) {
             eventFormData.append('remove_image', 'true');
           }
-
+          
           if (isEditing) {
             result = await apiService.updateEvent(editingItem.id, eventFormData);
             setEvents(prev => prev.map(e => e.id === editingItem.id ? result.event : e));
@@ -389,9 +389,8 @@ const AdminPage = () => {
             setEvents(prev => [...prev, result.event]);
           }
           break;
-        }
-        case 'achievements': {
-          // Prepare multipart FormData for achievements (supports image upload/removal)
+        case 'achievements':
+          // Prepare FormData to support image upload
           const achievementFormData = new FormData();
           achievementFormData.append('title', formData.title || '');
           achievementFormData.append('description', formData.description || '');
@@ -406,7 +405,7 @@ const AdminPage = () => {
           if (formData.remove_image) {
             achievementFormData.append('remove_image', 'true');
           }
-
+          
           if (isEditing) {
             result = await apiService.updateAchievement(editingItem.id, achievementFormData);
             setAchievements(prev => prev.map(a => a.id === editingItem.id ? result.achievement : a));
@@ -415,9 +414,8 @@ const AdminPage = () => {
             setAchievements(prev => [...prev, result.achievement]);
           }
           break;
-        }
-        case 'announcements': {
-          // Prepare multipart FormData for announcements (supports image upload/removal)
+        case 'announcements':
+          // Prepare FormData to support image upload
           const announcementFormData = new FormData();
           announcementFormData.append('title', formData.title || '');
           announcementFormData.append('date', formData.date || '');
@@ -431,7 +429,7 @@ const AdminPage = () => {
           if (formData.remove_image) {
             announcementFormData.append('remove_image', 'true');
           }
-
+          
           console.log('Creating/updating announcement with data:', announcementFormData);
           if (isEditing) {
             result = await apiService.updateAnnouncement(editingItem.id, announcementFormData);
@@ -442,7 +440,6 @@ const AdminPage = () => {
           }
           console.log('Announcement operation result:', result);
           break;
-        }
         // removed 'admissions-dates' case
         case 'departments': {
           // Prepare payload with sensible defaults and coercions
@@ -1127,6 +1124,44 @@ const AdminPage = () => {
                 rows="4"
               />
             </div>
+            <div className="form-group">
+              <label>Image</label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleInputChange}
+              />
+              {formData.image && formData.image instanceof File && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
+                  <img 
+                    src={URL.createObjectURL(formData.image)} 
+                    alt="Preview" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                </div>
+              )}
+              {editingItem && editingItem.image && !formData.image && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
+                  <img 
+                    src={editingItem.image} 
+                    alt="Current" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                  <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      name="remove_image"
+                      checked={formData.remove_image || false}
+                      onChange={handleInputChange}
+                    />
+                    Remove current image
+                  </label>
+                </div>
+              )}
+            </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Event Date *</label>
@@ -1167,47 +1202,6 @@ const AdminPage = () => {
                 value={formData.location || ''}
                 onChange={handleInputChange}
               />
-            </div>
-            <div className="form-group">
-              <label>Image</label>
-              <input
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={handleInputChange}
-              />
-              {formData.image && formData.image instanceof File && (
-                <div style={{ marginTop: '10px' }}>
-                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
-                  <img 
-                    src={URL.createObjectURL(formData.image)} 
-                    alt="Preview" 
-                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
-                  />
-                </div>
-              )}
-              {editingItem && editingItem.image && !formData.image && (
-                <div style={{ marginTop: '10px' }}>
-                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
-                  <img 
-                    src={editingItem.image} 
-                    alt="Current" 
-                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
-                  />
-                  <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="checkbox"
-                      name="remove_image"
-                      checked={formData.remove_image || false}
-                      onChange={handleInputChange}
-                    />
-                    Remove current image
-                  </label>
-                </div>
-              )}
-              <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
-                Upload an image for this event. Recommended size: 800x600px or larger.
-              </small>
             </div>
             <div className="form-row-inline">
               <div className="form-group">
@@ -1266,28 +1260,6 @@ const AdminPage = () => {
                 rows="4"
               />
             </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Achievement Date *</label>
-                <input
-                  type="date"
-                  name="achievement_date"
-                  value={formData.achievement_date || ''}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Category *</label>
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category || 'Achievement'}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
             <div className="form-group">
               <label>Image</label>
               <input
@@ -1325,9 +1297,28 @@ const AdminPage = () => {
                   </label>
                 </div>
               )}
-              <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
-                Upload an image for this achievement. Recommended size: 800x600px or larger.
-              </small>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Achievement Date *</label>
+                <input
+                  type="date"
+                  name="achievement_date"
+                  value={formData.achievement_date || ''}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Category *</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={formData.category || 'Achievement'}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
             </div>
             <div className="form-row-inline">
               <div className="form-group">
@@ -1433,9 +1424,6 @@ const AdminPage = () => {
                   </label>
                 </div>
               )}
-              <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
-                Upload an image for this announcement. Recommended size: 800x600px or larger.
-              </small>
             </div>
             <div className="form-row-inline">
               <div className="form-group">
