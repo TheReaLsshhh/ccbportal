@@ -37,6 +37,9 @@ const NewsEvents = () => {
   const [isAchievementsVisible, setIsAchievementsVisible] = useState(false);
   const [isEventsVisible, setIsEventsVisible] = useState(false);
   const [isNewsVisible, setIsNewsVisible] = useState(false);
+  const [isDateDetailModalOpen, setIsDateDetailModalOpen] = useState(false);
+  const [selectedDateItems, setSelectedDateItems] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
   
   // Pagination state for each section
   const [eventsDisplayCount, setEventsDisplayCount] = useState(8);
@@ -350,6 +353,23 @@ const NewsEvents = () => {
     setSelectedNews(null);
   };
 
+  const openDateDetailModal = (date, events, announcements, news, achievements) => {
+    setSelectedDate(date);
+    setSelectedDateItems({
+      events: events || [],
+      announcements: announcements || [],
+      news: news || [],
+      achievements: achievements || []
+    });
+    setIsDateDetailModalOpen(true);
+  };
+
+  const closeDateDetailModal = () => {
+    setIsDateDetailModalOpen(false);
+    setSelectedDate(null);
+    setSelectedDateItems(null);
+  };
+
   // Pagination handlers
   const loadMoreEvents = () => {
     setEventsDisplayCount(prev => prev + itemsPerPage);
@@ -369,13 +389,14 @@ const NewsEvents = () => {
 
   // Improve modal UX: close on Escape, lock background scroll
   useEffect(() => {
-    if (!isModalOpen && !isEventModalOpen && !isAchievementModalOpen && !isNewsModalOpen) return;
+    if (!isModalOpen && !isEventModalOpen && !isAchievementModalOpen && !isNewsModalOpen && !isDateDetailModalOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         if (isModalOpen) closeModal();
         if (isEventModalOpen) closeEventModal();
         if (isAchievementModalOpen) closeAchievementModal();
         if (isNewsModalOpen) closeNewsModal();
+        if (isDateDetailModalOpen) closeDateDetailModal();
       }
     };
     const previousOverflow = document.body.style.overflow;
@@ -385,7 +406,7 @@ const NewsEvents = () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isModalOpen, isEventModalOpen, isAchievementModalOpen, isNewsModalOpen]);
+  }, [isModalOpen, isEventModalOpen, isAchievementModalOpen, isNewsModalOpen, isDateDetailModalOpen]);
 
   const renderDetails = (text) => {
     if (!text) return null;
@@ -553,14 +574,29 @@ const NewsEvents = () => {
                           const totalItems = dayEvents.length + dayAnns.length + dayNews.length + dayAchievements.length;
                           const hasContent = totalItems > 0;
                           cells.push(
-                            <div key={key} className={`cal-cell ${inMonth ? '' : 'dim'} ${weekend ? 'weekend' : ''} ${isToday ? 'today' : ''} ${dayEvents.length ? 'has-events' : ''} ${dayAnns.length ? 'has-anns' : ''} ${dayNews.length ? 'has-news' : ''} ${dayAchievements.length ? 'has-achievements' : ''}`}>
+                            <div 
+                              key={key} 
+                              className={`cal-cell ${inMonth ? '' : 'dim'} ${weekend ? 'weekend' : ''} ${isToday ? 'today' : ''} ${dayEvents.length ? 'has-events' : ''} ${dayAnns.length ? 'has-anns' : ''} ${dayNews.length ? 'has-news' : ''} ${dayAchievements.length ? 'has-achievements' : ''} ${hasContent ? 'has-content clickable' : ''}`}
+                              onClick={hasContent ? () => openDateDetailModal(cellDate, dayEvents, dayAnns, dayNews, dayAchievements) : undefined}
+                              style={hasContent ? { cursor: 'pointer' } : {}}
+                            >
                               {hasContent && (
-                                <div className="cal-cell-popup">
+                                <div className="cal-cell-popup" onClick={(e) => e.stopPropagation()}>
                                   {dayEvents.length > 0 && (
                                     <div className="popup-section">
                                       <div className="popup-type">Events</div>
                                       {dayEvents.map((evt) => (
-                                        <div key={evt.id} className="popup-title">{evt.title}</div>
+                                        <button 
+                                          key={evt.id} 
+                                          className="popup-title clickable-title" 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            closeDateDetailModal();
+                                            openEventModal(evt);
+                                          }}
+                                        >
+                                          {evt.title}
+                                        </button>
                                       ))}
                                     </div>
                                   )}
@@ -568,7 +604,17 @@ const NewsEvents = () => {
                                     <div className="popup-section">
                                       <div className="popup-type">News</div>
                                       {dayNews.map((newsItem) => (
-                                        <div key={newsItem.id} className="popup-title">{newsItem.title}</div>
+                                        <button 
+                                          key={newsItem.id} 
+                                          className="popup-title clickable-title" 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            closeDateDetailModal();
+                                            openNewsModal(newsItem);
+                                          }}
+                                        >
+                                          {newsItem.title}
+                                        </button>
                                       ))}
                                     </div>
                                   )}
@@ -576,7 +622,17 @@ const NewsEvents = () => {
                                     <div className="popup-section">
                                       <div className="popup-type">Announcements</div>
                                       {dayAnns.map((ann) => (
-                                        <div key={ann.id} className="popup-title">{ann.title}</div>
+                                        <button 
+                                          key={ann.id} 
+                                          className="popup-title clickable-title" 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            closeDateDetailModal();
+                                            openModal(ann);
+                                          }}
+                                        >
+                                          {ann.title}
+                                        </button>
                                       ))}
                                     </div>
                                   )}
@@ -584,7 +640,17 @@ const NewsEvents = () => {
                                     <div className="popup-section">
                                       <div className="popup-type">Achievements</div>
                                       {dayAchievements.map((achievement) => (
-                                        <div key={achievement.id} className="popup-title">{achievement.title}</div>
+                                        <button 
+                                          key={achievement.id} 
+                                          className="popup-title clickable-title" 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            closeDateDetailModal();
+                                            openAchievementModal(achievement);
+                                          }}
+                                        >
+                                          {achievement.title}
+                                        </button>
                                       ))}
                                     </div>
                                   )}
@@ -910,6 +976,122 @@ const NewsEvents = () => {
                 selectedNews.details && selectedNews.details.trim()
                   ? selectedNews.details
                   : selectedNews.body
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Date Detail Modal */}
+      {isDateDetailModalOpen && selectedDateItems && selectedDate && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={closeDateDetailModal}>
+          <div className="modal-content date-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" aria-label="Close" onClick={closeDateDetailModal}>×</button>
+            <h3 className="modal-title">Date: {formatDate(selectedDate.toISOString())}</h3>
+            <div className="date-detail-content">
+              {selectedDateItems.events.length > 0 && (
+                <div className="date-detail-section">
+                  <h4 className="date-detail-section-title">
+                    <span className="date-detail-icon event-icon">📅</span>
+                    Events ({selectedDateItems.events.length})
+                  </h4>
+                  <div className="date-detail-items">
+                    {selectedDateItems.events.map((evt) => (
+                      <button
+                        key={evt.id}
+                        className="date-detail-item event-item-btn"
+                        onClick={() => {
+                          closeDateDetailModal();
+                          openEventModal(evt);
+                        }}
+                      >
+                        <span className="item-type">Event:</span>
+                        <span className="item-title">{evt.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedDateItems.news.length > 0 && (
+                <div className="date-detail-section">
+                  <h4 className="date-detail-section-title">
+                    <span className="date-detail-icon news-icon">📰</span>
+                    News ({selectedDateItems.news.length})
+                  </h4>
+                  <div className="date-detail-items">
+                    {selectedDateItems.news.map((newsItem) => (
+                      <button
+                        key={newsItem.id}
+                        className="date-detail-item news-item-btn"
+                        onClick={() => {
+                          closeDateDetailModal();
+                          openNewsModal(newsItem);
+                        }}
+                      >
+                        <span className="item-type">News:</span>
+                        <span className="item-title">{newsItem.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedDateItems.announcements.length > 0 && (
+                <div className="date-detail-section">
+                  <h4 className="date-detail-section-title">
+                    <span className="date-detail-icon announcement-icon">📢</span>
+                    Announcements ({selectedDateItems.announcements.length})
+                  </h4>
+                  <div className="date-detail-items">
+                    {selectedDateItems.announcements.map((ann) => (
+                      <button
+                        key={ann.id}
+                        className="date-detail-item announcement-item-btn"
+                        onClick={() => {
+                          closeDateDetailModal();
+                          openModal(ann);
+                        }}
+                      >
+                        <span className="item-type">Announcement:</span>
+                        <span className="item-title">{ann.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedDateItems.achievements.length > 0 && (
+                <div className="date-detail-section">
+                  <h4 className="date-detail-section-title">
+                    <span className="date-detail-icon achievement-icon">🏆</span>
+                    Achievements ({selectedDateItems.achievements.length})
+                  </h4>
+                  <div className="date-detail-items">
+                    {selectedDateItems.achievements.map((achievement) => (
+                      <button
+                        key={achievement.id}
+                        className="date-detail-item achievement-item-btn"
+                        onClick={() => {
+                          closeDateDetailModal();
+                          openAchievementModal(achievement);
+                        }}
+                      >
+                        <span className="item-type">Achievement:</span>
+                        <span className="item-title">{achievement.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedDateItems.events.length === 0 && 
+               selectedDateItems.news.length === 0 && 
+               selectedDateItems.announcements.length === 0 && 
+               selectedDateItems.achievements.length === 0 && (
+                <div className="date-detail-empty">
+                  <p>No items found for this date.</p>
+                </div>
               )}
             </div>
           </div>

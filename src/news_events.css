@@ -413,6 +413,143 @@ html, body {
   text-align: center;
 }
 
+/* Date Detail Modal */
+.date-detail-modal {
+  max-width: min(90vw, 700px);
+}
+
+.date-detail-content {
+  width: 100%;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+.date-detail-section {
+  margin-bottom: 30px;
+}
+
+.date-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.date-detail-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #2d5a2d;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.date-detail-icon {
+  font-size: 1.5rem;
+}
+
+.date-detail-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.date-detail-item {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.date-detail-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.date-detail-item .item-type {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+}
+
+.date-detail-item .item-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d5a2d;
+  line-height: 1.4;
+}
+
+.event-item-btn {
+  border-color: #cfe9cf;
+  background: linear-gradient(180deg, #f0f8f0, #ffffff);
+}
+
+.event-item-btn:hover {
+  border-color: #2d5a2d;
+  background: linear-gradient(180deg, #e0f0e0, #ffffff);
+}
+
+.event-item-btn .item-type {
+  color: #2d5a2d;
+}
+
+.news-item-btn {
+  border-color: #b3d9ff;
+  background: linear-gradient(180deg, #f0f8ff, #ffffff);
+}
+
+.news-item-btn:hover {
+  border-color: #0066cc;
+  background: linear-gradient(180deg, #e0f0ff, #ffffff);
+}
+
+.news-item-btn .item-type {
+  color: #0066cc;
+}
+
+.announcement-item-btn {
+  border-color: #ffd8a8;
+  background: linear-gradient(180deg, #fff6e9, #ffffff);
+}
+
+.announcement-item-btn:hover {
+  border-color: #ff8c00;
+  background: linear-gradient(180deg, #ffefdb, #ffffff);
+}
+
+.announcement-item-btn .item-type {
+  color: #ff8c00;
+}
+
+.achievement-item-btn {
+  border-color: #ce93d8;
+  background: linear-gradient(180deg, #faf5fc, #ffffff);
+}
+
+.achievement-item-btn:hover {
+  border-color: #9b59b6;
+  background: linear-gradient(180deg, #f3e5f5, #ffffff);
+}
+
+.achievement-item-btn .item-type {
+  color: #9b59b6;
+}
+
+.date-detail-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
 /* Custom wave colors for Admissions page footer */
 .news-events-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .news-events-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
@@ -660,6 +797,37 @@ html, body {
   .modal-image-wrapper img {
     max-height: 300px;
   }
+  
+  .date-detail-modal {
+    max-width: 96vw;
+    padding: 14px 12px;
+  }
+  
+  .date-detail-content {
+    max-height: calc(100dvh - 120px);
+    padding: 8px 0;
+  }
+  
+  .date-detail-section-title {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+  
+  .date-detail-icon {
+    font-size: 1.2rem;
+  }
+  
+  .date-detail-item {
+    padding: 10px 12px;
+  }
+  
+  .date-detail-item .item-type {
+    font-size: 0.7rem;
+  }
+  
+  .date-detail-item .item-title {
+    font-size: 0.95rem;
+  }
 }
 
 /* Calendar - Optimized UI/UX, Left-aligned */
@@ -844,6 +1012,14 @@ html, body {
   background: linear-gradient(180deg, #faf5fc, #ffffff);
 }
 
+.cal-cell.clickable {
+  cursor: pointer;
+}
+
+.cal-cell.clickable:active {
+  transform: translateY(0) scale(0.98);
+}
+
 /* Calendar Cell Popup Tooltip */
 .cal-cell-popup {
   position: absolute;
@@ -942,6 +1118,24 @@ html, body {
 
 .popup-title:last-child {
   margin-bottom: 0;
+}
+
+.popup-title.clickable-title {
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  padding: 4px 10px;
+  margin: 2px 0;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.popup-title.clickable-title:hover {
+  background: rgba(45, 90, 45, 0.1);
+  color: #2d5a2d;
+  transform: translateX(3px);
 }
 
 .cal-date {
