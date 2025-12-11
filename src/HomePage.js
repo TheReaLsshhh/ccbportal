@@ -929,6 +929,14 @@ const HomePage = () => {
         {/* Hero/Banner Section */}
         <div className="hero-banner-section"></div>
 
+        {/* Snow Stacking Effect Overlay */}
+        <div className="snow-stacking-section" aria-hidden="true">
+          <div className="snow-stacking-overlay"></div>
+          <div className="snow-stacking-layer-1"></div>
+          <div className="snow-stacking-layer-2"></div>
+          <div className="snow-stacking-layer-3"></div>
+        </div>
+
         <div className="features-section">
           <div className="container">
             <h2 className="section-title">
