@@ -96,7 +96,7 @@ const HomePage = () => {
                     ? a.details
                     : a.body) || "",
                 image: a.image || null,
-                link: "/news",
+                link: `/news?announcementId=${a.id}`,
               }))
             : [];
         const anns = annsAll
@@ -116,7 +116,7 @@ const HomePage = () => {
                     ? e.details
                     : e.description) || "",
                 image: e.image || null,
-                link: "/news",
+                link: `/news?eventId=${e.id}`,
               }))
             : [];
         const evts = evtsAll
@@ -136,7 +136,7 @@ const HomePage = () => {
                     ? c.details
                     : c.description) || "",
                 image: c.image || null,
-                link: "/news",
+                link: `/news?achievementId=${c.id}`,
               }))
             : [];
         const achs = achsAll
@@ -157,7 +157,7 @@ const HomePage = () => {
                     ? n.details
                     : n.body) || "",
                 image: n.image || null,
-                link: "/news",
+                link: `/news?newsId=${n.id}`,
               }))
             : [];
         
@@ -1020,7 +1020,7 @@ const HomePage = () => {
 
         <div className="news-section">
           <div className="container">
-            <h2 className="section-title">Latest News & Updates</h2>
+            <h2 className="section-title">News & Events</h2>
             {newsLoading ? (
               <div className="news-grid-layout">
                 <div className="news-grid-item">

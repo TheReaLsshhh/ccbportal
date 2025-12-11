@@ -37,6 +37,7 @@ const NewsEvents = () => {
   const [isAchievementsVisible, setIsAchievementsVisible] = useState(false);
   const [isEventsVisible, setIsEventsVisible] = useState(false);
   const [isNewsVisible, setIsNewsVisible] = useState(false);
+  const [deepLinkHandled, setDeepLinkHandled] = useState(false);
   const [isDateDetailModalOpen, setIsDateDetailModalOpen] = useState(false);
   const [selectedDateItems, setSelectedDateItems] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -292,6 +293,57 @@ const NewsEvents = () => {
     };
     loadNews();
   }, []);
+
+  // Open modal via deep-link query params
+  // Supported:
+  //   ?newsId=123
+  //   ?eventId=123
+  //   ?announcementId=123
+  //   ?achievementId=123
+  useEffect(() => {
+    if (deepLinkHandled) return;
+    const params = new URLSearchParams(window.location.search);
+    const newsId = params.get('newsId');
+    const eventId = params.get('eventId');
+    const announcementId = params.get('announcementId');
+    const achievementId = params.get('achievementId');
+
+    if (eventId && events.length > 0) {
+      const item = events.find((e) => String(e.id) === eventId || `e-${e.id}` === eventId);
+      if (item) {
+        openEventModal(item);
+        setDeepLinkHandled(true);
+        return;
+      }
+    }
+
+    if (announcementId && announcements.length > 0) {
+      const item = announcements.find((a) => String(a.id) === announcementId || `a-${a.id}` === announcementId);
+      if (item) {
+        openModal(item);
+        setDeepLinkHandled(true);
+        return;
+      }
+    }
+
+    if (achievementId && achievements.length > 0) {
+      const item = achievements.find((ach) => String(ach.id) === achievementId || `c-${ach.id}` === achievementId || `ach-${ach.id}` === achievementId);
+      if (item) {
+        openAchievementModal(item);
+        setDeepLinkHandled(true);
+        return;
+      }
+    }
+
+    if (newsId && news.length > 0) {
+      const item = news.find((n) => String(n.id) === newsId || `n-${n.id}` === newsId);
+      if (item) {
+        openNewsModal(item);
+        setDeepLinkHandled(true);
+        return;
+      }
+    }
+  }, [events, announcements, achievements, news, deepLinkHandled]);
 
   const formatDate = (iso) => {
     try {

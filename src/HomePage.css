@@ -721,7 +721,7 @@
 
 /* News Section */
 .homepage .news-section {
-  background-color: rgba(51, 90, 45, 0.85);
+  background-color: rgba(255, 255, 255, 255);
   padding: 80px 0 30px 0;
   margin: 0;
   position: relative;
@@ -936,27 +936,27 @@
 }
 
 .news-type-badge.type-announcement {
-  background: rgba(45, 90, 45, 0.1);
-  color: #2d5a2d;
-  border: 1px solid rgba(45, 90, 45, 0.25);
+  background: rgba(46, 26, 1, 0.1);
+  color: #ff8c00;
+  border: 1px solid rgba(46, 26, 1, 0.3);;
 }
 
 .news-type-badge.type-event {
-  background: rgba(255, 140, 0, 0.1);
-  color: #ff8c00;
-  border: 1px solid rgba(255, 140, 0, 0.3);
+  background: rgba(45, 90, 45, 0.1);
+  color: #2d5a2d;
+  border: 1px solid rgba(45, 90, 45, 0.3);
 }
 
 .news-type-badge.type-achievement {
-  background: rgba(0, 123, 255, 0.08);
-  color: #0d6efd;
-  border: 1px solid rgba(13, 110, 253, 0.25);
+  background: rgb(47, 3, 65, 0.1);
+  color: #9b59b6;
+  border: 1px solid rgba(47, 3, 65, 0.3);
 }
 
 .news-type-badge.type-news {
-  background: rgba(255, 20, 147, 0.1);
-  color: #ff1493;
-  border: 1px solid rgba(255, 20, 147, 0.3);
+  background: rgba(0, 102, 204, 0.1);
+  color: #0066cc;
+  border: 1px solid rgba(0, 102, 204, 0.3);
 }
 
 .news-card h3 {
@@ -995,8 +995,8 @@
 }
 
 .news-carousel-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: rgba(45, 90, 45, 0.1);
+  border: 2px solid #2d5a2d;
   border-radius: 50%;
   width: 48px;
   height: 48px;
@@ -1005,13 +1005,13 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #fff;
+  color: #2d5a2d;
   padding: 0;
 }
 
 .news-carousel-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(45, 90, 45, 0.18);
+  border-color: #2d5a2d;
   transform: scale(1.1);
 }
 
@@ -1035,7 +1035,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(0, 0, 0, 0.5);
   background: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1050,7 +1050,7 @@
 
 .news-carousel-dot.active {
   background: #fff;
-  border-color: #fff;
+  border-color: #2d5a2d;
   width: 14px;
   height: 14px;
 }

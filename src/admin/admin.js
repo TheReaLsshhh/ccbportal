@@ -363,76 +363,96 @@ const AdminPage = () => {
           }
           break;
         case 'events':
-          // Prepare FormData for file upload
-          const eventFormData = new FormData();
-          eventFormData.append('title', formData.title || '');
-          eventFormData.append('description', formData.description || '');
-          eventFormData.append('details', formData.details || '');
-          eventFormData.append('event_date', formData.event_date || '');
-          eventFormData.append('start_time', formData.start_time || '');
-          eventFormData.append('end_time', formData.end_time || '');
-          eventFormData.append('location', formData.location || '');
-          eventFormData.append('is_active', formData.is_active ? 'true' : 'false');
-          eventFormData.append('display_order', formData.display_order || 0);
-          
-          // Handle image upload
-          if (formData.image && formData.image instanceof File) {
-            eventFormData.append('image', formData.image);
-          }
-          
-          // Handle image removal
-          if (formData.remove_image) {
-            eventFormData.append('remove_image', 'true');
-          }
+          // Prepare event data with proper date/time formatting
+          const eventData = {
+            ...formData,
+            // Ensure date is in YYYY-MM-DD format
+            event_date: formData.event_date || '',
+            // Ensure time is in HH:MM format
+            start_time: formData.start_time || '',
+            end_time: formData.end_time || '',
+            // Convert boolean values
+            is_active: !!formData.is_active,
+            display_order: Number(formData.display_order) || 0
+          };
           
           if (isEditing) {
-            result = await apiService.updateEvent(editingItem.id, eventFormData);
+            result = await apiService.updateEvent(editingItem.id, eventData);
             setEvents(prev => prev.map(e => e.id === editingItem.id ? result.event : e));
           } else {
-            result = await apiService.createEvent(eventFormData);
+            result = await apiService.createEvent(eventData);
             setEvents(prev => [...prev, result.event]);
           }
           break;
-        case 'achievements':
-          // Prepare achievement data with proper date formatting
-          const achievementData = {
-            ...formData,
-            // Ensure date is in YYYY-MM-DD format
-            achievement_date: formData.achievement_date || '',
-            // Convert boolean values
-            is_active: !!formData.is_active,
-            display_order: Number(formData.display_order) || 0
-          };
-          
+        }
+        case 'achievements': {
+          const hasFile = (formData.image && formData.image instanceof File) || formData.remove_image;
+          let payload;
+          if (hasFile) {
+            const fd = new FormData();
+            fd.append('title', formData.title || '');
+            fd.append('description', formData.description || '');
+            fd.append('details', formData.details || '');
+            fd.append('achievement_date', formData.achievement_date || '');
+            fd.append('category', formData.category || '');
+            fd.append('is_active', formData.is_active ? 'true' : 'false');
+            fd.append('display_order', formData.display_order || 0);
+            if (formData.image && formData.image instanceof File) fd.append('image', formData.image);
+            if (formData.remove_image) fd.append('remove_image', 'true');
+            payload = fd;
+          } else {
+            payload = {
+              title: formData.title || '',
+              description: formData.description || '',
+              details: formData.details || '',
+              achievement_date: formData.achievement_date || '',
+              category: formData.category || '',
+              is_active: !!formData.is_active,
+              display_order: Number(formData.display_order) || 0,
+            };
+          }
           if (isEditing) {
-            result = await apiService.updateAchievement(editingItem.id, achievementData);
+            result = await apiService.updateAchievement(editingItem.id, payload);
             setAchievements(prev => prev.map(a => a.id === editingItem.id ? result.achievement : a));
           } else {
-            result = await apiService.createAchievement(achievementData);
+            result = await apiService.createAchievement(payload);
             setAchievements(prev => [...prev, result.achievement]);
           }
           break;
-        case 'announcements':
-          // Prepare announcement data with proper date formatting
-          const announcementData = {
-            ...formData,
-            // Ensure date is in YYYY-MM-DD format
-            date: formData.date || '',
-            // Convert boolean values
-            is_active: !!formData.is_active,
-            display_order: Number(formData.display_order) || 0
-          };
-          
-          console.log('Creating/updating announcement with data:', announcementData);
+        }
+        case 'announcements': {
+          const hasFile = (formData.image && formData.image instanceof File) || formData.remove_image;
+          let payload;
+          if (hasFile) {
+            const fd = new FormData();
+            fd.append('title', formData.title || '');
+            fd.append('date', formData.date || '');
+            fd.append('body', formData.body || '');
+            fd.append('details', formData.details || '');
+            fd.append('is_active', formData.is_active ? 'true' : 'false');
+            fd.append('display_order', formData.display_order || 0);
+            if (formData.image && formData.image instanceof File) fd.append('image', formData.image);
+            if (formData.remove_image) fd.append('remove_image', 'true');
+            payload = fd;
+          } else {
+            payload = {
+              title: formData.title || '',
+              date: formData.date || '',
+              body: formData.body || '',
+              details: formData.details || '',
+              is_active: !!formData.is_active,
+              display_order: Number(formData.display_order) || 0,
+            };
+          }
           if (isEditing) {
-            result = await apiService.updateAnnouncement(editingItem.id, announcementData);
+            result = await apiService.updateAnnouncement(editingItem.id, payload);
             setAnnouncements(prev => prev.map(a => a.id === editingItem.id ? result.announcement : a));
           } else {
-            result = await apiService.createAnnouncement(announcementData);
+            result = await apiService.createAnnouncement(payload);
             setAnnouncements(prev => [...prev, result.announcement]);
           }
-          console.log('Announcement operation result:', result);
           break;
+        }
         // removed 'admissions-dates' case
         case 'departments': {
           // Prepare payload with sensible defaults and coercions
@@ -1118,6 +1138,44 @@ const AdminPage = () => {
                 rows="4"
               />
             </div>
+            <div className="form-group">
+              <label>Image</label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleInputChange}
+              />
+              {formData.image && formData.image instanceof File && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
+                  <img 
+                    src={URL.createObjectURL(formData.image)} 
+                    alt="Preview" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                </div>
+              )}
+              {editingItem && editingItem.image && !formData.image && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
+                  <img 
+                    src={editingItem.image} 
+                    alt="Current" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                  <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      name="remove_image"
+                      checked={formData.remove_image || false}
+                      onChange={handleInputChange}
+                    />
+                    Remove current image
+                  </label>
+                </div>
+              )}
+            </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Event Date *</label>
@@ -1257,6 +1315,44 @@ const AdminPage = () => {
                 rows="4"
               />
             </div>
+            <div className="form-group">
+              <label>Image</label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleInputChange}
+              />
+              {formData.image && formData.image instanceof File && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
+                  <img 
+                    src={URL.createObjectURL(formData.image)} 
+                    alt="Preview" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                </div>
+              )}
+              {editingItem && editingItem.image && !formData.image && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
+                  <img 
+                    src={editingItem.image} 
+                    alt="Current" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                  <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      name="remove_image"
+                      checked={formData.remove_image || false}
+                      onChange={handleInputChange}
+                    />
+                    Remove current image
+                  </label>
+                </div>
+              )}
+            </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Achievement Date *</label>
@@ -1345,6 +1441,44 @@ const AdminPage = () => {
                 onChange={handleInputChange}
                 rows="4"
               />
+            </div>
+            <div className="form-group">
+              <label>Image</label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleInputChange}
+              />
+              {formData.image && formData.image instanceof File && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
+                  <img 
+                    src={URL.createObjectURL(formData.image)} 
+                    alt="Preview" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                </div>
+              )}
+              {editingItem && editingItem.image && !formData.image && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
+                  <img 
+                    src={editingItem.image} 
+                    alt="Current" 
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                  <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      name="remove_image"
+                      checked={formData.remove_image || false}
+                      onChange={handleInputChange}
+                    />
+                    Remove current image
+                  </label>
+                </div>
+              )}
             </div>
             <div className="form-row-inline">
               <div className="form-group">

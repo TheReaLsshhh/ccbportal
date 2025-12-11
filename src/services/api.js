@@ -9,11 +9,13 @@ class ApiService {
 
     async makeRequest(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
+        const isFormData = options.body instanceof FormData;
+        const headers = isFormData
+            ? { ...(options.headers || {}) } // let browser set Content-Type for FormData
+            : { 'Content-Type': 'application/json', ...(options.headers || {}) };
+
         const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
+            headers,
             credentials: 'include', // Include cookies for authentication
             ...options,
         };
@@ -90,14 +92,14 @@ class ApiService {
         console.log('API: Creating announcement with payload:', payload);
         return this.makeRequest('/admin/announcements/create/', {
             method: 'POST',
-            body: JSON.stringify(payload),
+            body: payload instanceof FormData ? payload : JSON.stringify(payload),
         });
     }
 
     async updateAnnouncement(announcementId, payload) {
         return this.makeRequest(`/admin/announcements/${announcementId}/`, {
             method: 'PUT',
-            body: JSON.stringify(payload),
+            body: payload instanceof FormData ? payload : JSON.stringify(payload),
         });
     }
 
@@ -276,32 +278,8 @@ class ApiService {
         const url = `${this.baseURL}/admin/events/create/`;
         const config = {
             method: 'POST',
-            body: formData,
-            credentials: 'include',
-            // Don't set Content-Type header - browser will set it with boundary for multipart/form-data
-        };
-
-        try {
-            const response = await fetch(url, config);
-            let data = null;
-            const contentType = response.headers.get('content-type') || '';
-            if (contentType.includes('application/json')) {
-                try { data = await response.json(); } catch (_) { /* ignore */ }
-            }
-
-            if (!response.ok) {
-                const message = (data && (data.message || data.detail || data.error)) || `HTTP error! status: ${response.status}`;
-                const err = new Error(message);
-                err.status = response.status;
-                err.data = data;
-                throw err;
-            }
-
-            return data || await response.json();
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
+            body: JSON.stringify(payload),
+        });
     }
 
     async updateEvent(eventId, formData) {
@@ -309,32 +287,8 @@ class ApiService {
         const url = `${this.baseURL}/admin/events/${eventId}/`;
         const config = {
             method: 'PUT',
-            body: formData,
-            credentials: 'include',
-            // Don't set Content-Type header - browser will set it with boundary for multipart/form-data
-        };
-
-        try {
-            const response = await fetch(url, config);
-            let data = null;
-            const contentType = response.headers.get('content-type') || '';
-            if (contentType.includes('application/json')) {
-                try { data = await response.json(); } catch (_) { /* ignore */ }
-            }
-
-            if (!response.ok) {
-                const message = (data && (data.message || data.detail || data.error)) || `HTTP error! status: ${response.status}`;
-                const err = new Error(message);
-                err.status = response.status;
-                err.data = data;
-                throw err;
-            }
-
-            return data || await response.json();
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
+            body: JSON.stringify(payload),
+        });
     }
 
     async deleteEvent(eventId) {
@@ -347,14 +301,14 @@ class ApiService {
     async createAchievement(payload) {
         return this.makeRequest('/admin/achievements/create/', {
             method: 'POST',
-            body: JSON.stringify(payload),
+            body: payload instanceof FormData ? payload : JSON.stringify(payload),
         });
     }
 
     async updateAchievement(achievementId, payload) {
         return this.makeRequest(`/admin/achievements/${achievementId}/`, {
             method: 'PUT',
-            body: JSON.stringify(payload),
+            body: payload instanceof FormData ? payload : JSON.stringify(payload),
         });
     }
 
