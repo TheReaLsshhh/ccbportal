@@ -44,10 +44,10 @@ const NewsEvents = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   
   // Pagination state for each section
-  const [eventsDisplayCount, setEventsDisplayCount] = useState(6);
-  const [newsDisplayCount, setNewsDisplayCount] = useState(6);
-  const [announcementsDisplayCount, setAnnouncementsDisplayCount] = useState(6);
-  const [achievementsDisplayCount, setAchievementsDisplayCount] = useState(6);
+  const [eventsPage, setEventsPage] = useState(1);
+  const [newsPage, setNewsPage] = useState(1);
+  const [announcementsPage, setAnnouncementsPage] = useState(1);
+  const [achievementsPage, setAchievementsPage] = useState(1);
   const itemsPerPage = 6;
 
   // Scroll-based navbar visibility
@@ -219,7 +219,7 @@ const NewsEvents = () => {
         const resp = await apiService.getAnnouncements();
         if (resp.status === 'success' && Array.isArray(resp.announcements)) {
           setAnnouncements(resp.announcements);
-          setAnnouncementsDisplayCount(itemsPerPage); // Reset display count when new data loads
+          setAnnouncementsPage(1); // Reset page when new data loads
         } else {
           setAnnError('Failed to load announcements');
         }
@@ -240,7 +240,7 @@ const NewsEvents = () => {
         const resp = await apiService.getEvents();
         if (resp.status === 'success' && Array.isArray(resp.events)) {
           setEvents(resp.events);
-          setEventsDisplayCount(itemsPerPage); // Reset display count when new data loads
+          setEventsPage(1); // Reset page when new data loads
         } else {
           setEventsError('Failed to load events');
         }
@@ -261,7 +261,7 @@ const NewsEvents = () => {
         const resp = await apiService.getAchievements();
         if (resp.status === 'success' && Array.isArray(resp.achievements)) {
           setAchievements(resp.achievements);
-          setAchievementsDisplayCount(itemsPerPage); // Reset display count when new data loads
+          setAchievementsPage(1); // Reset page when new data loads
         } else {
           setAchievementsError('Failed to load achievements');
         }
@@ -282,7 +282,7 @@ const NewsEvents = () => {
         const resp = await apiService.getNews();
         if (resp.status === 'success' && Array.isArray(resp.news)) {
           setNews(resp.news);
-          setNewsDisplayCount(itemsPerPage); // Reset display count when new data loads
+          setNewsPage(1); // Reset page when new data loads
         } else {
           setNewsError('Failed to load news');
         }
@@ -597,27 +597,67 @@ const NewsEvents = () => {
     setSelectedDateItems(null);
   };
 
-  // Pagination handlers
-  const loadMoreEvents = () => {
-    setEventsDisplayCount(prev => prev + itemsPerPage);
+  // Pagination helpers
+  const changePage = (targetPage, totalItems, currentPageSetter, currentPageValue, sectionKey) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+    const nextPage = Math.min(Math.max(targetPage, 1), totalPages);
+    if (nextPage === currentPageValue) return;
+    currentPageSetter(nextPage);
+    scrollToSection(sectionKey);
   };
 
-  const loadMoreNews = () => {
-    setNewsDisplayCount(prev => prev + itemsPerPage);
+  const buildPageList = (totalPages, currentPage) => {
+    if (totalPages <= 9) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages = [1];
+    const left = Math.max(2, currentPage - 2);
+    const right = Math.min(totalPages - 1, currentPage + 2);
+    if (left > 2) pages.push('...');
+    for (let i = left; i <= right; i += 1) pages.push(i);
+    if (right < totalPages - 1) pages.push('...');
+    pages.push(totalPages);
+    return pages;
   };
 
-  const loadMoreAnnouncements = () => {
-    setAnnouncementsDisplayCount(prev => prev + itemsPerPage);
+  const renderPagination = (sectionKey, totalItems, currentPage, setPage) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+    if (totalPages <= 1) return null;
+    const pageList = buildPageList(totalPages, currentPage);
+    return (
+      <div className="pagination-controls numbered">
+        <button
+          className="load-more-btn secondary"
+          onClick={() => changePage(currentPage - 1, totalItems, setPage, currentPage, sectionKey)}
+          disabled={currentPage === 1}
+        >
+          « Previous
+        </button>
+        <div className="page-list">
+          {pageList.map((page, idx) =>
+            page === '...' ? (
+              <span key={`ellipsis-${idx}`} className="page-ellipsis">…</span>
+            ) : (
+              <button
+                key={page}
+                className={`page-number ${page === currentPage ? 'active' : ''}`}
+                onClick={() => changePage(page, totalItems, setPage, currentPage, sectionKey)}
+              >
+                {page}
+              </button>
+            )
+          )}
+        </div>
+        <button
+          className="load-more-btn"
+          onClick={() => changePage(currentPage + 1, totalItems, setPage, currentPage, sectionKey)}
+          disabled={currentPage === totalPages}
+        >
+          Next »
+        </button>
+      </div>
+    );
   };
-
-  const loadMoreAchievements = () => {
-    setAchievementsDisplayCount(prev => prev + itemsPerPage);
-  };
-
-  const resetEvents = () => setEventsDisplayCount(itemsPerPage);
-  const resetNews = () => setNewsDisplayCount(itemsPerPage);
-  const resetAnnouncements = () => setAnnouncementsDisplayCount(itemsPerPage);
-  const resetAchievements = () => setAchievementsDisplayCount(itemsPerPage);
 
   // Improve modal UX: close on Escape, lock background scroll (page cannot scroll under modal)
   useEffect(() => {
@@ -744,6 +784,17 @@ const NewsEvents = () => {
     }
     return map;
   }, [achievements]);
+
+  // Pagination calculations
+  const totalEventPages = Math.max(1, Math.ceil(events.length / itemsPerPage));
+  const totalNewsPages = Math.max(1, Math.ceil(news.length / itemsPerPage));
+  const totalAnnouncementPages = Math.max(1, Math.ceil(announcements.length / itemsPerPage));
+  const totalAchievementPages = Math.max(1, Math.ceil(achievements.length / itemsPerPage));
+
+  const pagedEvents = events.slice((eventsPage - 1) * itemsPerPage, eventsPage * itemsPerPage);
+  const pagedNews = news.slice((newsPage - 1) * itemsPerPage, newsPage * itemsPerPage);
+  const pagedAnnouncements = announcements.slice((announcementsPage - 1) * itemsPerPage, announcementsPage * itemsPerPage);
+  const pagedAchievements = achievements.slice((achievementsPage - 1) * itemsPerPage, achievementsPage * itemsPerPage);
 
   return (
     <div className="App news-events-page">
@@ -975,7 +1026,7 @@ const NewsEvents = () => {
                   ) : (
                     <>
                       <div className={`events-grid ${isEventsVisible ? 'fade-in-visible' : ''}`}>
-                        {events.slice(0, eventsDisplayCount).map(event => (
+                        {pagedEvents.map(event => (
                           <div key={event.id} className="event-item">
                             {event.image ? (
                               <div className="event-image-wrapper">
@@ -1005,20 +1056,7 @@ const NewsEvents = () => {
                           </div>
                         ))}
                       </div>
-                      {(events.length > eventsDisplayCount || eventsDisplayCount > itemsPerPage) && (
-                        <div className="pagination-controls">
-                          {events.length > eventsDisplayCount && (
-                            <button className="load-more-btn" onClick={loadMoreEvents}>
-                              Load More Events
-                            </button>
-                          )}
-                          {eventsDisplayCount > itemsPerPage && (
-                            <button className="load-more-btn secondary" onClick={resetEvents}>
-                              Minimize
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      {renderPagination('events', events.length, eventsPage, setEventsPage)}
                     </>
                   )}
                 </div>
@@ -1033,7 +1071,7 @@ const NewsEvents = () => {
                   ) : (
                     <>
                       <div className={`news-grid ${isNewsVisible ? 'fade-in-visible' : ''}`}>
-                        {news.slice(0, newsDisplayCount).map(item => (
+                        {pagedNews.map(item => (
                           <div key={item.id} className="news-item">
                             {item.image && (
                               <div className="news-image-wrapper">
@@ -1056,20 +1094,7 @@ const NewsEvents = () => {
                           </div>
                         ))}
                       </div>
-                      {(news.length > newsDisplayCount || newsDisplayCount > itemsPerPage) && (
-                        <div className="pagination-controls">
-                          {news.length > newsDisplayCount && (
-                            <button className="load-more-btn" onClick={loadMoreNews}>
-                              Load More News
-                            </button>
-                          )}
-                          {newsDisplayCount > itemsPerPage && (
-                            <button className="load-more-btn secondary" onClick={resetNews}>
-                              Minimize
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      {renderPagination('news', news.length, newsPage, setNewsPage)}
                     </>
                   )}
                 </div>
@@ -1084,7 +1109,7 @@ const NewsEvents = () => {
                   ) : (
                     <>
                       <div className={`announcements-grid ${isAnnouncementsVisible ? 'fade-in-visible' : ''}`}>
-                        {announcements.slice(0, announcementsDisplayCount).map(item => (
+                        {pagedAnnouncements.map(item => (
                           <div key={item.id} className="announcement-item">
                             {item.image ? (
                               <div className="announcement-image-wrapper">
@@ -1106,20 +1131,7 @@ const NewsEvents = () => {
                           </div>
                         ))}
                       </div>
-                      {(announcements.length > announcementsDisplayCount || announcementsDisplayCount > itemsPerPage) && (
-                        <div className="pagination-controls">
-                          {announcements.length > announcementsDisplayCount && (
-                            <button className="load-more-btn" onClick={loadMoreAnnouncements}>
-                              Load More Announcements
-                            </button>
-                          )}
-                          {announcementsDisplayCount > itemsPerPage && (
-                            <button className="load-more-btn secondary" onClick={resetAnnouncements}>
-                              Minimize
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      {renderPagination('announcements', announcements.length, announcementsPage, setAnnouncementsPage)}
                     </>
                   )}
                 </div>
@@ -1134,7 +1146,7 @@ const NewsEvents = () => {
                   ) : (
                     <>
                       <div className={`achievements-grid ${isAchievementsVisible ? 'fade-in-visible' : ''}`}>
-                        {achievements.slice(0, achievementsDisplayCount).map(achievement => (
+                        {pagedAchievements.map(achievement => (
                           <div key={achievement.id} className={`achievement-item ${achievement.image ? 'has-image' : ''}`}>
                             {achievement.image ? (
                               <div className="achievement-image-wrapper">
@@ -1157,20 +1169,7 @@ const NewsEvents = () => {
                           </div>
                         ))}
                       </div>
-                      {(achievements.length > achievementsDisplayCount || achievementsDisplayCount > itemsPerPage) && (
-                        <div className="pagination-controls">
-                          {achievements.length > achievementsDisplayCount && (
-                            <button className="load-more-btn" onClick={loadMoreAchievements}>
-                              Load More Achievements
-                            </button>
-                          )}
-                          {achievementsDisplayCount > itemsPerPage && (
-                            <button className="load-more-btn secondary" onClick={resetAchievements}>
-                              Minimize
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      {renderPagination('achievements', achievements.length, achievementsPage, setAchievementsPage)}
                     </>
                   )}
                 </div>
