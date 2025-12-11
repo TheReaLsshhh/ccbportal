@@ -358,14 +358,21 @@ html, body {
 
 .modal-close {
   position: absolute;
-  top: 10px;
-  right: 14px;
+  top: 0;
+  right: 0;
   background: transparent;
   border: none;
   font-size: 1.6rem;
   line-height: 1;
   cursor: pointer;
   color: #2d5a2d;
+  padding: 8px;
+  border-radius: 0 12px 0 12px;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
 .modal-title {
@@ -436,6 +443,18 @@ html, body {
 /* Date Detail Modal */
 .date-detail-modal {
   max-width: min(90vw, 700px);
+}
+
+.date-detail-modal .modal-close:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #333;
+}
+
+.date-detail-modal .modal-close {
+  top: 0;
+  right: 0;
+  padding: 8px;
+  border-radius: 0 12px 0 12px;
 }
 
 .date-detail-content {
@@ -796,8 +815,8 @@ html, body {
   }
   
   .modal-close {
-    top: 6px;
-    right: 10px;
+    top: 0;
+    right: 0;
     font-size: 1.8rem;
     width: 36px;
     height: 36px;
@@ -807,6 +826,8 @@ html, body {
     /* Better touch target */
     min-width: 44px;
     min-height: 44px;
+    padding: 8px;
+    border-radius: 0 10px 0 10px;
   }
   
   .modal-image-wrapper {

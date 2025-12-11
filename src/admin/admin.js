@@ -363,28 +363,45 @@ const AdminPage = () => {
             setAcademicPrograms(prev => [...prev, result.program]);
           }
           break;
-        case 'events':
-          // Prepare event data with proper date/time formatting
-          const eventData = {
-            ...formData,
-            // Ensure date is in YYYY-MM-DD format
-            event_date: formData.event_date || '',
-            // Ensure time is in HH:MM format
-            start_time: formData.start_time || '',
-            end_time: formData.end_time || '',
-            // Convert boolean values
-            is_active: !!formData.is_active,
-            display_order: Number(formData.display_order) || 0
-          };
-          
+        case 'events': {
+          const hasFile = (formData.image && formData.image instanceof File) || formData.remove_image;
+          let payload;
+          if (hasFile) {
+            const fd = new FormData();
+            fd.append('title', formData.title || '');
+            fd.append('description', formData.description || '');
+            fd.append('details', formData.details || '');
+            fd.append('event_date', formData.event_date || '');
+            fd.append('start_time', formData.start_time || '');
+            fd.append('end_time', formData.end_time || '');
+            fd.append('location', formData.location || '');
+            fd.append('is_active', formData.is_active ? 'true' : 'false');
+            fd.append('display_order', formData.display_order || 0);
+            if (formData.image && formData.image instanceof File) fd.append('image', formData.image);
+            if (formData.remove_image) fd.append('remove_image', 'true');
+            payload = fd;
+          } else {
+            payload = {
+              title: formData.title || '',
+              description: formData.description || '',
+              details: formData.details || '',
+              event_date: formData.event_date || '',
+              start_time: formData.start_time || '',
+              end_time: formData.end_time || '',
+              location: formData.location || '',
+              is_active: !!formData.is_active,
+              display_order: Number(formData.display_order) || 0,
+            };
+          }
           if (isEditing) {
-            result = await apiService.updateEvent(editingItem.id, eventData);
+            result = await apiService.updateEvent(editingItem.id, payload);
             setEvents(prev => prev.map(e => e.id === editingItem.id ? result.event : e));
           } else {
-            result = await apiService.createEvent(eventData);
+            result = await apiService.createEvent(payload);
             setEvents(prev => [...prev, result.event]);
           }
           break;
+        }
         case 'achievements': {
           const hasFile = (formData.image && formData.image instanceof File) || formData.remove_image;
           let payload;
@@ -805,7 +822,7 @@ const AdminPage = () => {
       case 'events':
         return ['Title', 'Date', 'Time', 'Location', 'Image', 'Status'];
       case 'achievements':
-        return ['Title', 'Date', 'Category', 'Status'];
+        return ['Title', 'Date', 'Category', 'Image', 'Status'];
       case 'announcements':
         return ['Title', 'Date', 'Image', 'Status'];
       case 'news':
@@ -850,6 +867,7 @@ const AdminPage = () => {
           item.title || 'N/A',
           item.achievement_date || 'N/A',
           item.category || 'N/A',
+          item.image ? 'Yes' : 'No',
           item.is_active ? 'Active' : 'Inactive'
         ];
       case 'announcements':
@@ -1138,44 +1156,6 @@ const AdminPage = () => {
                 onChange={handleInputChange}
                 rows="4"
               />
-            </div>
-            <div className="form-group">
-              <label>Image</label>
-              <input
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={handleInputChange}
-              />
-              {formData.image && formData.image instanceof File && (
-                <div style={{ marginTop: '10px' }}>
-                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
-                  <img 
-                    src={URL.createObjectURL(formData.image)} 
-                    alt="Preview" 
-                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
-                  />
-                </div>
-              )}
-              {editingItem && editingItem.image && !formData.image && (
-                <div style={{ marginTop: '10px' }}>
-                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
-                  <img 
-                    src={normalizeImageUrl(editingItem.image)} 
-                    alt="Current" 
-                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
-                  />
-                  <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="checkbox"
-                      name="remove_image"
-                      checked={formData.remove_image || false}
-                      onChange={handleInputChange}
-                    />
-                    Remove current image
-                  </label>
-                </div>
-              )}
             </div>
             <div className="form-row">
               <div className="form-group">

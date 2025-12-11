@@ -3,6 +3,28 @@
 from django.db import migrations, models
 
 
+class AddFieldIfNotExists(migrations.AddField):
+    """Custom AddField that checks if column exists before adding"""
+    
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        model = to_state.apps.get_model(app_label, self.model_name)
+        if self.allow_migrate_model(schema_editor.connection.alias, model):
+            # Check if column already exists
+            with schema_editor.connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT COUNT(*) 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = %s 
+                    AND COLUMN_NAME = %s
+                """, [model._meta.db_table, self.name])
+                column_exists = cursor.fetchone()[0] > 0
+                
+                if not column_exists:
+                    # Only add if it doesn't exist
+                    super().database_forwards(app_label, schema_editor, from_state, to_state)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,7 +32,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
+        AddFieldIfNotExists(
             model_name='announcement',
             name='image',
             field=models.ImageField(blank=True, help_text='Announcement image', null=True, upload_to='announcements/'),
