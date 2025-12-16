@@ -1039,10 +1039,17 @@ const NewsEvents = () => {
                                 </div>
                               </div>
                             ) : (
-                              <div className="event-image">
-                                <div className="event-date">
-                                  <span className="day">{formatEventDate(event.event_date).day}</span>
-                                  <span className="month">{formatEventDate(event.event_date).month}</span>
+                              <div className="event-image-placeholder">
+                                <div className="event-icon">
+                                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+                                  </svg>
+                                </div>
+                                <div className="event-date-overlay">
+                                  <div className="event-date">
+                                    <span className="day">{formatEventDate(event.event_date).day}</span>
+                                    <span className="month">{formatEventDate(event.event_date).month}</span>
+                                  </div>
                                 </div>
                               </div>
                             )}
@@ -1073,19 +1080,20 @@ const NewsEvents = () => {
                       <div className={`news-grid ${isNewsVisible ? 'fade-in-visible' : ''}`}>
                         {pagedNews.map(item => (
                           <div key={item.id} className="news-item">
-                            {item.image && (
+                            {item.image ? (
                               <div className="news-image-wrapper">
                                 <img src={normalizeImageUrl(item.image)} alt={item.title} />
                               </div>
-                            )}
-                            <div className="news-item-content">
-                              {!item.image && (
+                            ) : (
+                              <div className="news-image-placeholder">
                                 <div className="news-icon">
                                   <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                                     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                                   </svg>
                                 </div>
-                              )}
+                              </div>
+                            )}
+                            <div className="news-item-content">
                               <h4>{item.title}</h4>
                               <p className="news-date">{formatDate(item.date)}</p>
                               <p>{item.body}</p>
@@ -1116,10 +1124,12 @@ const NewsEvents = () => {
                                 <img src={normalizeImageUrl(item.image)} alt={item.title} />
                               </div>
                             ) : (
-                              <div className="announcement-icon">
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                </svg>
+                              <div className="announcement-image-placeholder">
+                                <div className="announcement-icon">
+                                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                  </svg>
+                                </div>
                               </div>
                             )}
                             <div className="announcement-content">
@@ -1153,10 +1163,12 @@ const NewsEvents = () => {
                                 <img src={normalizeImageUrl(achievement.image)} alt={achievement.title} />
                               </div>
                             ) : (
-                              <div className="achievement-icon">
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
+                              <div className="achievement-image-placeholder">
+                                <div className="achievement-icon">
+                                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                  </svg>
+                                </div>
                               </div>
                             )}
                             <div className="achievement-content">

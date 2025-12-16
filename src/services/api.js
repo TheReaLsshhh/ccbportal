@@ -1,5 +1,4 @@
 // API service for communicating with Django backend
-import { addCsrfToken, sanitizeString } from '../utils/security';
 
 const API_BASE_URL = '/api';
 
@@ -11,14 +10,9 @@ class ApiService {
     async makeRequest(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         const isFormData = options.body instanceof FormData;
-        let headers = isFormData
+        const headers = isFormData
             ? { ...(options.headers || {}) } // let browser set Content-Type for FormData
             : { 'Content-Type': 'application/json', ...(options.headers || {}) };
-
-        // Add CSRF token for POST/PUT/DELETE requests
-        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method?.toUpperCase())) {
-            headers = addCsrfToken(headers);
-        }
 
         const config = {
             headers,
@@ -90,9 +84,7 @@ class ApiService {
 
     // Dynamic search across all content
     async search(query) {
-        // Sanitize search query to prevent XSS
-        const sanitizedQuery = sanitizeString(query, 200);
-        return this.makeRequest(`/search/?q=${encodeURIComponent(sanitizedQuery)}`);
+        return this.makeRequest(`/search/?q=${encodeURIComponent(query)}`);
     }
 
     // Admin: Announcements CRUD
@@ -289,11 +281,45 @@ class ApiService {
         });
     }
 
-    async updateEvent(eventId, formData) {
-        // Use FormData for file uploads (supports image uploads)
+    async updateEvent(eventId, payload) {
+        // For updates with an image (FormData), use POST so Django reliably
+        // parses multipart/form-data (similar pattern to updateNews).
+        if (payload instanceof FormData) {
+            const url = `${this.baseURL}/admin/events/${eventId}/`;
+            const config = {
+                method: 'POST',
+                body: payload,
+                credentials: 'include',
+                // Let the browser set Content-Type with the multipart boundary
+            };
+
+            try {
+                const response = await fetch(url, config);
+                let data = null;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    try { data = await response.json(); } catch (_) { /* ignore */ }
+                }
+
+                if (!response.ok) {
+                    const message = (data && (data.message || data.detail || data.error)) || `HTTP error! status: ${response.status}`;
+                    const err = new Error(message);
+                    err.status = response.status;
+                    err.data = data;
+                    throw err;
+                }
+
+                return data || await response.json();
+            } catch (error) {
+                console.error('API request failed:', error);
+                throw error;
+            }
+        }
+
+        // For simple JSON updates (no file), keep using PUT + JSON
         return this.makeRequest(`/admin/events/${eventId}/`, {
             method: 'PUT',
-            body: formData instanceof FormData ? formData : JSON.stringify(formData),
+            body: JSON.stringify(payload),
         });
     }
 

@@ -218,6 +218,18 @@ const AdminPage = () => {
     } else if (activeTab === 'news') {
       defaultFormData.is_active = true;
       defaultFormData.display_order = 0;
+    } else if (activeTab === 'events') {
+      // New events should be visible on the public site by default
+      defaultFormData.is_active = true;
+      defaultFormData.display_order = 0;
+    } else if (activeTab === 'achievements') {
+      // New achievements should also be visible by default
+      defaultFormData.is_active = true;
+      defaultFormData.display_order = 0;
+    } else if (activeTab === 'announcements') {
+      // New announcements: default to active so they appear on News & Events
+      defaultFormData.is_active = true;
+      defaultFormData.display_order = 0;
     } else if (activeTab === 'institutional-info') {
       // Initialize with existing data if available
       if (institutionalInfo) {

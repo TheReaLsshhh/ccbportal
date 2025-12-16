@@ -1875,7 +1875,7 @@ def api_create_event(request):
         }, status=500)
 
 
-@require_http_methods(["PUT", "PATCH"])
+@require_http_methods(["PUT", "PATCH", "POST"])
 @csrf_exempt
 @login_required
 @permission_required('portal.change_event', raise_exception=True)
