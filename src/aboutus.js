@@ -468,7 +468,15 @@ const AboutUs = () => {
               <h3>Core Values</h3>
               <div className="values-list">
                 {institutionalInfo.core_values ? (
-                  <div dangerouslySetInnerHTML={{ __html: institutionalInfo.core_values.replace(/\n/g, '<br/>') }} />
+                  <div dangerouslySetInnerHTML={{ 
+                    __html: institutionalInfo.core_values
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;')
+                      .replace(/\n/g, '<br/>') 
+                  }} />
                 ) : (
                   <>
                     <p>The City College of Bayawan adheres to the following core values:</p>

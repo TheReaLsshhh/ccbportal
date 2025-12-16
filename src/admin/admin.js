@@ -2259,7 +2259,15 @@ const AdminPage = () => {
                   <td><strong>Core Values</strong></td>
                   <td>
                     {institutionalInfo.core_values ? (
-                      <div dangerouslySetInnerHTML={{ __html: institutionalInfo.core_values.replace(/\n/g, '<br/>') }} />
+                      <div dangerouslySetInnerHTML={{ 
+                        __html: institutionalInfo.core_values
+                          .replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;')
+                          .replace(/'/g, '&#039;')
+                          .replace(/\n/g, '<br/>') 
+                      }} />
                     ) : 'N/A'}
                   </td>
                 </tr>

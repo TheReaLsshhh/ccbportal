@@ -292,7 +292,15 @@ const Admissions = () => {
                       <div className="timeline-number">{step.step_number || index + 1}</div>
                       <div className="timeline-content">
                         <h4>{step.title}</h4>
-                        <p dangerouslySetInnerHTML={{ __html: step.description.replace(/\n/g, '<br />') }}></p>
+                        <p dangerouslySetInnerHTML={{ 
+                          __html: step.description
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#039;')
+                            .replace(/\n/g, '<br />') 
+                        }}></p>
                       </div>
                     </div>
                   ))}

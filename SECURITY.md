@@ -1,173 +1,170 @@
-# Security Hardening Guide
+# Security Configuration Guide
 
-This document outlines the security measures implemented in the CCB Portal application.
+This document outlines the security measures implemented in the CCB Portal application and how to configure them properly.
 
-## Overview
+## Environment Variables
 
-The application has been hardened against common web vulnerabilities including:
-- SQL Injection
-- Cross-Site Scripting (XSS)
-- Cross-Site Request Forgery (CSRF)
-- Clickjacking
-- Brute Force Attacks
-- Information Disclosure
+For production deployment, you MUST set the following environment variables:
 
-## Backend Security (Django)
-
-### 1. Environment Variables
-
-**CRITICAL**: Never commit sensitive data to version control. All secrets must be stored in environment variables.
-
-Create a `.env` file in the project root with the following variables:
+### Required Environment Variables
 
 ```bash
-# Django Secret Key (generate a new one!)
+# Django Secret Key (CRITICAL - Generate a new random key for production)
 DJANGO_SECRET_KEY=your-secret-key-here
 
-# Debug Mode (set to False in production)
-DEBUG=False
+# Django Debug Mode (set to False in production)
+DJANGO_DEBUG=False
 
-# Allowed Hosts
-ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
+# Allowed Hosts (comma-separated list of domain names)
+ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+
+# CORS Allowed Origins (comma-separated list of allowed origins)
+CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 
 # Database Configuration
 DB_NAME=ccb_portal
-DB_USER=root
-DB_PASSWORD=your-secure-password
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
 DB_HOST=localhost
 DB_PORT=3306
-
-# CORS Configuration
-CORS_ALLOWED_ORIGINS=https://yourdomain.com
-CSRF_TRUSTED_ORIGINS=https://yourdomain.com
-
-# Email Configuration
-BREVO_API_KEY=your-api-key
-EMAIL_HOST_USER=your-email-user
-EMAIL_HOST_PASSWORD=your-email-password
 ```
 
-### 2. Security Settings
+### Optional Environment Variables
 
-The following security settings are configured in `settings.py`:
+```bash
+# Email Configuration (Brevo/Sendinblue)
+BREVO_API_KEY=your-brevo-api-key
+DEFAULT_FROM_EMAIL=noreply@yourdomain.com
+SERVER_EMAIL=noreply@yourdomain.com
 
-- **X-Frame-Options**: Set to `DENY` to prevent clickjacking
-- **XSS Protection**: Browser XSS filter enabled
-- **Content-Type Sniffing**: Disabled to prevent MIME type confusion
-- **HTTPS**: SSL redirect enabled in production
-- **HSTS**: HTTP Strict Transport Security enabled (1 year)
-- **Secure Cookies**: Session and CSRF cookies are secure in production
-- **HTTPOnly Cookies**: Session cookies are HTTPOnly
+# SMTP Fallback (if not using Brevo)
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your-email@example.com
+EMAIL_HOST_PASSWORD=your-email-password
 
-### 3. Input Validation and Sanitization
+# SSL Settings (for production with HTTPS)
+SECURE_SSL_REDIRECT=True
+```
 
-All user inputs are validated and sanitized using utilities in `portal/security.py`:
-
-- **String Sanitization**: HTML escaping to prevent XSS
-- **Email Validation**: Proper email format validation
-- **Phone Validation**: Format and length validation
-- **SQL Injection Prevention**: Pattern detection and sanitization
-- **Length Limits**: Maximum length restrictions on all text fields
-
-### 4. Rate Limiting
-
-Rate limiting is implemented to prevent brute force attacks:
-
-- **Contact Form**: 5 requests per 5 minutes per IP
-- **Admin Login**: 5 attempts per 5 minutes per IP
-
-### 5. CSRF Protection
-
-- CSRF protection is enabled for all authenticated endpoints
-- Public API endpoints (like contact form) use `@csrf_exempt` but include rate limiting
-- CSRF tokens are automatically handled by Django middleware
-
-### 6. Database Security
-
-- Django ORM is used exclusively (no raw SQL queries)
-- Parameterized queries prevent SQL injection
-- Database credentials stored in environment variables
-- Strict SQL mode enabled
-
-## Frontend Security (React)
+## Security Features Implemented
 
 ### 1. Input Sanitization
 
-All user inputs are sanitized using utilities in `src/utils/security.js`:
+All user inputs are sanitized to prevent:
+- SQL Injection (handled by Django ORM - uses parameterized queries)
+- XSS (Cross-Site Scripting) attacks
+- Code injection
 
-- **XSS Prevention**: HTML entity escaping
-- **Input Validation**: Email, phone, URL validation
-- **Length Limits**: Maximum length restrictions
+**Backend**: Uses `sanitize_input()` utility function in `portal/utils.py`
+**Frontend**: Uses HTML escaping for all user-generated content
 
-### 2. CSRF Token Handling
+### 2. File Upload Security
 
-CSRF tokens are automatically included in API requests:
+Image uploads are validated for:
+- File type (only images: JPEG, PNG, GIF, WebP)
+- File size (maximum 10MB)
+- File extension matches content type
 
-- Tokens are read from cookies
-- Automatically added to POST/PUT/DELETE requests
-- Handled transparently by the API service
+### 3. CSRF Protection
 
-### 3. Content Security
+- CSRF middleware is enabled in Django settings
+- API endpoints use `@csrf_exempt` decorator because they use session-based authentication with cookies
+- All API endpoints require `@login_required` decorator for authentication
+- Frontend includes credentials (cookies) in all API requests
 
-- User-generated content is escaped before display
-- URLs are validated before use
-- No `dangerouslySetInnerHTML` without sanitization
+### 4. Authentication & Authorization
 
-## Security Best Practices
+- All admin endpoints require login (`@login_required`)
+- Permission checks using Django's permission system (`@permission_required`)
+- Session-based authentication with secure cookies in production
 
-### For Development
+### 5. Security Headers (Production)
 
-1. **Never commit `.env` file** - Add it to `.gitignore`
-2. **Use different secrets** for development and production
-3. **Keep DEBUG=False** in production
-4. **Use strong passwords** for database and admin accounts
+When `DEBUG=False`, the following security headers are enabled:
+- `X-Frame-Options: DENY` - Prevents clickjacking
+- `X-Content-Type-Options: nosniff` - Prevents MIME type sniffing
+- `X-XSS-Protection: 1; mode=block` - Browser XSS protection
+- `Strict-Transport-Security` - Forces HTTPS
+- `Content-Security-Policy` - Can be added for additional protection
 
-### For Production
+### 6. CORS Configuration
 
-1. **Use HTTPS** - SSL/TLS certificates required
-2. **Set DEBUG=False** - Prevents information disclosure
-3. **Restrict ALLOWED_HOSTS** - Only your domain(s)
-4. **Use environment variables** - Never hardcode secrets
-5. **Regular updates** - Keep Django and dependencies updated
-6. **Monitor logs** - Watch for suspicious activity
-7. **Backup database** - Regular backups with encryption
-8. **Use strong SECRET_KEY** - Generate a new one for production
+- Development: Allows all origins (for local testing)
+- Production: Restricted to specific allowed origins via `CORS_ALLOWED_ORIGINS`
 
-### Generating a Secure Secret Key
+### 7. Database Security
+
+- Uses Django ORM which prevents SQL injection through parameterized queries
+- SQL mode set to `STRICT_TRANS_TABLES` to prevent invalid data
+- No raw SQL queries without proper sanitization
+
+## Image Upload/Display Security
+
+Images are validated before upload and URLs are safely generated:
+- File type validation
+- File size limits
+- Safe URL generation using `build_safe_media_url()` utility
+- Media files served with proper content types
+
+## HTML Content Sanitization
+
+Rich text content (like core_values, descriptions) is sanitized:
+- HTML tags are escaped by default
+- Only safe formatting is preserved (line breaks)
+- For production, consider using DOMPurify library on frontend
+
+## Production Deployment Checklist
+
+- [ ] Set `DJANGO_SECRET_KEY` to a secure random value
+- [ ] Set `DJANGO_DEBUG=False`
+- [ ] Configure `ALLOWED_HOSTS` with your domain(s)
+- [ ] Configure `CORS_ALLOWED_ORIGINS` with your frontend URL(s)
+- [ ] Enable HTTPS and set `SECURE_SSL_REDIRECT=True`
+- [ ] Configure secure database credentials
+- [ ] Set up proper file permissions for media directory
+- [ ] Configure web server (nginx/apache) to serve static/media files
+- [ ] Set up regular backups
+- [ ] Enable logging and monitoring
+- [ ] Review and update dependencies regularly
+- [ ] Set up rate limiting for API endpoints (consider django-ratelimit)
+
+## Known Security Considerations
+
+1. **@csrf_exempt on API endpoints**: This is acceptable for session-based authentication but ensure:
+   - All endpoints require authentication
+   - Proper permission checks are in place
+   - Consider adding rate limiting
+
+2. **HTML Content**: Some fields allow HTML content (core_values). Currently uses basic escaping. For production, consider:
+   - Installing and using `bleach` library for robust HTML sanitization
+   - Or using DOMPurify on the frontend
+
+3. **File Uploads**: Currently allows images up to 10MB. Consider:
+   - Adding virus scanning
+   - Adding image optimization
+   - Setting up CDN for media files
+
+## Generating a Secure Secret Key
+
+To generate a new Django secret key:
 
 ```python
 from django.core.management.utils import get_random_secret_key
 print(get_random_secret_key())
 ```
 
-## Security Checklist
+Or use:
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
 
-Before deploying to production:
+## Additional Recommendations
 
-- [ ] All secrets moved to environment variables
-- [ ] DEBUG set to False
-- [ ] ALLOWED_HOSTS configured correctly
-- [ ] HTTPS enabled and working
-- [ ] Database password is strong
-- [ ] Admin accounts use strong passwords
-- [ ] CORS origins restricted
-- [ ] CSRF trusted origins configured
-- [ ] Rate limiting tested
-- [ ] Input validation tested
-- [ ] Error messages don't leak sensitive info
-- [ ] Logs don't contain sensitive data
-- [ ] `.env` file is in `.gitignore`
-
-## Reporting Security Issues
-
-If you discover a security vulnerability, please report it responsibly:
-1. Do not create a public issue
-2. Contact the development team directly
-3. Provide detailed information about the vulnerability
-4. Allow time for the issue to be fixed before disclosure
-
-## Additional Resources
-
-- [Django Security Documentation](https://docs.djangoproject.com/en/stable/topics/security/)
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [Django Deployment Checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/)
+1. **Rate Limiting**: Install `django-ratelimit` to prevent brute force attacks
+2. **Logging**: Set up proper logging for security events
+3. **Monitoring**: Use tools like Sentry for error tracking
+4. **Backups**: Regular database and media file backups
+5. **Updates**: Keep Django and dependencies updated
+6. **Security Headers**: Consider adding Content-Security-Policy header

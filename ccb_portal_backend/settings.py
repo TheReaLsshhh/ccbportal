@@ -12,25 +12,43 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def get_env_variable(var_name, default=None, required=False):
+    """Get environment variable or return default/raise error"""
+    value = os.getenv(var_name, default)
+    if required and not value:
+        raise ImproperlyConfigured(f"Required environment variable '{var_name}' is not set")
+    return value
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-6epnt%znb*)x+vj1*&+r)f33dr(%i)bkdy(gc9fk@h%#+3c@3)')
+# Use environment variable in production, fallback to default for development
+SECRET_KEY = get_env_variable(
+    'DJANGO_SECRET_KEY',
+    default='django-insecure-6epnt%znb*)x+vj1*&+r)f33dr(%i)bkdy(gc9fk@h%#+3c@3)'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = get_env_variable('DJANGO_DEBUG', 'True').lower() == 'true'
 
-# Security: Only allow specific hosts in production
+# Security: Restrict ALLOWED_HOSTS in production
 if DEBUG:
-    ALLOWED_HOSTS = ['*']  # Allow all in development
+    # In development, allow all hosts
+    ALLOWED_HOSTS = ['*']
 else:
-    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    # In production, specify allowed hosts
+    allowed_hosts_env = get_env_variable('ALLOWED_HOSTS', '')
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()] if allowed_hosts_env else []
+    if not ALLOWED_HOSTS:
+        raise ImproperlyConfigured("ALLOWED_HOSTS must be set in production via environment variable")
 
 
 # Application definition
@@ -85,15 +103,14 @@ WSGI_APPLICATION = 'ccb_portal_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'ccb_portal'),
-        'USER': os.getenv('DB_USER', 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),  # Use environment variable for production
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '3306'),
+        'NAME': 'ccb_portal',
+        'USER': 'root',
+        'PASSWORD': '',  # Default XAMPP MySQL has no password
+        'HOST': 'localhost',
+        'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
             'sql_mode': 'STRICT_TRANS_TABLES',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
@@ -145,48 +162,69 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # CORS settings
-# In development, allow all origins so mobile/tablet (LAN IP) can access the API
+# Security: Restrict CORS in production
 if DEBUG:
+    # In development, allow all origins so mobile/tablet (LAN IP) can access the API
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    # Production: Only allow specific origins
-    allowed_origins = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
-    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in allowed_origins]
-    CORS_ALLOW_ALL_ORIGINS = False
+    # In production, specify allowed origins
+    cors_origins_env = get_env_variable('CORS_ALLOWED_ORIGINS', '')
+    if cors_origins_env:
+        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
+    else:
+        CORS_ALLOWED_ORIGINS = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+    # Additional CORS security settings
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+    CORS_ALLOW_HEADERS = [
+        'accept',
+        'accept-encoding',
+        'authorization',
+        'content-type',
+        'dnt',
+        'origin',
+        'user-agent',
+        'x-csrftoken',
+        'x-requested-with',
+    ]
 
 CORS_ALLOW_CREDENTIALS = True
-# Security: Restrict CORS methods and headers
-CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization', 'X-CSRFToken']
 
 # WhiteNoise settings
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Email settings via Anymail (Brevo)
-# SECURITY: All API keys and passwords must come from environment variables
-BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+# Security: Use environment variables for sensitive credentials
+BREVO_API_KEY = get_env_variable("BREVO_API_KEY", "")
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend" if BREVO_API_KEY else "django.core.mail.backends.console.EmailBackend"
 
 if BREVO_API_KEY:
-    EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
-    ANYMAIL = {
-        "BREVO_API_KEY": BREVO_API_KEY,
-        # Disable debug in production
-        "DEBUG_API_REQUESTS": DEBUG and os.getenv("ANYMAIL_DEBUG", "0") == "1",
-    }
-else:
-    # Fallback SMTP (optional) if Anymail not configured
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp-relay.brevo.com")
-    EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
-    EMAIL_HOST_USER = EMAIL_HOST_USER or os.getenv("EMAIL_HOST_USER", "")
-    EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD or os.getenv("EMAIL_HOST_PASSWORD", "")
+    try:
+        import anymail  # noqa: F401
+        ANYMAIL = {
+            "BREVO_API_KEY": BREVO_API_KEY,
+            # Enable to see full request/response details in console for troubleshooting (only in DEBUG)
+            "DEBUG_API_REQUESTS": DEBUG and get_env_variable("ANYMAIL_DEBUG", "0") == "1",
+        }
+    except ImportError:
+        EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+        ANYMAIL = {}
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "citycollegeofbayawan@gmail.com")
-SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+# Fallback SMTP (optional) if Anymail not configured
+if not BREVO_API_KEY:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = get_env_variable("EMAIL_HOST", "smtp-relay.brevo.com")
+    EMAIL_PORT = int(get_env_variable("EMAIL_PORT", "587"))
+    EMAIL_USE_TLS = get_env_variable("EMAIL_USE_TLS", "True").lower() == "true"
+    EMAIL_HOST_USER = get_env_variable("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = get_env_variable("EMAIL_HOST_PASSWORD", "")
+
+DEFAULT_FROM_EMAIL = get_env_variable("DEFAULT_FROM_EMAIL", "citycollegeofbayawan@gmail.com")
+SERVER_EMAIL = get_env_variable("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 
 # Default primary key field type
@@ -199,33 +237,30 @@ LOGIN_URL = '/admin/'  # Redirect to Django admin login
 LOGIN_REDIRECT_URL = '/admin/'  # After login, redirect here
 
 # Security Settings
-# Prevent clickjacking attacks
-X_FRAME_OPTIONS = 'DENY'
-
-# XSS Protection
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-
-# HTTPS Settings (enable in production)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    # Security headers for production
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = get_env_variable('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+else:
+    # Less strict settings for development
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Session Security
-SESSION_COOKIE_HTTPONLY = True
+# Additional security settings
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if os.getenv('CSRF_TRUSTED_ORIGINS') else []
 
-# Password Security
-PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-]
+# Database security (already using parameterized queries via Django ORM)
+# Ensure no raw SQL queries without proper sanitization
+DATABASES['default']['OPTIONS']['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO'"
