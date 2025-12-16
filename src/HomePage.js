@@ -66,7 +66,7 @@ const HomePage = () => {
     const interval = setInterval(() => {
       setSlideDirection('left'); // Auto-advance slides left
       setCurrentNewsPage((prev) => (prev + 1) % totalPages);
-    }, 5000); // Change page every 5 seconds
+    }, 7000); // Change page every 7 seconds (increased for more reading time)
 
     return () => clearInterval(interval);
   }, [newsData.length, isCarouselPaused]);
@@ -102,7 +102,7 @@ const HomePage = () => {
             : [];
         const anns = annsAll
           .sort((x, y) => new Date(y.date) - new Date(x.date))
-          .slice(0, 2);
+          .slice(0, 5); // Increased from 2 to 5
 
         const evtsAll =
           evtRes.status === "success" && Array.isArray(evtRes.events)
@@ -122,7 +122,7 @@ const HomePage = () => {
             : [];
         const evts = evtsAll
           .sort((x, y) => new Date(y.date) - new Date(x.date))
-          .slice(0, 2);
+          .slice(0, 5); // Increased from 2 to 5
 
         const achsAll =
           achRes.status === "success" && Array.isArray(achRes.achievements)
@@ -142,7 +142,7 @@ const HomePage = () => {
             : [];
         const achs = achsAll
           .sort((x, y) => new Date(y.date) - new Date(x.date))
-          .slice(0, 2);
+          .slice(0, 5); // Increased from 2 to 5
 
         // Process news items
         const newsAll =
@@ -161,9 +161,12 @@ const HomePage = () => {
                 link: `/news?section=news&newsId=${n.id}`,
               }))
             : [];
+        const newsItems = newsAll
+          .sort((x, y) => new Date(y.date) - new Date(x.date))
+          .slice(0, 5); // Take top 5 news items
         
         // Combine all items and sort by date
-        const allItems = [...anns, ...evts, ...achs, ...newsAll].sort(
+        const allItems = [...anns, ...evts, ...achs, ...newsItems].sort(
           (x, y) => new Date(y.date) - new Date(x.date)
         );
         
@@ -175,16 +178,17 @@ const HomePage = () => {
         itemsWithImages.sort((x, y) => new Date(y.date) - new Date(x.date));
         textOnlyItems.sort((x, y) => new Date(y.date) - new Date(x.date));
         
-        // Build the layout matching the image pattern:
-        // Row 1: TEXT BOX, IMAGE NEWS, TEXT BOX
-        // Row 2: IMAGE NEWS, TEXT BOX, IMAGE NEWS
-        // Indices: 0=TEXT, 1=IMAGE, 2=TEXT, 3=IMAGE, 4=TEXT, 5=IMAGE
+        // Build the layout with alternating pattern for better visual variety
+        // Pattern: TEXT, IMAGE, TEXT, IMAGE, TEXT, IMAGE (repeating)
         const combined = [];
         let imageIndex = 0;
         let textIndex = 0;
         
-        for (let i = 0; i < 6; i++) {
-          const isImageSlot = i === 1 || i === 3 || i === 5;
+        // Build up to 18 items (6 pages of 3 items each)
+        const maxItems = Math.min(allItems.length, 18);
+        
+        for (let i = 0; i < maxItems; i++) {
+          const isImageSlot = i % 2 === 1; // Odd positions get images
           
           if (isImageSlot) {
             // Image slots: prioritize news items with images
@@ -1031,6 +1035,12 @@ const HomePage = () => {
         <div className="news-section">
           <div className="container">
             <h2 className="section-title">News & Events</h2>
+            {!newsLoading && !newsError && newsData.length > 0 && (
+              <p className="news-section-subtitle">
+                Stay informed with the latest updates from City College of Bayawan. 
+                Browse through our recent announcements, events, achievements, and news.
+              </p>
+            )}
             {newsLoading ? (
               <div className="news-grid-layout">
                 <div className="news-grid-item">
@@ -1183,47 +1193,62 @@ const HomePage = () => {
                   </div>
                 </div>
                 {showCarousel && (
-                  <div className="news-carousel-controls">
-                    <button
-                      className="news-carousel-btn news-carousel-btn-prev"
-                      onClick={handlePrevPage}
-                      aria-label="Previous page"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
+                  <>
+                    <div className="news-carousel-controls">
+                      <button
+                        className="news-carousel-btn news-carousel-btn-prev"
+                        onClick={handlePrevPage}
+                        aria-label="Previous page"
                       >
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                      </svg>
-                    </button>
-                    <div className="news-carousel-dots">
-                      {Array.from({ length: totalPages }).map((_, index) => (
-                        <button
-                          key={index}
-                          className={`news-carousel-dot ${
-                            currentNewsPage === index ? "active" : ""
-                          }`}
-                          onClick={() => goToPage(index)}
-                          aria-label={`Go to page ${index + 1}`}
-                        />
-                      ))}
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                        >
+                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                      </button>
+                      <div className="news-carousel-dots">
+                        {Array.from({ length: totalPages }).map((_, index) => (
+                          <button
+                            key={index}
+                            className={`news-carousel-dot ${
+                              currentNewsPage === index ? "active" : ""
+                            }`}
+                            onClick={() => goToPage(index)}
+                            aria-label={`Go to page ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                      <button
+                        className="news-carousel-btn news-carousel-btn-next"
+                        onClick={handleNextPage}
+                        aria-label="Next page"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                        >
+                          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                        </svg>
+                      </button>
                     </div>
-                    <button
-                      className="news-carousel-btn news-carousel-btn-next"
-                      onClick={handleNextPage}
-                      aria-label="Next page"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                      >
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                    <div className="news-carousel-page-indicator">
+                      Page {currentNewsPage + 1} of {totalPages}
+                    </div>
+                  </>
+                )}
+                {newsData.length > 0 && (
+                  <div className="news-view-all-container">
+                    <a href="/news" className="btn btn-view-all">
+                      View All News & Events
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
                       </svg>
-                    </button>
+                    </a>
                   </div>
                 )}
               </div>
