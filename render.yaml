@@ -19,7 +19,7 @@ services:
       npm install
       npx react-scripts build || npm run build
       python manage.py collectstatic --noinput
-    startCommand: python manage.py migrate --noinput && python manage.py create_superuser_if_none --noinput && gunicorn ccb_portal_backend.wsgi:application
+    startCommand: python manage.py migrate --noinput; python manage.py create_superuser_if_none --noinput; gunicorn ccb_portal_backend.wsgi:application --timeout 120 --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
