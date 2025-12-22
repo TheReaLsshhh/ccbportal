@@ -181,12 +181,22 @@ else:
     # In production, specify allowed origins
     cors_origins_env = get_env_variable('CORS_ALLOWED_ORIGINS', '')
     if cors_origins_env:
-        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
-    else:
+        # Validate and filter CORS origins - only include valid URLs
+        import re
+        url_pattern = re.compile(r'^https?://[^\s/$.?#].[^\s]*$')
         CORS_ALLOWED_ORIGINS = [
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
+            origin.strip() for origin in cors_origins_env.split(',') 
+            if origin.strip() and url_pattern.match(origin.strip())
         ]
+        # If no valid origins found, allow same origin (since Django serves React)
+        if not CORS_ALLOWED_ORIGINS:
+            CORS_ALLOW_ALL_ORIGINS = False
+            # Allow same origin requests
+            CORS_ALLOWED_ORIGINS = []
+    else:
+        # Default: allow same origin (Django serves React frontend)
+        CORS_ALLOW_ALL_ORIGINS = False
+        CORS_ALLOWED_ORIGINS = []
     # Additional CORS security settings
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
