@@ -1,6 +1,6 @@
 services:
   # PostgreSQL Database
-  - type: pspg
+  - type: pg
     name: ccb-portal-db
     plan: free
     databaseName: ccb_portal
