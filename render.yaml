@@ -1,11 +1,13 @@
-services:
+databases:
   # PostgreSQL Database
-  - type: pg
-    name: ccb-portal-db
+  - name: ccb-portal-db
     plan: free
     databaseName: ccb_portal
     user: ccb_user
+    region: oregon
+    ipAllowList: []
 
+services:
   # Django Backend Web Service
   - type: web
     name: ccb-portal-backend
