@@ -928,7 +928,7 @@ const HomePage = () => {
       <video className="video-overlay" autoPlay loop muted playsInline>
         <source src="/images/bgvideo.mp4" type="video/mp4" />
       </video>
-      <Navbar />
+      <Navbar isHomePage={true} />
       <div className="homepage-content">
         {/* Hero/Banner Section */}
         <div className="hero-banner-section"></div>

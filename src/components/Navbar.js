@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Navbar.css";
 import apiService from "../services/api";
 
-const Navbar = ({ isTopBarVisible = true }) => {
+const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
@@ -261,9 +261,9 @@ const Navbar = ({ isTopBarVisible = true }) => {
   }, []);
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${isHomePage ? "homepage-navbar" : ""}`}>
       {/* Secondary Navigation Bar - Full Width Green Background */}
-      <div className="secondary-nav-bar">
+      <div className={`secondary-nav-bar ${isHomePage ? "homepage-nav-section" : ""}`}>
         <div className="secondary-nav-container">
           <div className="secondary-nav-links">
             <a
@@ -303,7 +303,7 @@ const Navbar = ({ isTopBarVisible = true }) => {
       </div>
 
       {/* Top Header Section - White Background with Logo */}
-      <div className="header-top">
+      <div className={`header-top ${isHomePage ? "homepage-nav-section" : ""}`}>
         <div className="header-container">
           <div className="brand">
             <div className="logo">
@@ -329,7 +329,7 @@ const Navbar = ({ isTopBarVisible = true }) => {
       </div>
 
       {/* Main Navigation Bar - Dark Green Background */}
-      <div className={`main-nav ${isScrolled ? "with-bg" : "no-bg"}`}>
+      <div className={`main-nav ${isScrolled ? "with-bg" : "no-bg"} ${isHomePage ? "homepage-nav-section" : ""}`}>
         <div className="nav-container">
           {/* Mobile Menu Button */}
           <button

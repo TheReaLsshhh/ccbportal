@@ -6,6 +6,36 @@
   overflow: hidden;
 }
 
+/* Sequential Navbar Dropdown Animation - HomePage Only */
+.homepage-navbar .secondary-nav-bar.homepage-nav-section {
+  transform: translateY(-100%);
+  opacity: 0;
+  animation: navbarSectionDropdown 0.5s ease-out 0.1s forwards;
+}
+
+.homepage-navbar .header-top.homepage-nav-section {
+  transform: translateY(-100%);
+  opacity: 0;
+  animation: navbarSectionDropdown 0.5s ease-out 0.3s forwards;
+}
+
+.homepage-navbar .main-nav.homepage-nav-section {
+  transform: translateY(-100%);
+  opacity: 0;
+  animation: navbarSectionDropdown 0.5s ease-out 0.5s forwards;
+}
+
+@keyframes navbarSectionDropdown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Snow overlay for December */
 .snow-container {
   position: fixed;
