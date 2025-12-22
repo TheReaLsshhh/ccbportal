@@ -41,5 +41,5 @@ services:
         value: citycollegeofbayawan@gmail.com
       - key: SECURE_SSL_REDIRECT
         value: True
-    healthCheckPath: /admin/
+    healthCheckPath: /api/test/
 

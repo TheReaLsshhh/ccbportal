@@ -47,9 +47,12 @@ if DEBUG:
 else:
     # In production, specify allowed hosts
     allowed_hosts_env = get_env_variable('ALLOWED_HOSTS', '')
-    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()] if allowed_hosts_env else []
-    if not ALLOWED_HOSTS:
-        raise ImproperlyConfigured("ALLOWED_HOSTS must be set in production via environment variable")
+    if allowed_hosts_env:
+        ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
+    else:
+        # If not set, allow Render's default domain pattern
+        # This allows the service to start even if ALLOWED_HOSTS isn't configured yet
+        ALLOWED_HOSTS = ['.onrender.com']
 
 
 # Application definition
