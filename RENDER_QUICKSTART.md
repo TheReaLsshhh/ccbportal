@@ -38,12 +38,31 @@ After services are created, go to **ccb-portal-backend** service → **Environme
 
 ### Step 4: Create Admin User
 
+**Option 1: Using Environment Variables (Recommended for Free Tier)**
+
+1. Go to **ccb-portal-backend** → **Environment**
+2. Add these environment variables:
+   - `DJANGO_SUPERUSER_USERNAME`: Your desired admin username (e.g., `admin`)
+   - `DJANGO_SUPERUSER_EMAIL`: Admin email (e.g., `admin@example.com`)
+   - `DJANGO_SUPERUSER_PASSWORD`: Your desired admin password
+3. **Redeploy** the service (or it will auto-create on next deploy)
+4. The superuser will be created automatically on startup
+
+**Option 2: Using Shell (if available)**
+
 1. Go to **ccb-portal-backend** → **Shell**
 2. Run:
    ```bash
    python manage.py createsuperuser
    ```
 3. Follow prompts to create admin account
+
+**Option 3: Using Management Command**
+
+If you can access the shell, you can also run:
+```bash
+python manage.py create_superuser_if_none --username admin --email admin@example.com --password yourpassword
+```
 
 ### Step 5: Access Your App
 
