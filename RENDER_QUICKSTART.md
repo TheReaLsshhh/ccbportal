@@ -1,5 +1,7 @@
 # Render.com Quick Start Guide
 
+> **Note**: This guide is configured for **Free Tier** accounts. The `render.yaml` uses `plan: free` for both database and web service.
+
 ## 🚀 Fast Deployment (5 Minutes)
 
 ### Step 1: Prepare Your Code
@@ -17,6 +19,8 @@
 2. **Click "New +" → "Blueprint"**
 3. **Connect your Git repository**
 4. **Render will detect `render.yaml` automatically**
+   - ✅ Both services are configured for **Free Tier** (`plan: free`)
+   - ✅ No payment required - perfect for testing and development
 5. **Click "Apply"**
 
 ### Step 3: Configure Environment Variables
@@ -50,6 +54,25 @@ After services are created, go to **ccb-portal-backend** service → **Environme
 
 Your app should now be live. Check the logs if you encounter any issues.
 
+## ⚠️ Free Tier Limitations
+
+Since you're using the **Free Tier**, be aware of these limitations:
+
+1. **Service Spin-Down**: Your web service will spin down after **15 minutes of inactivity**
+   - First request after spin-down may take 30-60 seconds to wake up
+   - This is normal for free tier services
+
+2. **Database**: 
+   - Free PostgreSQL databases have **90-day data retention**
+   - 1GB storage limit
+   - Perfect for development and testing
+
+3. **Build Time**: Limited build minutes per month (usually sufficient for regular deployments)
+
+4. **No Custom Domain**: Free tier services use `.onrender.com` subdomains
+
+**To avoid spin-down** (if needed), consider upgrading to a Starter plan ($7/month) for always-on services.
+
 ## 🔧 Troubleshooting
 
 ### Build Fails
@@ -66,6 +89,11 @@ Your app should now be live. Check the logs if you encounter any issues.
 - Check application logs
 - Verify `ALLOWED_HOSTS` matches your domain
 - Ensure all environment variables are set
+
+### Service Spun Down (Free Tier)
+- **First request after inactivity**: May take 30-60 seconds to wake up
+- **This is normal**: Free tier services spin down after 15 minutes of inactivity
+- **Solution**: Wait for the service to wake up, or upgrade to Starter plan for always-on
 
 ## 📚 Full Documentation
 
