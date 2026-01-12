@@ -142,15 +142,6 @@ def api_test(request):
 
 
 @require_http_methods(["GET"])
-def health_check(request):
-    """Simple health check endpoint for Render and other monitoring"""
-    return JsonResponse({
-        'status': 'healthy',
-        'service': 'ccb-portal-backend'
-    }, status=200)
-
-
-@require_http_methods(["GET"])
 def api_academic_programs(request):
     """Get academic programs data from database"""
     try:
@@ -2426,8 +2417,6 @@ def api_contact_verify(request):
         sub_phone = escape(submission.phone or '')
         sub_subject = escape(submission.subject or 'general')
         sub_message = escape(submission.message or '').replace('\n', '<br/>')
-        # HTML for empty phone placeholder (extracted to avoid f-string backslash issue)
-        phone_display = sub_phone if sub_phone else '<span style="color:#888;">—</span>'
 
         # Plain-text fallback
         text_body = (
@@ -2465,7 +2454,7 @@ def api_contact_verify(request):
                     </tr>
                     <tr>
                       <td style=\"padding:6px 0; color:#555;\"><strong>Phone:</strong></td>
-                      <td style=\"padding:6px 0; color:#111;\">{phone_display}</td>
+                      <td style=\"padding:6px 0; color:#111;\">{sub_phone or '<span style=\\"color:#888;\\">—</span>'}</td>
                     </tr>
                   </table>
                 </div>

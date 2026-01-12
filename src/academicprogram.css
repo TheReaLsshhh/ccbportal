@@ -9,6 +9,18 @@
     padding: 3rem 1rem;
     text-align: center;
   }
+
+  .academic-page .nav-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 50px;
+  }
   
   .loading-spinner {
     width: 40px;
@@ -770,11 +782,57 @@
 .academic-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
 .academic-page .footer-wave .shape-fill-3 { fill: rgba(252, 249, 239, 1); }
   
-  /* Responsive Design */
+  /* Responsive Design - Tablet (769px - 1024px) */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .academics-hero {
+      padding: 110px 0 70px;
+      margin-top: 88px;
+      min-height: 450px;
+    }
+
+    .academics-hero.navbar-collapsed {
+      margin-top: 48px;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.3rem;
+    }
+
+    .hero-motto {
+      font-size: 1.1rem;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+    }
+
+    .programs-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.75rem;
+    }
+
+    .requirements-grid,
+    .specific-requirements-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.75rem;
+    }
+
+    .core-courses ul,
+    .career-prospects ul {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Responsive Design - Mobile (max-width: 768px) */
   @media (max-width: 768px) {
     .academics-hero {
       padding: 100px 0 60px;
       margin-top: 104px;
+      min-height: 400px;
     }
     
     .academics-hero.navbar-collapsed {
@@ -783,6 +841,7 @@
     
     .hero-title {
       font-size: 2.5rem;
+      line-height: 1.2;
     }
     
     .hero-subtitle {
@@ -799,6 +858,7 @@
     
     .section-title {
       font-size: 2rem;
+      padding: 0 20px;
     }
     
     .programs-grid {
@@ -809,16 +869,29 @@
     .program-card {
       padding: 2rem;
     }
+
+    .program-card h3 {
+      font-size: 1.3rem;
+    }
+
+    .program-description {
+      font-size: 0.95rem;
+    }
     
     .description-card {
       padding: 2rem;
+    }
+
+    .description-card h3 {
+      font-size: 1.5rem;
     }
     
     .description-details {
       gap: 1.5rem;
     }
     
-    .core-courses ul {
+    .core-courses ul,
+    .career-prospects ul {
       grid-template-columns: 1fr;
     }
     
@@ -839,28 +912,49 @@
     .timeline-content {
       padding: 1.2rem;
     }
+
+    .timeline-content h4 {
+      font-size: 1.15rem;
+    }
+
+    .timeline-content p {
+      font-size: 0.95rem;
+    }
     
     .section-cta {
       flex-direction: column;
       align-items: center;
       gap: 1rem;
+      padding: 0 20px;
     }
     
     .section-cta .btn {
       width: 100%;
       max-width: 300px;
+      padding: 14px 28px;
     }
     
+    .requirements-grid,
     .specific-requirements-grid {
       grid-template-columns: 1fr;
       gap: 1.5rem;
     }
+
+    .requirement-category {
+      padding: 1.25rem;
+    }
+
+    .container {
+      padding: 0 20px;
+    }
   }
   
+  /* Responsive Design - Small Mobile (max-width: 480px) */
   @media (max-width: 480px) {
     .academics-hero {
-      padding: 80px 0 50px;
-      margin-top: -50px;
+      padding: 90px 0 50px;
+      margin-top: 100px;
+      min-height: 350px;
     }
     
     .academics-hero.navbar-collapsed {
@@ -868,7 +962,8 @@
     }
     
     .hero-title {
-      font-size: 2rem;
+      font-size: 1.8rem;
+      line-height: 1.1;
     }
     
     .hero-subtitle {
@@ -885,6 +980,7 @@
     
     .section-title {
       font-size: 1.7rem;
+      padding: 0 15px;
     }
     
     .program-card {
@@ -894,6 +990,22 @@
     .program-card h3 {
       font-size: 1.2rem;
     }
+
+    .program-description {
+      font-size: 0.9rem;
+    }
+
+    .duration-label,
+    .units-label,
+    .enhancements-label {
+      font-size: 0.9rem;
+    }
+
+    .duration-value,
+    .units-value,
+    .enhancements-value {
+      font-size: 0.9rem;
+    }
     
     .description-card {
       padding: 1.5rem;
@@ -901,6 +1013,29 @@
     
     .description-card h3 {
       font-size: 1.4rem;
+    }
+
+    .program-overview p {
+      font-size: 0.95rem;
+    }
+
+    .core-courses li,
+    .career-prospects li {
+      font-size: 0.9rem;
+    }
+    
+    .timeline-item {
+      gap: 1.25rem;
+    }
+
+    .timeline-item:not(:last-child)::after {
+      left: 18px;
+    }
+    
+    .timeline-number {
+      width: 36px;
+      height: 36px;
+      font-size: 0.95rem;
     }
     
     .timeline-content {
@@ -910,10 +1045,52 @@
     .timeline-content h4 {
       font-size: 1.1rem;
     }
+
+    .timeline-content p {
+      font-size: 0.9rem;
+    }
     
+    .section-cta {
+      padding: 0 15px;
+    }
+
     .section-cta .btn {
       padding: 12px 25px;
-      font-size: 1rem;
+      font-size: 0.95rem;
+      max-width: 280px;
+    }
+
+    .requirements-grid,
+    .specific-requirements-grid {
+      gap: 1.25rem;
+    }
+
+    .requirement-category {
+      padding: 1.15rem;
+    }
+
+    .requirement-category h4 {
+      font-size: 1.1rem;
+    }
+
+    .requirement-category li {
+      font-size: 0.9rem;
+    }
+
+    .specific-req-card {
+      padding: 1.5rem;
+    }
+
+    .specific-req-card h4 {
+      font-size: 1.2rem;
+    }
+
+    .specific-req-card li {
+      font-size: 0.9rem;
+    }
+
+    .container {
+      padding: 0 15px;
     }
   }
   

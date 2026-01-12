@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,12 +46,9 @@ if DEBUG:
 else:
     # In production, specify allowed hosts
     allowed_hosts_env = get_env_variable('ALLOWED_HOSTS', '')
-    if allowed_hosts_env:
-        ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
-    else:
-        # If not set, allow Render's default domain pattern
-        # This allows the service to start even if ALLOWED_HOSTS isn't configured yet
-        ALLOWED_HOSTS = ['.onrender.com']
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()] if allowed_hosts_env else []
+    if not ALLOWED_HOSTS:
+        raise ImproperlyConfigured("ALLOWED_HOSTS must be set in production via environment variable")
 
 
 # Application definition
@@ -104,30 +100,20 @@ WSGI_APPLICATION = 'ccb_portal_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Use PostgreSQL on Render, MySQL locally
-DATABASE_URL = get_env_variable('DATABASE_URL', None)
-
-if DATABASE_URL:
-    # Production: Use PostgreSQL from Render
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ccb_portal',
+        'USER': 'root',
+        'PASSWORD': '',  # Default XAMPP MySQL has no password
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'sql_mode': 'STRICT_TRANS_TABLES',
+        },
     }
-else:
-    # Development: Use MySQL (XAMPP)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': get_env_variable('DB_NAME', 'ccb_portal'),
-            'USER': get_env_variable('DB_USER', 'root'),
-            'PASSWORD': get_env_variable('DB_PASSWORD', ''),
-            'HOST': get_env_variable('DB_HOST', 'localhost'),
-            'PORT': get_env_variable('DB_PORT', '3306'),
-            'OPTIONS': {
-                'charset': 'utf8mb4',
-                'sql_mode': 'STRICT_TRANS_TABLES',
-            },
-        }
-    }
+}
 
 
 # Password validation
@@ -184,19 +170,12 @@ else:
     # In production, specify allowed origins
     cors_origins_env = get_env_variable('CORS_ALLOWED_ORIGINS', '')
     if cors_origins_env:
-        # Validate and filter CORS origins - only include valid URLs
-        import re
-        url_pattern = re.compile(r'^https?://[^\s/$.?#].[^\s]*$')
-        CORS_ALLOWED_ORIGINS = [
-            origin.strip() for origin in cors_origins_env.split(',') 
-            if origin.strip() and url_pattern.match(origin.strip())
-        ]
-        # If no valid origins found after filtering, use empty list (same-origin is allowed by default)
-        if not CORS_ALLOWED_ORIGINS:
-            CORS_ALLOWED_ORIGINS = []
+        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
     else:
-        # Default: empty list allows same-origin requests (Django serves React frontend)
-        CORS_ALLOWED_ORIGINS = []
+        CORS_ALLOWED_ORIGINS = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
     # Additional CORS security settings
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
@@ -284,8 +263,4 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Database security (already using parameterized queries via Django ORM)
 # Ensure no raw SQL queries without proper sanitization
-# Only set MySQL-specific options if using MySQL
-if DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
-    if 'OPTIONS' not in DATABASES['default']:
-        DATABASES['default']['OPTIONS'] = {}
-    DATABASES['default']['OPTIONS']['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO'"
+DATABASES['default']['OPTIONS']['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO'"

@@ -31,6 +31,18 @@ html, body {
     height: 445px !important;
 }
 
+.students-page .nav-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 50px;
+}
+
 .students-header::before {
   content: '';
   position: absolute;
@@ -863,30 +875,91 @@ html, body {
   margin-bottom: 0;
 }
 
-.students-footer .footer {
-  background-color: #2d5a2d;
-  color: #fff;
-  padding: 0 0 20px;
-  margin-top: 60px;
+.students-footer {
+  background-color: #f8fafc;
 }
 
-/* Custom wave colors for Admissions page footer */
+.students-footer .footer {
+  background-color: #2d5a2d;
+  color: #f8fafc !important;
+  padding: 0 0 20px;
+  margin-top: 40px;
+}
+
+/* Dedicated Wave Footer Styles for Students Page */
 .students-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .students-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.students-page .footer-wave .shape-fill-3 { fill: rgba(255, 255, 252, 1); }
+.students-page .footer-wave .shape-fill-3 { fill: #f8fafc; }
 
-/* Responsive Design */
+/* Responsive Design - Tablet (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .students-header {
+    padding: 110px 0 70px;
+    height: 400px !important;
+  }
+
+  .students-header .hero-title {
+    font-size: 3rem;
+  }
+
+  .students-header .hero-subtitle {
+    font-size: 1.15rem;
+  }
+
+  .students-section .section-title {
+    font-size: 2.2rem;
+  }
+
+  .handbook-content,
+  .calendar-content,
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .organizations-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .activities-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .students-section {
+    padding: 70px 0;
+  }
+}
+
+/* Responsive Design - Mobile (max-width: 768px) */
 @media (max-width: 768px) {
+  .students-header {
+    padding: 100px 0 60px;
+    height: 380px !important;
+  }
+
   .students-header .hero-title {
     font-size: 2.5rem;
+    line-height: 1.2;
   }
   
   .students-header .hero-subtitle {
     font-size: 1.1rem;
   }
+
+  .students-header .hero-motto {
+    font-size: 1rem;
+  }
   
   .students-section .section-title {
     font-size: 2rem;
+    padding: 0 20px;
+  }
+
+  .students-section .section-subtitle {
+    font-size: 1rem;
+    padding: 0 20px;
   }
   
   .handbook-content,
@@ -894,24 +967,62 @@ html, body {
   .services-grid,
   .organizations-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
   .activities-list {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
   .students-section {
     padding: 60px 0;
   }
+
+  .handbook-card,
+  .calendar-card,
+  .service-card,
+  .org-card {
+    padding: 1.75rem;
+  }
+
+  .activity-item {
+    padding: 1rem;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
 }
 
+/* Responsive Design - Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
   .students-header {
-    padding: 100px 0 60px;
+    padding: 90px 0 50px;
+    height: 350px !important;
   }
   
   .students-header .hero-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    line-height: 1.1;
+  }
+
+  .students-header .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .students-header .hero-motto {
+    font-size: 0.9rem;
+  }
+  
+  .students-section .section-title {
+    font-size: 1.8rem;
+    padding: 0 15px;
+  }
+
+  .students-section .section-subtitle {
+    font-size: 0.95rem;
+    padding: 0 15px;
   }
   
   .handbook-card,
@@ -920,10 +1031,32 @@ html, body {
   .org-card {
     padding: 1.5rem;
   }
+
+  .handbook-card h3,
+  .calendar-card h3,
+  .service-card h3,
+  .org-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .handbook-card p,
+  .calendar-card p,
+  .service-card p,
+  .org-card p {
+    font-size: 0.9rem;
+  }
+
+  .download-btn,
+  .service-btn,
+  .org-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
+  }
   
   .activity-item {
     flex-direction: column;
     text-align: center;
+    padding: 1rem;
   }
   
   .activity-icon {
@@ -931,16 +1064,37 @@ html, body {
   }
   
   .event-date-badge {
-    margin: 0 auto;
+    margin: 0 auto 0.5rem;
+  }
+
+  .activity-content h4 {
+    font-size: 1rem;
+  }
+
+  .activity-content p {
+    font-size: 0.85rem;
   }
   
   .modal-content {
     padding: 20px;
     max-width: 95vw;
+    margin: 20px;
   }
   
   .modal-title {
     font-size: 1.4rem;
+  }
+
+  .modal-description {
+    font-size: 0.95rem;
+  }
+
+  .students-section {
+    padding: 50px 0;
+  }
+
+  .container {
+    padding: 0 15px;
   }
 }
 

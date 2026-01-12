@@ -10,11 +10,14 @@ import { normalizeImageUrl } from "./utils/imageUtils";
 const HomePage = () => {
   // State for responsive behavior
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const [showAudioButton, setShowAudioButton] = useState(false);
 
   // Animation states
   const [isFeaturesGridVisible, setIsFeaturesGridVisible] = useState(false);
   const [isCtaButtonsVisible, setIsCtaButtonsVisible] = useState(false);
+  const [isNewsSectionTitleVisible, setIsNewsSectionTitleVisible] = useState(false);
+  const [navAnimationsComplete, setNavAnimationsComplete] = useState(false);
 
   // Carousel state for news section
   const [currentNewsPage, setCurrentNewsPage] = useState(0);
@@ -31,18 +34,28 @@ const HomePage = () => {
     if (audioManager.isAudioAvailableOnMobile()) {
       setShowAudioButton(true);
     }
+
+    // Mark nav animations as complete after all animations finish (after ~1.5s)
+    // This prevents animations from re-triggering on scroll
+    const animationTimeout = setTimeout(() => {
+      setNavAnimationsComplete(true);
+    }, 1500);
+
+    return () => clearTimeout(animationTimeout);
   }, []);
 
   // Check if device is mobile/tablet
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const checkDeviceType = () => {
+      const width = window.innerWidth;
+      setIsMobile(width <= 768);
+      setIsTablet(width > 768 && width <= 1024);
     };
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+    checkDeviceType();
+    window.addEventListener("resize", checkDeviceType);
 
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkDeviceType);
   }, []);
 
   // Dynamic Latest News & Updates (Announcements + Events + Achievements)
@@ -50,16 +63,18 @@ const HomePage = () => {
   const [newsError, setNewsError] = useState("");
   const [newsLoading, setNewsLoading] = useState(true);
 
-  // Reset carousel to first page when news data changes
+  // Reset carousel to first page when news data changes or when switching between mobile/tablet/desktop
   useEffect(() => {
     setCurrentNewsPage(0);
-  }, [newsData.length]);
+  }, [newsData.length, isMobile, isTablet]);
 
   // Auto-play carousel
   useEffect(() => {
-    const itemsPerPage = 3;
-    const totalPages = Math.ceil(newsData.length / itemsPerPage);
-    const showCarousel = newsData.length > itemsPerPage;
+    const itemsPerPage = isMobile ? 1 : isTablet ? 2 : 3;
+    // On mobile, limit to 6 items for 6 pages; on tablet, limit to 12 items for 6 pages; on desktop, use all 18 items for 6 pages
+    const displayData = isMobile ? newsData.slice(0, 6) : isTablet ? newsData.slice(0, 12) : newsData;
+    const totalPages = Math.ceil(displayData.length / itemsPerPage);
+    const showCarousel = displayData.length > itemsPerPage;
     
     if (!showCarousel || isCarouselPaused) return;
 
@@ -69,7 +84,7 @@ const HomePage = () => {
     }, 7000); // Change page every 7 seconds (increased for more reading time)
 
     return () => clearInterval(interval);
-  }, [newsData.length, isCarouselPaused]);
+  }, [newsData.length, isCarouselPaused, isMobile, isTablet]);
 
 
   // Load announcements, events, achievements, and news for carousel
@@ -184,7 +199,7 @@ const HomePage = () => {
         let imageIndex = 0;
         let textIndex = 0;
         
-        // Build up to 18 items (6 pages of 3 items each)
+        // Build up to 18 items (6 pages of 3 items each on desktop, 6 items for 6 pages of 1 item each on mobile)
         const maxItems = Math.min(allItems.length, 18);
         
         for (let i = 0; i < maxItems; i++) {
@@ -279,7 +294,38 @@ const HomePage = () => {
     };
   }, []);
 
-  // More realistic snowflake configs for holiday effect
+  // Intersection Observer for news section title
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsNewsSectionTitleVisible(true);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of the element is visible
+        rootMargin: "0px 0px -50px 0px", // Start animation 50px before element comes into view
+      }
+    );
+
+    const newsSectionTitleElement = document.querySelector(".news-section .section-title");
+    if (newsSectionTitleElement) {
+      observer.observe(newsSectionTitleElement);
+    }
+
+    return () => {
+      if (newsSectionTitleElement) {
+        observer.unobserve(newsSectionTitleElement);
+      }
+    };
+  }, []);
+
+  // Check if current month is December (month index 11, since months are 0-indexed)
+  const isDecember = new Date().getMonth() === 11;
+
+  // More realistic snowflake configs for holiday effect (only in December)
   const SNOWFLAKE_COUNT = 80;
   const [snowflakes] = useState(() =>
     Array.from({ length: SNOWFLAKE_COUNT }, () => ({
@@ -332,20 +378,26 @@ const HomePage = () => {
   };
 
   // Carousel navigation handlers
-  const itemsPerPage = 3;
-  const totalPages = Math.ceil(newsData.length / itemsPerPage);
-  const showCarousel = newsData.length > itemsPerPage;
+  // Responsive items per page: 
+  // - Mobile (≤768px): 1 item per page, 6 items = 6 pages
+  // - Tablet (769px-1024px): 2 items per page, 12 items = 6 pages
+  // - Desktop (>1024px): 3 items per page, 18 items = 6 pages
+  const itemsPerPage = isMobile ? 1 : isTablet ? 2 : 3;
+  // On mobile, limit to 6 items for 6 pages; on tablet, limit to 12 items for 6 pages; on desktop, use all 18 items for 6 pages
+  const displayData = isMobile ? newsData.slice(0, 6) : isTablet ? newsData.slice(0, 12) : newsData;
+  const totalPages = Math.ceil(displayData.length / itemsPerPage);
+  const showCarousel = displayData.length > itemsPerPage;
   
   const getCurrentPageItems = () => {
     const startIndex = currentNewsPage * itemsPerPage;
-    const pageItems = newsData.slice(startIndex, startIndex + itemsPerPage);
+    const pageItems = displayData.slice(startIndex, startIndex + itemsPerPage);
     
-    // Always return exactly 3 items - pad with empty items if needed
+    // Pad with empty items if needed to maintain consistent layout
     const paddedItems = [...pageItems];
     while (paddedItems.length < itemsPerPage) {
-      paddedItems.push(null); // Add null placeholder to maintain 3 cards
+      paddedItems.push(null); // Add null placeholder
     }
-    return paddedItems.slice(0, itemsPerPage); // Ensure exactly 3 items
+    return paddedItems.slice(0, itemsPerPage);
   };
 
   const handleNextPage = () => {
@@ -374,28 +426,30 @@ const HomePage = () => {
   };
 
   return (
-    <div className="homepage">
+    <div className={`homepage ${navAnimationsComplete ? "nav-animations-complete" : ""}`}>
       {/* Festive snow overlay for December */}
-      <div className="snow-container" aria-hidden="true">
-        {snowflakes.map((flake, index) => (
-          <div
-            key={index}
-            className="snowflake"
-            style={{
-              left: `${flake.left}%`,
-              width: `${flake.size * 1.2}px`,
-              height: `${flake.size * 1.2}px`,
-              fontSize: `${flake.size}px`,
-              animationDuration: `${flake.duration}s`,
-              animationDelay: `${flake.delay}s`,
-              opacity: flake.opacity,
-              "--drift": `${flake.drift}px`,
-            }}
-          >
-            ❄
-          </div>
-        ))}
-      </div>
+      {isDecember && (
+        <div className="snow-container" aria-hidden="true">
+          {snowflakes.map((flake, index) => (
+            <div
+              key={index}
+              className="snowflake"
+              style={{
+                left: `${flake.left}%`,
+                width: `${flake.size * 1.2}px`,
+                height: `${flake.size * 1.2}px`,
+                fontSize: `${flake.size}px`,
+                animationDuration: `${flake.duration}s`,
+                animationDelay: `${flake.delay}s`,
+                opacity: flake.opacity,
+                "--drift": `${flake.drift}px`,
+              }}
+            >
+              ❄
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Flickering lights overlay */}
       <div className="lights-container" aria-hidden="true">
@@ -933,14 +987,16 @@ const HomePage = () => {
         {/* Hero/Banner Section */}
         <div className="hero-banner-section"></div>
 
-        {/* Snow Stacking Effect Overlay */}
-        <div className="snow-stacking-section" aria-hidden="true">
-          <div className="snow-stacking-overlay"></div>
-          <div className="snow-fog-layer"></div>
-          <div className="snow-stacking-layer-1"></div>
-          <div className="snow-stacking-layer-2"></div>
-          <div className="snow-stacking-layer-3"></div>
-        </div>
+        {/* Snow Stacking Effect Overlay - Only in December */}
+        {isDecember && (
+          <div className="snow-stacking-section" aria-hidden="true">
+            <div className="snow-stacking-overlay"></div>
+            <div className="snow-fog-layer"></div>
+            <div className="snow-stacking-layer-1"></div>
+            <div className="snow-stacking-layer-2"></div>
+            <div className="snow-stacking-layer-3"></div>
+          </div>
+        )}
 
         <div className="features-section">
           <div className="container">
@@ -1034,7 +1090,7 @@ const HomePage = () => {
 
         <div className="news-section">
           <div className="container">
-            <h2 className="section-title">News & Events</h2>
+            <h2 className={`section-title ${isNewsSectionTitleVisible ? "bounce-in-visible" : ""}`}>News & Events</h2>
             {!newsLoading && !newsError && newsData.length > 0 && (
               <p className="news-section-subtitle">
                 Stay informed with the latest updates from City College of Bayawan. 
@@ -1077,12 +1133,15 @@ const HomePage = () => {
                     key={`news-page-${currentNewsPage}`}
                   >
                   {(showCarousel ? getCurrentPageItems() : (() => {
-                    // If not using carousel, pad to 3 items if needed
-                    const items = [...newsData];
-                    while (items.length < 3) {
+                    // If not using carousel, pad to itemsPerPage if needed
+                    // On mobile, limit to 6 items; on tablet, limit to 12 items; on desktop, use all 18 items
+                    const displayData = isMobile ? newsData.slice(0, 6) : isTablet ? newsData.slice(0, 12) : newsData;
+                    const items = [...displayData];
+                    const targetCount = isMobile ? 1 : isTablet ? 2 : 3;
+                    while (items.length < targetCount) {
                       items.push(null);
                     }
-                    return items.slice(0, 3);
+                    return items.slice(0, targetCount);
                   })()).map((news, index) => {
                     // Skip rendering if item is null (placeholder)
                     if (!news) {

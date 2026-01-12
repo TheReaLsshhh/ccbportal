@@ -27,6 +27,18 @@ html.modal-open {
   height: 445px !important;
 }
 
+.news-events-page .nav-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 50px;
+}
+
 .news-hero::before {
   content: '';
   position: absolute;
@@ -225,7 +237,7 @@ html.modal-open {
   background: linear-gradient(135deg, #ffffff48, #ffffff36);
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #2d5a2d;
   transition: all 0.3s ease;
   opacity: 0;
   transform: translateY(20px);
@@ -235,7 +247,7 @@ html.modal-open {
 
 .announcement-item:hover {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
+  border-color: rgba(45, 90, 45, 0.3);
   transform: translateY(-5px);
 }
 
@@ -1475,7 +1487,7 @@ html.modal-open {
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #2d5a2d;
   transition: all 0.3s ease;
   width: 100%;
   max-width: 100%;
@@ -1484,7 +1496,7 @@ html.modal-open {
 
 .event-item:hover {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
+  border-color: rgba(45, 90, 45, 0.3);
 }
 
 .event-image {
@@ -1785,7 +1797,7 @@ html.modal-open {
   background: linear-gradient(135deg, #ffffff48, #ffffff36);
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #2d5a2d;
   transition: all 0.3s ease;
   opacity: 0;
   transform: translateY(20px);
@@ -1795,7 +1807,7 @@ html.modal-open {
 
 .news-item:hover {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
+  border-color: rgba(45, 90, 45, 0.3);
   transform: translateY(-5px);
 }
 
@@ -1976,7 +1988,7 @@ html.modal-open {
   background: linear-gradient(135deg, #ffffff48, #ffffff36);
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #2d5a2d;
   transition: all 0.3s ease;
 }
 
@@ -1999,7 +2011,7 @@ html.modal-open {
 
 .achievement-item:hover {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
+  border-color: rgba(45, 90, 45, 0.3);
 }
 
 .achievement-image-wrapper {

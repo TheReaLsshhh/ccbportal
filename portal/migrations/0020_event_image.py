@@ -4,34 +4,17 @@ from django.db import migrations, models, connection
 
 
 def add_image_field_if_not_exists(apps, schema_editor):
-    """Add image column only if it doesn't exist (database-agnostic)"""
-    db_engine = connection.vendor
+    """Add image column only if it doesn't exist"""
     with connection.cursor() as cursor:
         # Check if the column exists
-        if db_engine == 'postgresql':
-            cursor.execute("""
-                SELECT COUNT(*) 
-                FROM information_schema.columns 
-                WHERE table_schema = current_schema()
-                AND table_name = 'portal_event' 
-                AND column_name = 'image'
-            """)
-        elif db_engine == 'mysql':
-            cursor.execute("""
-                SELECT COUNT(*) 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_SCHEMA = DATABASE() 
-                AND TABLE_NAME = 'portal_event' 
-                AND COLUMN_NAME = 'image'
-            """)
-        else:
-            # SQLite or other - skip check, just try to add
-            column_exists = False
-        
-        if db_engine != 'sqlite':
-            column_exists = cursor.fetchone()[0] > 0
-        else:
-            column_exists = False
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'portal_event' 
+            AND COLUMN_NAME = 'image'
+        """)
+        column_exists = cursor.fetchone()[0] > 0
         
         if not column_exists:
             # Add the column using schema_editor to ensure proper field creation
@@ -42,34 +25,16 @@ def add_image_field_if_not_exists(apps, schema_editor):
 
 
 def remove_image_field_if_exists(apps, schema_editor):
-    """Remove image column if it exists (database-agnostic)"""
-    db_engine = connection.vendor
+    """Remove image column if it exists"""
     with connection.cursor() as cursor:
-        # Check if the column exists
-        if db_engine == 'postgresql':
-            cursor.execute("""
-                SELECT COUNT(*) 
-                FROM information_schema.columns 
-                WHERE table_schema = current_schema()
-                AND table_name = 'portal_event' 
-                AND column_name = 'image'
-            """)
-        elif db_engine == 'mysql':
-            cursor.execute("""
-                SELECT COUNT(*) 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_SCHEMA = DATABASE() 
-                AND TABLE_NAME = 'portal_event' 
-                AND COLUMN_NAME = 'image'
-            """)
-        else:
-            # SQLite or other - skip check
-            column_exists = False
-        
-        if db_engine != 'sqlite':
-            column_exists = cursor.fetchone()[0] > 0
-        else:
-            column_exists = False
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'portal_event' 
+            AND COLUMN_NAME = 'image'
+        """)
+        column_exists = cursor.fetchone()[0] > 0
         
         if column_exists:
             Event = apps.get_model('portal', 'Event')
@@ -84,41 +49,15 @@ class AddFieldIfNotExists(migrations.AddField):
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
         model = to_state.apps.get_model(app_label, self.model_name)
         if self.allow_migrate_model(schema_editor.connection.alias, model):
-            # Check if column already exists (database-agnostic)
+            # Check if column already exists
             with schema_editor.connection.cursor() as cursor:
-                db_engine = schema_editor.connection.vendor
-                table_name = model._meta.db_table
-                column_name = self.name
-                
-                if db_engine == 'postgresql':
-                    # PostgreSQL query
-                    cursor.execute("""
-                        SELECT COUNT(*) 
-                        FROM information_schema.columns 
-                        WHERE table_schema = current_schema()
-                        AND table_name = %s 
-                        AND column_name = %s
-                    """, [table_name, column_name])
-                elif db_engine == 'mysql':
-                    # MySQL query
-                    cursor.execute("""
-                        SELECT COUNT(*) 
-                        FROM INFORMATION_SCHEMA.COLUMNS 
-                        WHERE TABLE_SCHEMA = DATABASE() 
-                        AND TABLE_NAME = %s 
-                        AND COLUMN_NAME = %s
-                    """, [table_name, column_name])
-                else:
-                    # SQLite or other - use Django's introspection
-                    from django.db import connection
-                    columns = [col.name for col in connection.introspection.get_table_description(
-                        cursor, table_name
-                    )]
-                    column_exists = column_name in columns
-                    if not column_exists:
-                        super().database_forwards(app_label, schema_editor, from_state, to_state)
-                    return
-                
+                cursor.execute("""
+                    SELECT COUNT(*) 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = %s 
+                    AND COLUMN_NAME = %s
+                """, [model._meta.db_table, self.name])
                 column_exists = cursor.fetchone()[0] > 0
                 
                 if not column_exists:

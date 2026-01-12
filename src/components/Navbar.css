@@ -36,6 +36,7 @@
 }
 
 .secondary-nav-links {
+  cursor: default !important;
   display: flex;
   align-items: center;
   gap: 15px;
@@ -90,7 +91,7 @@
     z-index: 990;
     position: relative;
   }
-  
+
   /* Ensure brand text and tagline are behind the dropdown */
   .header-top .brand,
   .header-top .brand-text,
@@ -123,6 +124,7 @@
   background-color: #2d5a2d;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* In mobile view, main-nav should be below the mobile menu overlay */
@@ -132,10 +134,6 @@
   }
 }
 
-.main-nav.no-bg {
-  background-color: #2d5a2d;
-}
-
 .main-nav.with-bg {
   background-color: #2d5a2d;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -143,7 +141,7 @@
 
 .nav-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 0px;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
@@ -252,7 +250,8 @@
 }
 
 .nav-icon {
-  display: none; /* Hide icons to match the design */
+  display: none;
+  /* Hide icons to match the design */
 }
 
 .nav-link:hover {
@@ -365,7 +364,8 @@
   top: 10px;
   right: 12px;
   flex-shrink: 0;
-  z-index: 1100; /* keep above other header elements */
+  z-index: 1100;
+  /* keep above other header elements */
   justify-content: flex-end;
 }
 
@@ -451,7 +451,7 @@
   .mobile-menu-overlay {
     z-index: 1002;
   }
-  
+
   /* Ensure overlay is above header */
   .mobile-menu-overlay.active {
     z-index: 1002;
@@ -476,6 +476,7 @@
 }
 
 .search-btn {
+  cursor: pointer !important;
   background: transparent;
   border: none;
   color: #fff;
@@ -543,8 +544,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .search-results {
@@ -645,12 +651,42 @@
   display: none;
 }
 
-/* Responsive Design */
-/* Tablet and Mobile - Portrait and Landscape */
+/* Responsive Design - Tablet (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header-top .brand-text h1 {
+    font-size: 24px;
+  }
+
+  .header-top .brand-text h2 {
+    font-size: 11px;
+  }
+
+  .brand-logo {
+    width: 55px;
+    height: 55px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .secondary-nav-bar .top-link {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .secondary-nav-container {
+    gap: 12px;
+  }
+}
+
+/* Responsive Design - Tablet and Mobile - Portrait and Landscape */
 @media (max-width: 1024px) {
+
   /* Add margin-top to navbar in mobile view */
   .navbar {
-    margin-top: 8px;
+    margin-top: 0;
   }
 
   /* Hide secondary nav bar in mobile */
@@ -780,6 +816,7 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1003;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -788,7 +825,7 @@
     z-index: 1003;
     position: fixed;
   }
-  
+
   /* Ensure header stays behind the dropdown menu */
   .header-top {
     z-index: 990 !important;
@@ -827,6 +864,11 @@
   .services-dropdown-container,
   .admissions-dropdown-container {
     width: 100%;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
   }
 
   .services-dropdown-container .dropdown-arrow {
@@ -839,10 +881,11 @@
 
   .services-dropdown,
   .admissions-dropdown {
-    position: relative;
+    position: relative !important;
     width: 100%;
-    margin-top: 12px;
+    margin-top: 8px;
     margin-left: 0;
+    margin-bottom: 0;
     box-shadow: none;
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -852,21 +895,29 @@
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    display: block;
+    z-index: auto;
+    top: auto;
+    left: auto;
+    transform: none;
   }
 
   .services-dropdown.dropdown-open,
   .admissions-dropdown.dropdown-open {
-    max-height: 500px;
+    max-height: 1000px;
     opacity: 1;
     visibility: visible;
+    transform: none !important;
+    overflow: visible;
   }
 
   .dropdown-item {
     color: #fff;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 12px 20px;
+    padding: 12px 20px 12px 28px;
     text-align: left;
     transition: all 0.2s ease;
+    display: block;
   }
 
   .dropdown-item:last-child {
@@ -876,7 +927,7 @@
   .dropdown-item:hover {
     background-color: rgba(255, 255, 255, 0.15);
     color: #fff;
-    padding-left: 24px;
+    padding-left: 32px;
   }
 
   .nav-search {
@@ -974,10 +1025,10 @@
   }
 }
 
-/* Mobile-specific adjustments */
+/* Responsive Design - Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .navbar {
-    margin-top: 10px;
+    margin-top: 0px;
   }
 
   .secondary-nav-container {
@@ -992,15 +1043,25 @@
   .secondary-nav-bar .top-link {
     font-size: 10px;
     padding: 4px 8px;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
   }
 
   .header-top .brand-text h1 {
     font-size: 18px;
+    line-height: 1.2;
   }
 
   .header-top .brand-tagline {
     font-size: 0.75rem;
     margin-top: 0.2rem;
+    line-height: 1.2;
+  }
+
+  .header-date-display {
+    top: 6px;
+    right: 10px;
   }
 
   .header-date-display .date-text {
@@ -1019,8 +1080,11 @@
   }
 
   .nav-link {
-    padding: 12px 15px;
+    padding: 14px 15px;
     font-size: 15px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
   }
 
   .mobile-secondary-nav {
@@ -1030,14 +1094,33 @@
   }
 
   .mobile-secondary-nav .nav-link {
-    padding: 12px 15px;
+    padding: 14px 15px;
     font-size: 14px;
+    min-height: 48px;
+  }
+
+  .mobile-menu-btn {
+    /* left: 27.5rem !important; */
+    padding: 12px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .mobile-menu-btn span {
+    width: 26px;
+    height: 3px;
+  }
+
+  .search-popover {
+    min-width: 90vw;
+    max-width: 90vw;
   }
 }
 
+/* Responsive Design - Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
   .navbar {
-    margin-top: 12px;
+    margin-top: 0;
   }
 
   .secondary-nav-container {
@@ -1047,11 +1130,13 @@
 
   .secondary-nav-links {
     gap: 6px;
+    flex-wrap: wrap;
   }
 
   .secondary-nav-bar .top-link {
     font-size: 9px;
     padding: 4px 6px;
+    min-height: 26px;
   }
 
   .header-container {
@@ -1069,11 +1154,13 @@
 
   .header-top .brand-text h1 {
     font-size: 16px;
+    line-height: 1.1;
   }
 
   .header-top .brand-tagline {
     font-size: 0.7rem;
     margin-top: 0.01rem;
+    line-height: 1.1;
   }
 
   .header-date-display {
@@ -1087,13 +1174,15 @@
   }
 
   .mobile-menu-btn {
-    padding: 6px;
+    padding: 8px;
     right: 12px;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .mobile-menu-btn span {
     width: 24px;
-    height: 2px;
+    height: 2.5px;
   }
 
   .nav-links {
@@ -1102,8 +1191,9 @@
   }
 
   .nav-link {
-    padding: 12px 15px;
+    padding: 14px 15px;
     font-size: 14px;
+    min-height: 48px;
   }
 
   .mobile-secondary-nav {
@@ -1113,8 +1203,9 @@
   }
 
   .mobile-secondary-nav .nav-link {
-    padding: 12px 15px;
+    padding: 14px 15px;
     font-size: 13px;
+    min-height: 48px;
   }
 
   .nav-search {
@@ -1122,13 +1213,25 @@
     padding-top: 20px;
   }
 
+  .nav-search .search-btn {
+    padding: 14px 18px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+
   .search-popover {
-    min-width: 90vw;
-    max-width: 90vw;
+    min-width: 92vw;
+    max-width: 92vw;
   }
 
   .search-container {
     padding: 15px;
+  }
+
+  .search-input {
+    font-size: 16px;
+    /* Prevents zoom on iOS */
+    padding: 12px 15px;
   }
 }
 
@@ -1161,4 +1264,4 @@ body.mobile-menu-open {
   overflow: hidden;
   position: fixed;
   width: 100%;
-} 
+}

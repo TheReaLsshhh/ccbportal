@@ -31,6 +31,18 @@ html, body {
   height: 445px !important;
 }
 
+.contactus-page .nav-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 50px;
+}
+
 .contact-hero::before {
   content: '';
   position: absolute;
@@ -100,7 +112,7 @@ html, body {
 /* Main Contact Section */
 .contact-section {
   padding: 38px 0;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: #f8fafc;
   min-height: 60vh;
 }
 
@@ -456,6 +468,10 @@ html, body {
   box-sizing: border-box;
 }
 
+.contactus-footer {
+  background-color: #f8fafc;
+}
+
 .contactus-footer .footer {
   background-color: #2d5a2d;
   color: #fff;
@@ -514,20 +530,55 @@ html, body {
   }
 }
 
-/* Custom wave colors for Admissions page footer */
+/* Dedicated Wave Footer Styles for Contact Us Page */
 .contactus-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .contactus-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.contactus-page .footer-wave .shape-fill-3 { fill: rgba(255, 255, 252, 1); }
+.contactus-page .footer-wave .shape-fill-3 { fill: #f8fafc; }
 
 /* Responsive Design */
+/* Responsive Design - Tablet (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .contact-hero {
+    padding: 110px 0 70px;
+    height: 400px !important;
+  }
+
+  .contact-hero .hero-title {
+    font-size: 3rem;
+  }
+
+  .contact-hero .hero-subtitle {
+    font-size: 1.15rem;
+  }
+
+  .contact-content {
+    gap: 50px;
+  }
+
+  .contact-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .contact-form {
+    padding: 35px;
+  }
+
+  .map-container iframe {
+    height: 400px;
+  }
+}
+
+/* Responsive Design - Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .contact-hero {
     padding: 100px 0 60px;
-    height: 445px;
+    height: 380px !important;
   }
 
   .contact-hero .hero-title {
     font-size: 2.5rem;
+    line-height: 1.2;
   }
   
   .contact-hero .hero-subtitle {
@@ -541,6 +592,13 @@ html, body {
   .contact-content {
     grid-template-columns: 1fr;
     gap: 40px;
+    padding: 0 20px;
+  }
+
+  .contact-info-section h2,
+  .contact-form-section h2,
+  .map-section h2 {
+    font-size: 1.8rem;
   }
 
   .form-row {
@@ -550,26 +608,43 @@ html, body {
 
   .contact-cards {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .contact-form {
     padding: 25px;
   }
 
-  .map-container iframe {
-    height: 398px;
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
   }
-  
+
+  .submit-btn {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+
+  .map-container iframe {
+    height: 350px;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
 }
 
+/* Responsive Design - Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
   .contact-hero {
-    padding: 100px 0 60px;
-    height: 445px !important;
+    padding: 90px 0 50px;
+    height: 350px !important;
   }
   
   .contact-hero .hero-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    line-height: 1.1;
   }
   
   .contact-hero .hero-subtitle {
@@ -580,17 +655,62 @@ html, body {
     font-size: 0.9rem;
   }
 
+  .contact-content {
+    gap: 30px;
+    padding: 0 15px;
+  }
+
+  .contact-info-section h2,
+  .contact-form-section h2,
+  .map-section h2 {
+    font-size: 1.6rem;
+  }
+
   .contact-card,
   .contact-form {
     padding: 20px;
   }
 
-  .container {
-    padding: 0 15px;
+  .card-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 15px;
+  }
+
+  .contact-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .contact-card p {
+    font-size: 0.9rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px 14px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .form-group textarea {
+    min-height: 100px;
+  }
+
+  .submit-btn {
+    padding: 12px 24px;
+    font-size: 0.95rem;
   }
 
   .map-container iframe {
-    height: 398px;
+    height: 300px;
+  }
+
+  .container {
+    padding: 0 15px;
   }
 }
 

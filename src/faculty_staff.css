@@ -75,6 +75,18 @@ html, body {
     height: 445px !important;
 }
 
+.faculty-staff-page .nav-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 50px;
+}
+
 .faculty-staff-header::before {
   content: '';
   position: absolute;
@@ -403,10 +415,6 @@ html, body {
   transition: all 0.3s ease;
 }
 
-.policy-card:hover .policy-icon {
-  color: #ff8c00;
-}
-
 .policy-card h3 {
   font-size: 1.25rem;
   font-weight: 600;
@@ -437,24 +445,6 @@ html, body {
 }
 
 /* Forms Section */
-.forms-section {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 2rem;
-  border: 1px solid #e5e7eb;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.forms-section h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #2d5a2d;
-  text-align: center;
-}
-
 .forms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -711,6 +701,10 @@ html, body {
   color: white;
 }
 
+.faculty-staff-footer {
+  background-color: #f8fafc;
+}
+
 .faculty-staff-footer .footer {
   background-color: #2d5a2d;
   color: #fff;
@@ -718,23 +712,85 @@ html, body {
   margin-top: 60px;
 }
 
-/* Custom wave colors for Admissions page footer */
+/* Dedicated Wave Footer Styles for Faculty & Staff Page */
 .faculty-staff-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .faculty-staff-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.faculty-staff-page .footer-wave .shape-fill-3 { fill: rgba(255, 255, 254, 1); }
+.faculty-staff-page .footer-wave .shape-fill-3 { fill: #f8fafc; }
 
-/* Responsive Design */
+/* Responsive Design - Tablet (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .faculty-staff-header {
+    padding: 110px 0 70px;
+    height: 400px !important;
+  }
+
+  .faculty-staff-header .hero-title {
+    font-size: 3rem;
+  }
+
+  .faculty-staff-header .hero-subtitle {
+    font-size: 1.15rem;
+  }
+
+  .faculty-staff-section .section-title {
+    font-size: 2.2rem;
+  }
+
+  .departments-grid,
+  .policies-grid,
+  .resources-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .forms-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .offices-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .faculty-staff-section {
+    padding: 70px 0;
+  }
+}
+
+/* Responsive Design - Mobile (max-width: 768px) */
 @media (max-width: 768px) {
+  .faculty-staff-header {
+    padding: 100px 0 60px;
+    height: 380px !important;
+  }
+
   .faculty-staff-header .hero-title {
     font-size: 2.5rem;
+    line-height: 1.2;
   }
   
   .faculty-staff-header .hero-subtitle {
     font-size: 1.1rem;
   }
+
+  .faculty-staff-header .hero-motto {
+    font-size: 1rem;
+  }
   
   .faculty-staff-section .section-title {
     font-size: 2rem;
+    padding: 0 20px;
+  }
+
+  .faculty-staff-section .section-subtitle {
+    font-size: 1rem;
+    padding: 0 20px;
   }
   
   .departments-grid,
@@ -743,24 +799,63 @@ html, body {
   .resources-grid,
   .admin-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
   .offices-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
   
   .faculty-staff-section {
     padding: 60px 0;
   }
+
+  .department-card,
+  .policy-card,
+  .form-card,
+  .resource-card,
+  .admin-card {
+    padding: 1.75rem;
+  }
+
+  .administrative-offices {
+    padding: 1.75rem;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
 }
 
+/* Responsive Design - Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
   .faculty-staff-header {
-    padding: 100px 0 60px;
+    padding: 90px 0 50px;
+    height: 350px !important;
   }
   
   .faculty-staff-header .hero-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    line-height: 1.1;
+  }
+
+  .faculty-staff-header .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .faculty-staff-header .hero-motto {
+    font-size: 0.9rem;
+  }
+
+  .faculty-staff-section .section-title {
+    font-size: 1.8rem;
+    padding: 0 15px;
+  }
+
+  .faculty-staff-section .section-subtitle {
+    font-size: 0.95rem;
+    padding: 0 15px;
   }
   
   .department-card,
@@ -770,10 +865,48 @@ html, body {
   .admin-card {
     padding: 1.5rem;
   }
+
+  .department-card h3,
+  .policy-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .department-card p,
+  .policy-card p,
+  .resource-card p {
+    font-size: 0.9rem;
+  }
+
+  .contact-btn,
+  .download-btn,
+  .resource-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .form-btn {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.85rem;
+  }
   
-  .administrative-offices,
-  .forms-section {
+  .administrative-offices {
     padding: 1.5rem;
+  }
+
+  .administrative-offices h3 {
+    font-size: 1.3rem;
+  }
+
+  .office-card {
+    padding: 1.25rem;
+  }
+
+  .faculty-staff-section {
+    padding: 50px 0;
+  }
+
+  .container {
+    padding: 0 15px;
   }
 }
 

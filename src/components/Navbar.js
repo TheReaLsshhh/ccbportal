@@ -5,7 +5,6 @@ import apiService from "../services/api";
 const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState("");
-  const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -249,16 +248,13 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
     };
   }, []);
 
-  // Toggle navbar background on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY || window.pageYOffset || 0;
-      setIsScrolled(y > 0);
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  // Compute main nav classes:
+  // Updated approach:
+  // - Always use "with-bg" for a solid background
+  // - On the homepage, just add "homepage-nav-section" without the "no-bg" variant
+  const mainNavClassName = isHomePage
+    ? "main-nav with-bg homepage-nav-section"
+    : "main-nav with-bg";
 
   return (
     <nav className={`navbar ${isHomePage ? "homepage-navbar" : ""}`}>
@@ -328,8 +324,8 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
         </div>
       </div>
 
-      {/* Main Navigation Bar - Dark Green Background */}
-      <div className={`main-nav ${isScrolled ? "with-bg" : "no-bg"} ${isHomePage ? "homepage-nav-section" : ""}`}>
+      {/* Main Navigation Bar */}
+      <div className={mainNavClassName}>
         <div className="nav-container">
           {/* Mobile Menu Button */}
           <button
@@ -345,9 +341,8 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
 
           {/* Mobile Menu Overlay */}
           <div
-            className={`mobile-menu-overlay ${
-              isMobileMenuOpen ? "active" : ""
-            }`}
+            className={`mobile-menu-overlay ${isMobileMenuOpen ? "active" : ""
+              }`}
             onClick={toggleMobileMenu}
           ></div>
 
@@ -407,7 +402,7 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
               ADMISSIONS
             </a>
             {/* Services Dropdown */}
-            <div 
+            <div
               className="services-dropdown-container"
               onMouseEnter={() => {
                 if (window.innerWidth > 1024) {
@@ -438,7 +433,7 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
                 SERVICES
                 <span className={`dropdown-arrow ${isServicesDropdownOpen ? 'open' : ''}`}>▼</span>
               </a>
-              <div 
+              <div
                 className={`services-dropdown ${isServicesDropdownOpen ? 'dropdown-open' : ''}`}
                 onMouseEnter={() => {
                   if (window.innerWidth > 1024) {
@@ -522,9 +517,8 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
                 </svg>
               </button>
               <div
-                className={`search-popover ${
-                  isSearchOpen ? "search-open" : ""
-                }`}
+                className={`search-popover ${isSearchOpen ? "search-open" : ""
+                  }`}
               >
                 <div className="search-container">
                   <input

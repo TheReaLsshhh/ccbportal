@@ -18,6 +18,18 @@ html, body {
   z-index: 10;
 }
 
+.admissions-page .nav-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 50px;
+}
+
 .admissions-navigation .nav-tabs {
   display: flex;
   justify-content: center;
