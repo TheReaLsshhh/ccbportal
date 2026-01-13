@@ -326,6 +326,28 @@ html, body {
   cursor: pointer;
 }
 
+/* Subject select specific styling */
+#subject,
+.form-group select#subject {
+  cursor: pointer !important;
+}
+
+#subject:hover,
+.form-group select#subject:hover {
+  cursor: pointer !important;
+}
+
+/* Option values cursor pointer */
+#subject option,
+.form-group select#subject option {
+  cursor: pointer !important;
+}
+
+#subject option:hover,
+.form-group select#subject option:hover {
+  cursor: pointer !important;
+}
+
 /* Form Messages */
 .form-message {
   display: flex;

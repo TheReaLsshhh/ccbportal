@@ -15,12 +15,33 @@ const AdminLogin = ({ onLoginSuccess }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Sanitize input in real-time (except password)
+    let sanitizedValue = value;
+    if (name === 'username') {
+      sanitizedValue = sanitizeInput(value, 150);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: sanitizedValue
     }));
     // Clear error when user starts typing
     if (error) setError(null);
+  };
+
+  // Input validation and sanitization
+  const sanitizeInput = (value, maxLength = 150) => {
+    if (!value) return '';
+    // Remove potentially dangerous characters
+    let sanitized = String(value).trim();
+    // Remove null bytes and control characters
+    sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+    // Limit length
+    if (maxLength && sanitized.length > maxLength) {
+      sanitized = sanitized.substring(0, maxLength);
+    }
+    return sanitized;
   };
 
   const togglePasswordVisibility = () => {
@@ -30,8 +51,23 @@ const AdminLogin = ({ onLoginSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.username || !formData.password) {
+    // Sanitize inputs
+    const sanitizedUsername = sanitizeInput(formData.username, 150);
+    const sanitizedPassword = formData.password; // Don't sanitize password, but validate
+    
+    if (!sanitizedUsername || !sanitizedPassword) {
       setError('Please enter both username and password');
+      return;
+    }
+
+    // Additional validation
+    if (sanitizedUsername.length < 3) {
+      setError('Username must be at least 3 characters long');
+      return;
+    }
+
+    if (sanitizedPassword.length < 6) {
+      setError('Password must be at least 6 characters long');
       return;
     }
 
@@ -40,13 +76,16 @@ const AdminLogin = ({ onLoginSuccess }) => {
     setSuccess(null);
 
     try {
-      const response = await apiService.login(formData.username, formData.password);
+      const response = await apiService.login(sanitizedUsername, sanitizedPassword);
       
       if (response.status === 'success') {
         setSuccess('Login successful! Redirecting...');
         
-        // Store user info in localStorage for session persistence
-        localStorage.setItem('admin_user', JSON.stringify(response.user));
+        // Store user info in sessionStorage (more secure than localStorage)
+        // sessionStorage is cleared when browser tab is closed
+        sessionStorage.setItem('admin_user', JSON.stringify(response.user));
+        sessionStorage.setItem('session_timeout', response.session_timeout || 1800);
+        sessionStorage.setItem('login_time', Date.now().toString());
         
         // Call the success callback to redirect to admin page
         setTimeout(() => {
@@ -56,7 +95,23 @@ const AdminLogin = ({ onLoginSuccess }) => {
         setError(response.message || 'Login failed');
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      // Handle specific error cases
+      if (err.status === 423) {
+        // Account locked
+        const lockoutTime = err.data?.lockout_remaining || 0;
+        const minutes = Math.floor(lockoutTime / 60);
+        const seconds = lockoutTime % 60;
+        setError(err.message || `Account locked. Please try again in ${minutes}m ${seconds}s.`);
+      } else if (err.status === 429) {
+        // Rate limited
+        const retryAfter = err.data?.retry_after || 60;
+        setError(err.message || `Too many attempts. Please try again in ${retryAfter} seconds.`);
+      } else if (err.status === 413) {
+        // Request too large
+        setError('Request too large. Please contact administrator.');
+      } else {
+        setError(err.message || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

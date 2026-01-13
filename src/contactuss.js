@@ -3,6 +3,7 @@ import './contactuss.css';
 import Navbar from './components/Navbar';
 import Footer from './components/footer';
 import ScrollToTop from './components/ScrollToTop';
+import SEO from './components/SEO';
 
 const ContactUs = () => {
   const API_BASE = process.env.REACT_APP_API_BASE || 'http://127.0.0.1:8000';
@@ -20,27 +21,140 @@ const ContactUs = () => {
   // Animation state
   const [isMapContainerVisible, setIsMapContainerVisible] = useState(false);
 
+  // Input sanitization function (for submission, not real-time)
+  const sanitizeInput = (value, maxLength = null, allowSpaces = true) => {
+    if (!value) return '';
+    // Remove null bytes and control characters (preserve spaces and newlines)
+    let sanitized = String(value);
+    // Remove null bytes and control characters (except newlines)
+    sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+    // Trim only leading/trailing whitespace (not spaces in the middle)
+    sanitized = sanitized.trim();
+    // Limit length
+    if (maxLength && sanitized.length > maxLength) {
+      sanitized = sanitized.substring(0, maxLength);
+    }
+    return sanitized;
+  };
+
+  // Email validation
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Minimal sanitization in real-time (preserve spaces for name and message)
+    let sanitizedValue = value;
+    if (name === 'name') {
+      // Only remove dangerous control chars, preserve spaces
+      sanitizedValue = String(value).replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+      if (sanitizedValue.length > 200) {
+        sanitizedValue = sanitizedValue.substring(0, 200);
+      }
+    } else if (name === 'email') {
+      // Remove dangerous chars and convert to lowercase
+      sanitizedValue = String(value).replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '').toLowerCase();
+      if (sanitizedValue.length > 254) {
+        sanitizedValue = sanitizedValue.substring(0, 254);
+      }
+    } else if (name === 'phone') {
+      // Remove dangerous chars
+      sanitizedValue = String(value).replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+      if (sanitizedValue.length > 20) {
+        sanitizedValue = sanitizedValue.substring(0, 20);
+      }
+    } else if (name === 'subject') {
+      // Remove dangerous chars
+      sanitizedValue = String(value).replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+      if (sanitizedValue.length > 100) {
+        sanitizedValue = sanitizedValue.substring(0, 100);
+      }
+    } else if (name === 'message') {
+      // Allow newlines and spaces in message, but sanitize other control chars
+      sanitizedValue = String(value).replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+      if (sanitizedValue.length > 5000) {
+        sanitizedValue = sanitizedValue.substring(0, 5000);
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: sanitizedValue
     }));
+    
+    // Clear error when user starts typing
+    if (errorMessage) setErrorMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Client-side validation
+    const sanitizedName = sanitizeInput(formData.name, 200);
+    const sanitizedEmail = sanitizeInput(formData.email, 254).toLowerCase();
+    const sanitizedPhone = sanitizeInput(formData.phone, 20);
+    const sanitizedSubject = sanitizeInput(formData.subject, 100);
+    const sanitizedMessage = sanitizeInput(formData.message, 5000);
+    
+    // Validate required fields
+    if (!sanitizedName || !sanitizedEmail || !sanitizedMessage || !sanitizedSubject) {
+      setErrorMessage('Please fill in all required fields.');
+      setSubmitStatus("error");
+      return;
+    }
+    
+    // Validate name length
+    if (sanitizedName.length < 2) {
+      setErrorMessage('Name must be at least 2 characters long.');
+      setSubmitStatus("error");
+      return;
+    }
+    
+    // Validate email format
+    if (!validateEmail(sanitizedEmail)) {
+      setErrorMessage('Please enter a valid email address.');
+      setSubmitStatus("error");
+      return;
+    }
+    
+    // Validate message length
+    if (sanitizedMessage.length < 10) {
+      setErrorMessage('Message must be at least 10 characters long.');
+      setSubmitStatus("error");
+      return;
+    }
+    
+    // Validate subject
+    const allowedSubjects = ['admissions', 'academics', 'student-services', 'faculty', 'general', 'complaint', 'suggestion', 'other'];
+    if (!allowedSubjects.includes(sanitizedSubject)) {
+      setErrorMessage('Please select a valid subject.');
+      setSubmitStatus("error");
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitStatus('');
     setErrorMessage('');
   
     try {
+      // Prepare sanitized data
+      const sanitizedData = {
+        name: sanitizedName,
+        email: sanitizedEmail,
+        phone: sanitizedPhone,
+        subject: sanitizedSubject,
+        message: sanitizedMessage
+      };
+      
       const response = await fetch(`${API_BASE}/api/contact/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(sanitizedData),
       });
       
       let result = {};
@@ -56,12 +170,21 @@ const ContactUs = () => {
           setSubmitStatus("");
         }, 10000);
       } else {
-        const msg = (result && (result.message || result.detail)) || response.statusText || 'Unknown error';
-        setErrorMessage(msg);
+        // Handle specific error cases
+        if (response.status === 429) {
+          const retryAfter = result.retry_after || 60;
+          const minutes = Math.floor(retryAfter / 60);
+          setErrorMessage(result.message || `Too many submissions. Please try again in ${minutes} minutes.`);
+        } else if (response.status === 413) {
+          setErrorMessage('Message too long. Please reduce the size of your message.');
+        } else {
+          const msg = (result && (result.message || result.detail)) || response.statusText || 'Unknown error';
+          setErrorMessage(msg);
+        }
         setSubmitStatus("error");
       }
     } catch (error) {
-      setErrorMessage(error?.message || 'Network error');
+      setErrorMessage(error?.message || 'Network error. Please check your connection and try again.');
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -98,6 +221,12 @@ const ContactUs = () => {
 
   return (
     <div className="App contactus-page nav-animations-complete">
+      <SEO
+        title="Contact Us"
+        description="Get in touch with City College of Bayawan. Find our address, phone numbers, email addresses, office hours, and location. Send us a message or visit our campus in Bayawan City, Negros Oriental."
+        keywords="contact City College of Bayawan, CCB contact, Bayawan City college contact, college address, college phone number, college email"
+        url="/contact"
+      />
       <ScrollToTop />
       <Navbar isHomePage={true} />
       {/* Hero Section */}

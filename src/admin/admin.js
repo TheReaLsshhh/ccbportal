@@ -81,7 +81,10 @@ const AdminPage = () => {
         // Session likely expired; force re-login
         setIsAuthenticated(false);
         setUser(null);
-        localStorage.removeItem('admin_user');
+        sessionStorage.removeItem('admin_user');
+        sessionStorage.removeItem('session_expiry');
+        sessionStorage.removeItem('session_warning_time');
+        sessionStorage.removeItem('login_time');
         showAlert('warning', 'Session expired', 'Please log in again.');
         setError('Session expired. Please log in again.');
       } else {
@@ -127,9 +130,63 @@ const AdminPage = () => {
     }
   }, [activeTab, isMobile, isTablet]);
 
+  // Session timeout monitoring
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const checkSessionTimeout = async () => {
+      try {
+        const response = await apiService.checkAuth();
+        if (response.status === 'success' && response.authenticated) {
+          // Session is still valid
+          const sessionExpiry = response.session_expiry || 1800;
+          const warningTime = response.session_warning_time || 300;
+          
+          // Check if we're within warning time
+          if (sessionExpiry <= warningTime) {
+            const minutes = Math.floor(sessionExpiry / 60);
+            const seconds = sessionExpiry % 60;
+            showAlert('warning', 'Session Expiring Soon', 
+              `Your session will expire in ${minutes}m ${seconds}s. Please save your work.`);
+          }
+        } else {
+          // Session expired
+          showAlert('error', 'Session Expired', 'Your session has expired. Please log in again.');
+          handleLogout();
+        }
+      } catch (err) {
+        if (err.status === 401) {
+          // Session expired
+          showAlert('error', 'Session Expired', 'Your session has expired. Please log in again.');
+          handleLogout();
+        }
+      }
+    };
+
+    // Check session every 30 seconds
+    const sessionCheckInterval = setInterval(checkSessionTimeout, 30000);
+    
+    // Also check on page visibility change (user returns to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isAuthenticated) {
+        checkSessionTimeout();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Initial check
+    checkSessionTimeout();
+
+    return () => {
+      clearInterval(sessionCheckInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthenticated]);
+
   const checkAuthentication = async () => {
     try {
-      const storedUser = localStorage.getItem('admin_user');
+      const storedUser = sessionStorage.getItem('admin_user');
       if (storedUser) {
         // Optimistically show stored user while verifying session
         setUser(JSON.parse(storedUser));
@@ -139,17 +196,30 @@ const AdminPage = () => {
       if (response.status === 'success' && response.authenticated) {
         setUser(response.user);
         setIsAuthenticated(true);
-        localStorage.setItem('admin_user', JSON.stringify(response.user));
+        // Use sessionStorage instead of localStorage for better security
+        sessionStorage.setItem('admin_user', JSON.stringify(response.user));
+        
+        // Store session expiry info
+        if (response.session_expiry) {
+          sessionStorage.setItem('session_expiry', response.session_expiry.toString());
+          sessionStorage.setItem('session_warning_time', (response.session_warning_time || 300).toString());
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
-        localStorage.removeItem('admin_user');
+        sessionStorage.removeItem('admin_user');
+        sessionStorage.removeItem('session_expiry');
+        sessionStorage.removeItem('session_warning_time');
+        sessionStorage.removeItem('login_time');
       }
     } catch (err) {
       console.error('Auth check failed:', err);
       setIsAuthenticated(false);
       setUser(null);
-      localStorage.removeItem('admin_user');
+      sessionStorage.removeItem('admin_user');
+      sessionStorage.removeItem('session_expiry');
+      sessionStorage.removeItem('session_warning_time');
+      sessionStorage.removeItem('login_time');
     } finally {
       setCheckingAuth(false);
     }
@@ -197,7 +267,11 @@ const AdminPage = () => {
     } finally {
       setIsAuthenticated(false);
       setUser(null);
-      localStorage.removeItem('admin_user');
+      // Clear all session data
+      sessionStorage.removeItem('admin_user');
+      sessionStorage.removeItem('session_expiry');
+      sessionStorage.removeItem('session_warning_time');
+      sessionStorage.removeItem('login_time');
       showAlert('info', 'Logged out', 'You have been successfully logged out.');
     }
   };
@@ -1369,7 +1443,8 @@ const AdminPage = () => {
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
                   <img 
-                    src={normalizeImageUrl(editingItem.image)} 
+                    src={normalizeImageUrl(editingItem.image)}
+                    loading="lazy" 
                     alt="Current" 
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
@@ -1467,7 +1542,8 @@ const AdminPage = () => {
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
                   <img 
-                    src={normalizeImageUrl(editingItem.image)} 
+                    src={normalizeImageUrl(editingItem.image)}
+                    loading="lazy" 
                     alt="Current" 
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
@@ -1594,7 +1670,8 @@ const AdminPage = () => {
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
                   <img 
-                    src={normalizeImageUrl(editingItem.image)} 
+                    src={normalizeImageUrl(editingItem.image)}
+                    loading="lazy" 
                     alt="Current" 
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
@@ -2201,7 +2278,8 @@ const AdminPage = () => {
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
                   <img 
-                    src={normalizeImageUrl(editingItem.image)} 
+                    src={normalizeImageUrl(editingItem.image)}
+                    loading="lazy" 
                     alt="Current" 
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />

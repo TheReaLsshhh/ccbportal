@@ -264,3 +264,24 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 # Database security (already using parameterized queries via Django ORM)
 # Ensure no raw SQL queries without proper sanitization
 DATABASES['default']['OPTIONS']['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO'"
+
+# Cache configuration for security features (rate limiting, account lockout, audit logs)
+# Using local memory cache for development, Redis/Memcached recommended for production
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000,
+        },
+        'TIMEOUT': 3600,  # Default timeout: 1 hour
+    }
+}
+
+# For production, use Redis or Memcached:
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',
+#     }
+# }

@@ -1402,16 +1402,105 @@ def api_search(request):
 @csrf_exempt
 def api_contact_form(request):
     """Create pending submission and email verification link to the user."""
+    from portal.security import (
+        get_client_ip, check_rate_limit, validate_request_size,
+        sanitize_input
+    )
+    from django.core.validators import validate_email
+    from django.core.exceptions import ValidationError
+    
+    ip_address = get_client_ip(request)
+    
     try:
+        # Validate request size (max 50KB for contact form)
+        is_valid_size, size_error = validate_request_size(request, max_size_mb=0.05)
+        if not is_valid_size:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Request too large. Please reduce the size of your message.'
+            }, status=413)
+        
+        # Rate limiting: 10 submissions per hour per IP (increased from 3)
+        is_allowed, remaining, reset_time = check_rate_limit(
+            f'contact_form_{ip_address}',
+            max_requests=10,
+            window=3600  # 1 hour
+        )
+        if not is_allowed:
+            minutes = reset_time // 60
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Too many submissions. Please try again in {minutes} minutes.',
+                'retry_after': reset_time
+            }, status=429)
+        
+        # Rate limiting: 20 submissions per hour per email (increased from 10)
         data = json.loads(request.body)
-        name = data.get('name', '')
-        email = data.get('email', '')
-        message = data.get('message', '')
-        subject = data.get('subject', 'general')
-        phone = data.get('phone', '')
-
+        email = data.get('email', '').strip().lower()
+        
+        if email:
+            is_allowed_email, _, reset_time_email = check_rate_limit(
+                f'contact_form_email_{email}',
+                max_requests=20,
+                window=3600  # 1 hour
+            )
+            if not is_allowed_email:
+                minutes = reset_time_email // 60
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Too many submissions from this email. Please try again in {minutes} minutes.',
+                    'retry_after': reset_time_email
+                }, status=429)
+        
+        # Sanitize and validate inputs
+        name = sanitize_input(data.get('name', ''), max_length=200)
+        email = sanitize_input(email, max_length=254)
+        message = sanitize_input(data.get('message', ''), max_length=5000)
+        subject = sanitize_input(data.get('subject', 'general'), max_length=100)
+        phone = sanitize_input(data.get('phone', ''), max_length=20)
+        
+        # Validate required fields
         if not name or not email or not message or not subject:
             return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+        
+        # Validate email format
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid email address format'
+            }, status=400)
+        
+        # Additional validation
+        if len(name) < 2:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Name must be at least 2 characters long'
+            }, status=400)
+        
+        if len(message) < 10:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Message must be at least 10 characters long'
+            }, status=400)
+        
+        # Validate subject is from allowed list
+        allowed_subjects = ['admissions', 'academics', 'student-services', 'faculty', 'general', 'complaint', 'suggestion', 'other']
+        if subject not in allowed_subjects:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid subject selected'
+            }, status=400)
+        
+        # Basic spam detection: check for common spam patterns
+        spam_keywords = ['http://', 'https://', 'www.', '.com', '.net', '.org']
+        spam_count = sum(1 for keyword in spam_keywords if keyword.lower() in message.lower())
+        if spam_count > 3:  # More than 3 links might be spam
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Message contains too many links. Please contact us directly if needed.'
+            }, status=400)
 
         token = get_random_string(48)
         ContactSubmission.objects.create(
@@ -1471,34 +1560,99 @@ def api_contact_form(request):
                 msg.send(fail_silently=False)
             return JsonResponse({"status": "success", "message": "Verification email sent. Please check your inbox."})
         except Exception as e:
-            return JsonResponse({"status": "error", "message": f"Failed to send verification email: {str(e)}"}, status=500)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Contact form email error for IP {ip_address}: {str(e)}', exc_info=True)
+            return JsonResponse({
+                "status": "error",
+                "message": "Failed to send verification email. Please try again later."
+            }, status=500)
 
     except json.JSONDecodeError:
         return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'Contact form error for IP {ip_address}: {str(e)}', exc_info=True)
+        return JsonResponse({
+            'status': 'error',
+            'message': 'An error occurred. Please try again later.'
+        }, status=500)
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def api_admin_login(request):
-    """Admin login endpoint"""
+    """Admin login endpoint with enhanced security"""
+    from portal.security import (
+        get_client_ip, is_account_locked, record_failed_login,
+        clear_login_attempts, check_rate_limit, validate_request_size,
+        sanitize_input, log_admin_action
+    )
+    
+    ip_address = get_client_ip(request)
+    
     try:
+        # Validate request size
+        is_valid_size, size_error = validate_request_size(request, max_size_mb=1)
+        if not is_valid_size:
+            return JsonResponse({
+                'status': 'error',
+                'message': size_error
+            }, status=413)
+        
+        # Check rate limiting
+        is_allowed, remaining, reset_time = check_rate_limit(
+            f'login_{ip_address}',
+            max_requests=5,  # 5 login attempts per minute
+            window=60
+        )
+        if not is_allowed:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Too many login attempts. Please try again in {reset_time} seconds.',
+                'retry_after': reset_time
+            }, status=429)
+        
         data = json.loads(request.body)
-        username = data.get('username', '')
-        password = data.get('password', '')
-
+        
+        # Sanitize inputs
+        username = sanitize_input(data.get('username', ''), max_length=150)
+        password = data.get('password', '')  # Don't sanitize password, but validate it exists
+        
         if not username or not password:
             return JsonResponse({
                 'status': 'error',
                 'message': 'Username and password are required'
             }, status=400)
-
+        
+        # Check if account is locked
+        is_locked, remaining_time, lockout_key = is_account_locked(username, ip_address)
+        if is_locked:
+            minutes = remaining_time // 60
+            seconds = remaining_time % 60
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Account temporarily locked due to too many failed login attempts. Please try again in {minutes}m {seconds}s.',
+                'lockout_remaining': remaining_time
+            }, status=423)  # 423 Locked
+        
         # Authenticate user
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
             if user.is_active and user.is_staff:
+                # Clear failed login attempts on success
+                clear_login_attempts(username, ip_address)
+                
                 # Log the user in
                 login(request, user)
+                
+                # Set session timeout (30 minutes)
+                request.session.set_expiry(1800)
+                
+                # Log successful login
+                log_admin_action(user, 'login', 'authentication', ip_address=ip_address)
                 
                 return JsonResponse({
                     'status': 'success',
@@ -1511,14 +1665,28 @@ def api_admin_login(request):
                         'last_name': user.last_name,
                         'is_staff': user.is_staff,
                         'is_superuser': user.is_superuser
-                    }
+                    },
+                    'session_timeout': 1800  # 30 minutes in seconds
                 })
             else:
+                # Record failed attempt for inactive/non-staff accounts
+                record_failed_login(username, ip_address)
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Account is not active or does not have admin privileges'
                 }, status=403)
         else:
+            # Record failed login attempt
+            is_locked_now, lockout_time = record_failed_login(username, ip_address)
+            if is_locked_now:
+                minutes = lockout_time // 60
+                seconds = lockout_time % 60
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Too many failed login attempts. Account locked for {minutes}m {seconds}s.',
+                    'lockout_remaining': lockout_time
+                }, status=423)
+            
             return JsonResponse({
                 'status': 'error',
                 'message': 'Invalid username or password'
@@ -1530,16 +1698,22 @@ def api_admin_login(request):
             'message': 'Invalid JSON data'
         }, status=400)
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'Login error for IP {ip_address}: {str(e)}', exc_info=True)
         return JsonResponse({
             'status': 'error',
-            'message': f'Login failed: {str(e)}'
+            'message': 'Login failed. Please try again later.'
         }, status=500)
 
 
 @require_http_methods(["GET"])
 @login_required_json
 def api_admin_auth_check(request):
-    """Check if user is authenticated"""
+    """Check if user is authenticated and session is valid"""
+    # Check session expiry
+    session_expiry = request.session.get_expiry_age()
+    
     return JsonResponse({
         'status': 'success',
         'authenticated': True,
@@ -1551,16 +1725,29 @@ def api_admin_auth_check(request):
             'last_name': request.user.last_name,
             'is_staff': request.user.is_staff,
             'is_superuser': request.user.is_superuser
-        }
+        },
+        'session_expiry': session_expiry,
+        'session_warning_time': 300  # Warn 5 minutes before expiry
     })
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 @login_required_json
+@require_http_methods(["POST"])
+@login_required_json
 def api_admin_logout(request):
-    """Admin logout endpoint"""
+    """Admin logout endpoint with audit logging"""
     from django.contrib.auth import logout
+    from portal.security import get_client_ip, log_admin_action
+    
+    user = request.user
+    ip_address = get_client_ip(request)
+    
+    # Log logout action
+    if user.is_authenticated:
+        log_admin_action(user, 'logout', 'authentication', ip_address=ip_address)
+    
     logout(request)
     return JsonResponse({
         'status': 'success',
@@ -1831,10 +2018,22 @@ def api_update_academic_program(request, program_id):
 @permission_required('portal.delete_academicprogram', raise_exception=True)
 def api_delete_academic_program(request, program_id):
     """Delete an academic program (Admin only)"""
+    from portal.security import log_admin_action, get_client_ip
+    
     try:
         program = get_object_or_404(AcademicProgram, id=program_id)
         program_title = program.title
         program.delete()
+        
+        # Log the action
+        log_admin_action(
+            user=request.user,
+            action='delete',
+            resource_type='academic_program',
+            resource_id=program_id,
+            details={'title': program_title},
+            ip_address=get_client_ip(request)
+        )
         
         return JsonResponse({
             'status': 'success',
@@ -1922,6 +2121,17 @@ def api_create_event(request):
         if image:
             event.image = image
             event.save()
+        
+        # Log the action
+        from portal.security import log_admin_action, get_client_ip
+        log_admin_action(
+            user=request.user,
+            action='create',
+            resource_type='event',
+            resource_id=event.id,
+            details={'title': event.title, 'event_date': event.event_date.isoformat()},
+            ip_address=get_client_ip(request)
+        )
         
         event_data = {
             'id': event.id,
