@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 import socket
 import json
+import logging
 from django.conf import settings
 from functools import wraps
 import datetime
@@ -4236,6 +4237,120 @@ def api_delete_download(request, download_id):
             'status': 'error',
             'message': f'Error deleting download: {str(e)}'
         }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_chatbot_ask(request):
+    """
+    Hybrid chatbot endpoint that uses provided page context and OpenAI for responses.
+    """
+    try:
+        try:
+            data = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            data = {}
+
+        user_message = (data.get('message') or '').strip()
+        context_items = data.get('context') or []
+        history_items = data.get('history') or []
+
+        if not user_message:
+            return JsonResponse({
+                'status': 'error',
+                'message': "Please send a message. I'm here to help!",
+                'reply': "Please send a message. I'm here to help!"
+            }, status=400)
+
+        openai_api_key = getattr(settings, 'OPENAI_API_KEY', '')
+        if not openai_api_key:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'OPENAI_API_KEY is not configured',
+                'reply': "I can't access my AI assistant right now. Please try again later."
+            }, status=503)
+
+        context_lines = []
+        for item in context_items:
+            if isinstance(item, dict):
+                title = (item.get('title') or '').strip()
+                summary = (item.get('summary') or '').strip()
+                url = (item.get('url') or '').strip()
+                if title or summary or url:
+                    line = f"- {title}: {summary}".strip()
+                    if url:
+                        line = f"{line} (URL: {url})"
+                    context_lines.append(line)
+            elif isinstance(item, str) and item.strip():
+                context_lines.append(f"- {item.strip()}")
+
+        context_blob = "\n".join(context_lines) if context_lines else "No additional page context provided."
+
+        system_prompt = (
+            "You are the CCB Assistant for the City College of Bayawan website.\n"
+            "You must answer ONLY using the provided website context and the site sections listed here:\n"
+            "- Home\n"
+            "- Academic Programs\n"
+            "- Admissions\n"
+            "- News & Events\n"
+            "- Downloads\n"
+            "- Students\n"
+            "- Faculty & Staff\n"
+            "- About Us\n"
+            "- Contact Us\n\n"
+            "Rules:\n"
+            "- Do NOT invent information.\n"
+            "- Do NOT use external knowledge beyond the provided context.\n"
+            "- If the answer is not in the context, say it is not available on the site pages listed above.\n"
+            "- Be specific and detailed when the context supports it. Use short paragraphs or bullets.\n\n"
+            f"Website context:\n{context_blob}"
+        )
+
+        messages = [{"role": "system", "content": system_prompt}]
+
+        if isinstance(history_items, list):
+            for item in history_items[-8:]:
+                if not isinstance(item, dict):
+                    continue
+                role = item.get('role')
+                content = (item.get('content') or '').strip()
+                if role in ['user', 'assistant'] and content:
+                    messages.append({"role": role, "content": content})
+
+        messages.append({"role": "user", "content": user_message})
+
+        from openai import OpenAI
+        client = OpenAI(api_key=openai_api_key)
+        model_name = os.getenv('OPENAI_CHAT_MODEL', 'gpt-4o-mini')
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            temperature=0.6,
+            max_tokens=450
+        )
+
+        response_text = completion.choices[0].message.content.strip()
+        return JsonResponse({
+            'status': 'success',
+            'reply': response_text
+        })
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f'Chatbot ask error: {str(e)}', exc_info=True)
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Chatbot request failed',
+            'reply': "Sorry, I'm having trouble responding right now. Please try again in a bit."
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_chatbot_query(request):
+    """
+    Chatbot endpoint alias for the frontend query route.
+    """
+    return api_chatbot_ask(request)
 
 
 @csrf_exempt

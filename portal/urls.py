@@ -18,6 +18,8 @@ urlpatterns = [
     path('api/contact/', views.contact, name='contact'),
     path('api/contact/verify/', views.api_contact_verify, name='api_contact_verify'),
     path('api/search/', views.api_search, name='api_search'),
+    path('api/chatbot/ask/', views.api_chatbot_ask, name='api_chatbot_ask'),
+    path('api/chatbot/query/', views.api_chatbot_query, name='api_chatbot_query'),
     # path('api/chatbot/', views.api_chatbot, name='api_chatbot'),
     
     # Admin login endpoint

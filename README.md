@@ -310,6 +310,8 @@ The application includes a comprehensive email system:
 - `FRONTEND_BASE_URL`: Frontend application URL
 - `CONTACT_INBOX`: Email address for contact form submissions
 - `DEFAULT_FROM_EMAIL`: Default sender email address
+- `OPENAI_API_KEY`: API key for the chatbot AI fallback
+- `OPENAI_CHAT_MODEL`: Optional model override for chatbot (default: `gpt-4o-mini`)
 
 ### Database Options
 - **MySQL via XAMPP**: Current development setup

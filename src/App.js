@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from './components/ErrorBoundary';
-import Chatbot from './components/Chatbot';
+import ChatbotWidget from './components/ChatbotWidget';
 import HomePage from './HomePage';
 import AcademicPrograms from './academicprogram';
 import Students from './students';
@@ -33,7 +33,7 @@ function App() {
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/ccb-logo" element={<CCBlogo />} />
           </Routes>
-          <Chatbot />
+          <ChatbotWidget />
         </Router>
       </HelmetProvider>
     </ErrorBoundary>
