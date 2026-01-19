@@ -1,7 +1,16 @@
 import { getOrCreateSessionId } from './sessionManager';
 
-const API_BASE = process.env.REACT_APP_API_URL || '';
-const CHATBOT_ENDPOINT = `${API_BASE}/api/chatbot/query/`;
+// Get backend URL and construct full API path
+const getApiBase = () => {
+  const backendUrl = process.env.REACT_APP_API_URL;
+  if (backendUrl) {
+    return `${backendUrl.replace(/\/$/, '')}/api`;
+  }
+  return '/api';
+};
+
+const API_BASE = getApiBase();
+const CHATBOT_ENDPOINT = `${API_BASE}/chatbot/query/`;
 
 const sendChatbotQuery = async ({ message, context, history }) => {
   const payload = {

@@ -1,6 +1,17 @@
 // API service for communicating with Django backend
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+// If REACT_APP_API_URL is provided (full backend URL), append /api
+// Otherwise use relative /api for local development
+const getApiBaseUrl = () => {
+  const backendUrl = process.env.REACT_APP_API_URL;
+  if (backendUrl) {
+    // Remove trailing slash if present, then add /api
+    return `${backendUrl.replace(/\/$/, '')}/api`;
+  }
+  return '/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiService {
     constructor() {
