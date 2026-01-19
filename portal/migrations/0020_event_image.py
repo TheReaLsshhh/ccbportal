@@ -6,12 +6,11 @@ from django.db import migrations, models, connection
 def add_image_field_if_not_exists(apps, schema_editor):
     """Add image column only if it doesn't exist"""
     with connection.cursor() as cursor:
-        # Check if the column exists
+        # Check if the column exists (database-agnostic query)
         cursor.execute("""
             SELECT COUNT(*) 
             FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_SCHEMA = DATABASE() 
-            AND TABLE_NAME = 'portal_event' 
+            WHERE TABLE_NAME = 'portal_event' 
             AND COLUMN_NAME = 'image'
         """)
         column_exists = cursor.fetchone()[0] > 0
@@ -30,8 +29,7 @@ def remove_image_field_if_exists(apps, schema_editor):
         cursor.execute("""
             SELECT COUNT(*) 
             FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_SCHEMA = DATABASE() 
-            AND TABLE_NAME = 'portal_event' 
+            WHERE TABLE_NAME = 'portal_event' 
             AND COLUMN_NAME = 'image'
         """)
         column_exists = cursor.fetchone()[0] > 0
@@ -49,13 +47,12 @@ class AddFieldIfNotExists(migrations.AddField):
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
         model = to_state.apps.get_model(app_label, self.model_name)
         if self.allow_migrate_model(schema_editor.connection.alias, model):
-            # Check if column already exists
+            # Check if column already exists (database-agnostic query)
             with schema_editor.connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT COUNT(*) 
                     FROM INFORMATION_SCHEMA.COLUMNS 
-                    WHERE TABLE_SCHEMA = DATABASE() 
-                    AND TABLE_NAME = %s 
+                    WHERE TABLE_NAME = %s 
                     AND COLUMN_NAME = %s
                 """, [model._meta.db_table, self.name])
                 column_exists = cursor.fetchone()[0] > 0

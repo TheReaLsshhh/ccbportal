@@ -9,13 +9,12 @@ class AddFieldIfNotExists(migrations.AddField):
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
         model = to_state.apps.get_model(app_label, self.model_name)
         if self.allow_migrate_model(schema_editor.connection.alias, model):
-            # Check if column already exists
+            # Check if column already exists (database-agnostic query)
             with schema_editor.connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT COUNT(*) 
                     FROM INFORMATION_SCHEMA.COLUMNS 
-                    WHERE TABLE_SCHEMA = DATABASE() 
-                    AND TABLE_NAME = %s 
+                    WHERE TABLE_NAME = %s 
                     AND COLUMN_NAME = %s
                 """, [model._meta.db_table, self.name])
                 column_exists = cursor.fetchone()[0] > 0
