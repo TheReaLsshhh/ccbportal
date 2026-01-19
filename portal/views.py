@@ -2639,6 +2639,9 @@ def api_contact_verify(request):
             f"Message:\n{submission.message}"
         )
 
+        # Prepare phone display value (fix for f-string backslash limitation)
+        phone_display = sub_phone if sub_phone else '<span style="color:#888;">—</span>'
+        
         # Branded HTML email
         html_body = f"""
         <div style=\"font-family: Arial, Helvetica, sans-serif; color:#1e1e1e; line-height:1.6; background:#f5f7f5; padding:18px;\">
@@ -2667,7 +2670,7 @@ def api_contact_verify(request):
                     </tr>
                     <tr>
                       <td style=\"padding:6px 0; color:#555;\"><strong>Phone:</strong></td>
-                      <td style=\"padding:6px 0; color:#111;\">{sub_phone or '<span style=\\"color:#888;\\">—</span>'}</td>
+                      <td style=\"padding:6px 0; color:#111;\">{phone_display}</td>
                     </tr>
                   </table>
                 </div>
