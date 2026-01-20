@@ -257,35 +257,35 @@
 }
 
 /* Staggered animation for ALL navigation links - no exceptions */
-.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"] {
+.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"] {
   animation: slideInNavLink 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.75s forwards;
   opacity: 0;
   transform: translateY(-10px);
 }
 
-.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"] {
+.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"] {
+.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"] {
   animation: slideInNavLink 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s forwards;
   opacity: 0;
   transform: translateY(-10px);
 }
 
-.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"] {
+.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"] {
+.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"] {
   animation: slideInNavLink 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.85s forwards;
   opacity: 0;
   transform: translateY(-10px);
 }
 
-.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"] {
+.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -364,25 +364,25 @@
 }
 
 /* NEWS & EVENTS link - animated */
-.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"] {
+.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"] {
   animation: slideInNavLink 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.95s forwards;
   opacity: 0;
   transform: translateY(-10px);
 }
 
-.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"] {
+.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
 /* DOWNLOADS link - animated */
-.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.homepage:not(.nav-animations-complete) .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   animation: slideInNavLink 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1s forwards;
   opacity: 0;
   transform: translateY(-10px);
 }
 
-.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.homepage.nav-animations-complete .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -393,10 +393,12 @@
     opacity: 0;
     transform: translateY(-100%) scaleY(0.8);
   }
+
   60% {
     opacity: 0.9;
     transform: translateY(5px) scaleY(1.02);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scaleY(1);
@@ -408,6 +410,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -419,10 +422,12 @@
     opacity: 0;
     transform: translateY(-10px) scale(0.9);
   }
+
   60% {
     opacity: 0.8;
     transform: translateY(2px) scale(1.02);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -434,6 +439,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -445,10 +451,12 @@
     opacity: 0;
     transform: translateY(-100%) scaleY(0.8);
   }
+
   60% {
     opacity: 0.9;
     transform: translateY(5px) scaleY(1.02);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scaleY(1);
@@ -461,10 +469,12 @@
     opacity: 0;
     transform: translateX(-20px) scale(0.9);
   }
+
   60% {
     opacity: 0.9;
     transform: translateX(2px) scale(1.02);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0) scale(1);
@@ -477,10 +487,12 @@
     opacity: 0;
     transform: translateX(-15px);
   }
+
   60% {
     opacity: 0.9;
     transform: translateX(2px);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0);
@@ -492,6 +504,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -503,10 +516,12 @@
     opacity: 0;
     transform: translateY(-100%) scaleY(0.8);
   }
+
   60% {
     opacity: 0.9;
     transform: translateY(5px) scaleY(1.02);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scaleY(1);
@@ -519,10 +534,12 @@
     opacity: 0;
     transform: translateY(-10px) scale(0.95);
   }
+
   60% {
     opacity: 0.8;
     transform: translateY(2px) scale(1.02);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -535,6 +552,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   100% {
     opacity: 1;
     transform: scale(1);
@@ -546,6 +564,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -557,6 +576,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -569,6 +589,7 @@
     opacity: 0;
     transform: translateY(-5px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -581,10 +602,12 @@
     opacity: 0;
     transform: translateY(-5px) scale(0.95);
   }
+
   60% {
     opacity: 0.8;
     transform: translateY(1px) scale(1.01);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -596,7 +619,7 @@
   .homepage-navbar {
     margin-top: 0 !important;
   }
-  
+
   .homepage-content .header-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -736,10 +759,10 @@
     transform: translateY(-12px) scale(0.96) !important;
     filter: blur(2px);
     transition: max-height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-                opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                filter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     display: block !important;
     z-index: auto !important;
     top: auto !important;
@@ -829,8 +852,8 @@
     visibility: hidden;
     transform: translateY(-15px) scale(0.96);
     transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-origin: top center;
     filter: blur(2px);
   }
@@ -870,9 +893,9 @@
     opacity: 0;
     transform: translateY(-8px) translateX(-12px);
     transition: opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                background-color 0.25s ease,
-                padding-left 0.25s ease;
+      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 0.25s ease,
+      padding-left 0.25s ease;
   }
 
   .homepage .navbar .services-dropdown-container:hover .services-dropdown .dropdown-item,
@@ -922,6 +945,7 @@
     opacity: 0;
     transform: translateX(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -934,6 +958,7 @@
     opacity: 0;
     transform: translateY(-8px) translateX(-12px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) translateX(0) scale(1);
@@ -946,6 +971,7 @@
     opacity: 0;
     transform: translateX(-15px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -2535,6 +2561,7 @@
 
 /* Responsive Design - Mobile (max-width: 768px) */
 @media (max-width: 768px) {
+
   /* Match navbar dimensions from other pages - max-width: 768px */
   .homepage-navbar .brand-logo,
   .homepage .brand-logo {
@@ -2795,6 +2822,7 @@
 
 /* Responsive Design - Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
+
   /* Match navbar dimensions from other pages - max-width: 480px */
   .homepage-navbar .brand-logo,
   .homepage .brand-logo {
@@ -3269,11 +3297,11 @@
   transform: translateY(0) scale(1);
 }
 
-.academic-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.academic-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.academic-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.academic-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.academic-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.academic-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.academic-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.academic-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.academic-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.academic-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -3307,7 +3335,7 @@
   .academic-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .academic-page .brand-logo,
   .academic-page-navbar .brand-logo {
     width: 55px;
@@ -3321,6 +3349,7 @@
 }
 
 @media (max-width: 768px) {
+
   .academic-page-navbar .brand-logo,
   .academic-page .brand-logo {
     width: 50px;
@@ -3342,6 +3371,7 @@
 }
 
 @media (max-width: 480px) {
+
   .academic-page-navbar .brand-logo,
   .academic-page .brand-logo {
     width: 45px;
@@ -3460,11 +3490,11 @@
   transform: translateY(0) scale(1);
 }
 
-.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.admissions-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -3498,7 +3528,7 @@
   .admissions-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .admissions-page .brand-logo,
   .admissions-page-navbar .brand-logo {
     width: 55px;
@@ -3512,6 +3542,7 @@
 }
 
 @media (max-width: 768px) {
+
   .admissions-page-navbar .brand-logo,
   .admissions-page .brand-logo {
     width: 50px;
@@ -3533,6 +3564,7 @@
 }
 
 @media (max-width: 480px) {
+
   .admissions-page-navbar .brand-logo,
   .admissions-page .brand-logo {
     width: 45px;
@@ -3651,11 +3683,11 @@
   transform: translateY(0) scale(1);
 }
 
-.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.news-events-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -3689,7 +3721,7 @@
   .news-events-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .news-events-page .brand-logo,
   .news-events-page-navbar .brand-logo {
     width: 55px;
@@ -3703,6 +3735,7 @@
 }
 
 @media (max-width: 768px) {
+
   .news-events-page-navbar .brand-logo,
   .news-events-page .brand-logo {
     width: 50px;
@@ -3724,6 +3757,7 @@
 }
 
 @media (max-width: 480px) {
+
   .news-events-page-navbar .brand-logo,
   .news-events-page .brand-logo {
     width: 45px;
@@ -3842,11 +3876,11 @@
   transform: translateY(0) scale(1);
 }
 
-.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.downloads-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -3880,7 +3914,7 @@
   .downloads-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .downloads-page .brand-logo,
   .downloads-page-navbar .brand-logo {
     width: 55px;
@@ -3894,6 +3928,7 @@
 }
 
 @media (max-width: 768px) {
+
   .downloads-page-navbar .brand-logo,
   .downloads-page .brand-logo {
     width: 50px;
@@ -3915,6 +3950,7 @@
 }
 
 @media (max-width: 480px) {
+
   .downloads-page-navbar .brand-logo,
   .downloads-page .brand-logo {
     width: 45px;
@@ -4033,11 +4069,11 @@
   transform: translateY(0) scale(1);
 }
 
-.students-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.students-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.students-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.students-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.students-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.students-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.students-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.students-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.students-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.students-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -4071,7 +4107,7 @@
   .students-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .students-page .brand-logo,
   .students-page-navbar .brand-logo {
     width: 55px;
@@ -4085,6 +4121,7 @@
 }
 
 @media (max-width: 768px) {
+
   .students-page-navbar .brand-logo,
   .students-page .brand-logo {
     width: 50px;
@@ -4106,6 +4143,7 @@
 }
 
 @media (max-width: 480px) {
+
   .students-page-navbar .brand-logo,
   .students-page .brand-logo {
     width: 45px;
@@ -4224,11 +4262,11 @@
   transform: translateY(0) scale(1);
 }
 
-.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.faculty-staff-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -4262,7 +4300,7 @@
   .faculty-staff-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .faculty-staff-page .brand-logo,
   .faculty-staff-page-navbar .brand-logo {
     width: 55px;
@@ -4276,6 +4314,7 @@
 }
 
 @media (max-width: 768px) {
+
   .faculty-staff-page-navbar .brand-logo,
   .faculty-staff-page .brand-logo {
     width: 50px;
@@ -4297,6 +4336,7 @@
 }
 
 @media (max-width: 480px) {
+
   .faculty-staff-page-navbar .brand-logo,
   .faculty-staff-page .brand-logo {
     width: 45px;
@@ -4415,11 +4455,11 @@
   transform: translateY(0) scale(1);
 }
 
-.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.aboutus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -4453,7 +4493,7 @@
   .aboutus-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .aboutus-page .brand-logo,
   .aboutus-page-navbar .brand-logo {
     width: 55px;
@@ -4467,6 +4507,7 @@
 }
 
 @media (max-width: 768px) {
+
   .aboutus-page-navbar .brand-logo,
   .aboutus-page .brand-logo {
     width: 50px;
@@ -4488,6 +4529,7 @@
 }
 
 @media (max-width: 480px) {
+
   .aboutus-page-navbar .brand-logo,
   .aboutus-page .brand-logo {
     width: 45px;
@@ -4606,11 +4648,11 @@
   transform: translateY(0) scale(1);
 }
 
-.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/"],
-.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/academics"],
-.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/admissions"],
-.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/news"],
-.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links > a[href="/downloads"] {
+.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/"],
+.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/academics"],
+.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/admissions"],
+.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/news"],
+.contactus-page .main-nav.with-bg.homepage-nav-section .nav-links>a[href="/downloads"] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -4644,7 +4686,7 @@
   .contactus-page-navbar {
     margin-top: 0 !important;
   }
-  
+
   .contactus-page .brand-logo,
   .contactus-page-navbar .brand-logo {
     width: 55px;
@@ -4658,6 +4700,7 @@
 }
 
 @media (max-width: 768px) {
+
   .contactus-page-navbar .brand-logo,
   .contactus-page .brand-logo {
     width: 50px;
@@ -4679,6 +4722,7 @@
 }
 
 @media (max-width: 480px) {
+
   .contactus-page-navbar .brand-logo,
   .contactus-page .brand-logo {
     width: 45px;

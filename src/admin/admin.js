@@ -12,11 +12,11 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   // Removed unused success state
-  
+
   // CRUD Alert states
   const [alerts, setAlerts] = useState([]);
   const [alertId, setAlertId] = useState(0);
-  
+
   // Removed welcome message popup states
 
   // Viewport responsiveness
@@ -74,7 +74,7 @@ const AdminPage = () => {
       setAdmissionNotes(notesRes.notes || []);
       setInstitutionalInfo(institutionalInfoRes.institutional_info || null);
       setDownloads(downloadsRes.downloads || []);
-      
+
       showAlert('info', 'Data Loaded', 'All data has been loaded successfully.');
     } catch (err) {
       if (err.status === 401) {
@@ -141,12 +141,12 @@ const AdminPage = () => {
           // Session is still valid
           const sessionExpiry = response.session_expiry || 1800;
           const warningTime = response.session_warning_time || 300;
-          
+
           // Check if we're within warning time
           if (sessionExpiry <= warningTime) {
             const minutes = Math.floor(sessionExpiry / 60);
             const seconds = sessionExpiry % 60;
-            showAlert('warning', 'Session Expiring Soon', 
+            showAlert('warning', 'Session Expiring Soon',
               `Your session will expire in ${minutes}m ${seconds}s. Please save your work.`);
           }
         } else {
@@ -165,16 +165,16 @@ const AdminPage = () => {
 
     // Check session every 30 seconds
     const sessionCheckInterval = setInterval(checkSessionTimeout, 30000);
-    
+
     // Also check on page visibility change (user returns to tab)
     const handleVisibilityChange = () => {
       if (!document.hidden && isAuthenticated) {
         checkSessionTimeout();
       }
     };
-    
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     // Initial check
     checkSessionTimeout();
 
@@ -198,7 +198,7 @@ const AdminPage = () => {
         setIsAuthenticated(true);
         // Use sessionStorage instead of localStorage for better security
         sessionStorage.setItem('admin_user', JSON.stringify(response.user));
-        
+
         // Store session expiry info
         if (response.session_expiry) {
           sessionStorage.setItem('session_expiry', response.session_expiry.toString());
@@ -241,10 +241,10 @@ const AdminPage = () => {
       timestamp: new Date(),
       duration
     };
-    
+
     setAlerts(prev => [...prev, newAlert]);
     setAlertId(prev => prev + 1);
-    
+
     // Auto-remove alert after duration
     setTimeout(() => {
       removeAlert(newAlert.id);
@@ -365,7 +365,7 @@ const AdminPage = () => {
       editData.details = item.details || '';
       editData.is_active = item.is_active !== undefined ? item.is_active : true;
       editData.display_order = item.display_order || 0;
-      
+
       // Format date for HTML date input
       if (editData.date) {
         try {
@@ -425,7 +425,7 @@ const AdminPage = () => {
     setError(null);
     try {
       console.log(`Attempting to delete ${type} with ID:`, item.id);
-      
+
       switch (type) {
         case 'academic-programs':
           await apiService.deleteAcademicProgram(item.id);
@@ -479,7 +479,7 @@ const AdminPage = () => {
         default:
           throw new Error(`Unknown type: ${type}`);
       }
-      
+
       console.log(`Successfully deleted ${type}`);
       showAlert('success', 'Deleted Successfully', `${type.replace('-', ' ')} has been deleted successfully!`);
     } catch (err) {
@@ -513,7 +513,7 @@ const AdminPage = () => {
             is_active: !!formData.is_active,
             display_order: Number(formData.display_order) || 0
           };
-          
+
           if (isEditing) {
             result = await apiService.updateAcademicProgram(editingItem.id, programData);
             setAcademicPrograms(prev => prev.map(p => p.id === editingItem.id ? result.program : p));
@@ -656,7 +656,8 @@ const AdminPage = () => {
             result = await apiService.createDepartment(payload);
             setDepartments(prev => [...prev, result.department]);
           }
-          break; }
+          break;
+        }
         case 'personnel':
           // Prepare personnel data with proper formatting
           const personnelData = {
@@ -667,7 +668,7 @@ const AdminPage = () => {
             is_active: !!formData.is_active,
             display_order: Number(formData.display_order) || 0
           };
-          
+
           if (isEditing) {
             result = await apiService.updatePersonnel(editingItem.id, personnelData);
             setPersonnel(prev => prev.map(p => p.id === editingItem.id ? result.personnel : p));
@@ -683,7 +684,7 @@ const AdminPage = () => {
             is_active: !!formData.is_active,
             display_order: Number(formData.display_order) || 0
           };
-          
+
           if (isEditing) {
             result = await apiService.updateAdmissionRequirement(editingItem.id, requirementData);
             setAdmissionRequirements(prev => prev.map(r => r.id === editingItem.id ? result.requirement : r));
@@ -701,7 +702,7 @@ const AdminPage = () => {
             is_active: !!formData.is_active,
             display_order: Number(formData.display_order) || 0
           };
-          
+
           if (isEditing) {
             result = await apiService.updateEnrollmentStep(editingItem.id, stepData);
             setEnrollmentSteps(prev => prev.map(s => s.id === editingItem.id ? result.step : s));
@@ -717,7 +718,7 @@ const AdminPage = () => {
             is_active: !!formData.is_active,
             display_order: Number(formData.display_order) || 0
           };
-          
+
           if (isEditing) {
             result = await apiService.updateAdmissionNote(editingItem.id, noteData);
             setAdmissionNotes(prev => prev.map(n => n.id === editingItem.id ? result.note : n));
@@ -734,36 +735,36 @@ const AdminPage = () => {
             core_values: formData.core_values || '',
             is_active: !!formData.is_active
           };
-          
+
           result = await apiService.updateInstitutionalInfo(institutionalData);
           setInstitutionalInfo(result.institutional_info);
           break;
         case 'news':
           // Prepare FormData for file upload
           const newsFormData = new FormData();
-          
+
           // Ensure all required fields are present
           if (!formData.title || !formData.date || !formData.body) {
             throw new Error('Title, date, and body are required fields');
           }
-          
+
           newsFormData.append('title', formData.title.trim());
           newsFormData.append('date', formData.date);
           newsFormData.append('body', formData.body.trim());
           newsFormData.append('details', formData.details || '');
           newsFormData.append('is_active', formData.is_active ? 'true' : 'false');
           newsFormData.append('display_order', String(formData.display_order || 0));
-          
+
           // Handle image upload
           if (formData.image && formData.image instanceof File) {
             newsFormData.append('image', formData.image);
           }
-          
+
           // Handle image removal
           if (formData.remove_image) {
             newsFormData.append('remove_image', 'true');
           }
-          
+
           if (isEditing) {
             result = await apiService.updateNews(editingItem.id, newsFormData);
             setNews(prev => prev.map(n => n.id === editingItem.id ? result.news : n));
@@ -775,28 +776,28 @@ const AdminPage = () => {
         case 'downloads': {
           // Prepare FormData for file upload
           const downloadFormData = new FormData();
-          
+
           // Ensure all required fields are present
           if (!formData.title) {
             throw new Error('Title is required');
           }
-          
+
           downloadFormData.append('title', formData.title.trim());
           downloadFormData.append('description', formData.description || '');
           downloadFormData.append('category', formData.category || 'other');
           downloadFormData.append('is_active', formData.is_active ? 'true' : 'false');
           downloadFormData.append('display_order', String(formData.display_order || 0));
-          
+
           // Handle file upload (required for create, optional for update)
           if (formData.file && formData.file instanceof File) {
             downloadFormData.append('file', formData.file);
           }
-          
+
           // Handle file removal
           if (formData.remove_file) {
             downloadFormData.append('remove_file', 'true');
           }
-          
+
           if (isEditing) {
             // For updates, file is optional
             result = await apiService.updateDownload(editingItem.id, downloadFormData);
@@ -951,14 +952,14 @@ const AdminPage = () => {
             ))}
           </div>
           <div className="data-card-actions">
-            <button 
-              className="btn btn-sm btn-secondary" 
+            <button
+              className="btn btn-sm btn-secondary"
               onClick={() => handleEdit(item)}
             >
               Edit
             </button>
-            <button 
-              className="btn btn-sm btn-danger" 
+            <button
+              className="btn btn-sm btn-danger"
               onClick={() => handleDelete(item, type)}
             >
               Delete
@@ -1004,14 +1005,14 @@ const AdminPage = () => {
                       <td key={index}>{cell}</td>
                     ))}
                     <td className="actions-cell">
-                      <button 
-                        className="btn btn-sm btn-secondary" 
+                      <button
+                        className="btn btn-sm btn-secondary"
                         onClick={() => handleEdit(item)}
                       >
                         Edit
                       </button>
-                      <button 
-                        className="btn btn-sm btn-danger" 
+                      <button
+                        className="btn btn-sm btn-danger"
                         onClick={() => handleDelete(item, type)}
                       >
                         Delete
@@ -1112,7 +1113,7 @@ const AdminPage = () => {
           item.full_name || 'N/A',
           item.department_name || 'N/A',
           item.title || 'N/A',
-          item.position_type === 'faculty' ? 'Faculty' : 
+          item.position_type === 'faculty' ? 'Faculty' :
             item.position_type === 'administrative' ? 'Administrative' : 'Support',
           item.is_active ? 'Active' : 'Inactive'
         ];
@@ -1193,7 +1194,7 @@ const AdminPage = () => {
       <div className="content-top-nav">
         <nav className="top-nav" role="navigation" aria-label="Admin navigation">
           {navItems.map(item => (
-            <button 
+            <button
               key={item.key}
               className={`nav-item ${activeTab === item.key ? 'active' : ''}`}
               onClick={() => setActiveTab(item.key)}
@@ -1432,9 +1433,9 @@ const AdminPage = () => {
               {formData.image && formData.image instanceof File && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
-                  <img 
-                    src={URL.createObjectURL(formData.image)} 
-                    alt="Preview" 
+                  <img
+                    src={URL.createObjectURL(formData.image)}
+                    alt="Preview"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                 </div>
@@ -1442,10 +1443,10 @@ const AdminPage = () => {
               {editingItem && editingItem.image && !formData.image && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
-                  <img 
+                  <img
                     src={normalizeImageUrl(editingItem.image)}
-                    loading="lazy" 
-                    alt="Current" 
+                    loading="lazy"
+                    alt="Current"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                   <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1531,9 +1532,9 @@ const AdminPage = () => {
               {formData.image && formData.image instanceof File && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
-                  <img 
-                    src={URL.createObjectURL(formData.image)} 
-                    alt="Preview" 
+                  <img
+                    src={URL.createObjectURL(formData.image)}
+                    alt="Preview"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                 </div>
@@ -1541,10 +1542,10 @@ const AdminPage = () => {
               {editingItem && editingItem.image && !formData.image && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
-                  <img 
+                  <img
                     src={normalizeImageUrl(editingItem.image)}
-                    loading="lazy" 
-                    alt="Current" 
+                    loading="lazy"
+                    alt="Current"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                   <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1659,9 +1660,9 @@ const AdminPage = () => {
               {formData.image && formData.image instanceof File && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
-                  <img 
-                    src={URL.createObjectURL(formData.image)} 
-                    alt="Preview" 
+                  <img
+                    src={URL.createObjectURL(formData.image)}
+                    alt="Preview"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                 </div>
@@ -1669,10 +1670,10 @@ const AdminPage = () => {
               {editingItem && editingItem.image && !formData.image && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
-                  <img 
+                  <img
                     src={normalizeImageUrl(editingItem.image)}
-                    loading="lazy" 
-                    alt="Current" 
+                    loading="lazy"
+                    alt="Current"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                   <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1686,6 +1687,115 @@ const AdminPage = () => {
                   </label>
                 </div>
               )}
+            </div>
+            <div className="form-row-inline">
+              <div className="form-group">
+                <label>Display Order</label>
+                <input
+                  type="number"
+                  name="display_order"
+                  value={formData.display_order || 0}
+                  onChange={handleInputChange}
+                  min="0"
+                />
+              </div>
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    checked={formData.is_active || false}
+                    onChange={handleInputChange}
+                  />
+                  Active
+                </label>
+              </div>
+            </div>
+          </>
+        );
+      case 'news':
+        return (
+          <>
+            <div className="form-group">
+              <label>Title *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title || ''}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Date *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date || ''}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Body *</label>
+              <textarea
+                name="body"
+                value={formData.body || ''}
+                onChange={handleInputChange}
+                required
+                rows="4"
+              />
+            </div>
+            <div className="form-group">
+              <label>Details</label>
+              <textarea
+                name="details"
+                value={formData.details || ''}
+                onChange={handleInputChange}
+                rows="4"
+              />
+            </div>
+            <div className="form-group">
+              <label>Image</label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleInputChange}
+              />
+              {formData.image && formData.image instanceof File && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
+                  <img
+                    src={URL.createObjectURL(formData.image)}
+                    alt="Preview"
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                </div>
+              )}
+              {editingItem && editingItem.image && !formData.image && (
+                <div style={{ marginTop: '10px' }}>
+                  <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
+                  <img
+                    src={normalizeImageUrl(editingItem.image)}
+                    loading="lazy"
+                    alt="Current"
+                    style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
+                  />
+                  <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      name="remove_image"
+                      checked={formData.remove_image || false}
+                      onChange={handleInputChange}
+                    />
+                    Remove current image
+                  </label>
+                </div>
+              )}
+              <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
+                Upload an image for this news item. Recommended size: 800x600px or larger.
+              </small>
             </div>
             <div className="form-row-inline">
               <div className="form-group">
@@ -2065,16 +2175,16 @@ const AdminPage = () => {
               </small>
             </div>
             <div className="form-row-inline">
-            <div className="form-group">
-              <label>Display Order</label>
-              <input
-                type="number"
-                name="display_order"
-                value={formData.display_order || 0}
-                onChange={handleInputChange}
-                min="0"
-              />
-            </div>
+              <div className="form-group">
+                <label>Display Order</label>
+                <input
+                  type="number"
+                  name="display_order"
+                  value={formData.display_order || 0}
+                  onChange={handleInputChange}
+                  min="0"
+                />
+              </div>
               <div className="form-group">
                 <label className="checkbox-label">
                   <input
@@ -2267,9 +2377,9 @@ const AdminPage = () => {
               {formData.image && formData.image instanceof File && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Selected: {formData.image.name}</p>
-                  <img 
-                    src={URL.createObjectURL(formData.image)} 
-                    alt="Preview" 
+                  <img
+                    src={URL.createObjectURL(formData.image)}
+                    alt="Preview"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                 </div>
@@ -2277,10 +2387,10 @@ const AdminPage = () => {
               {editingItem && editingItem.image && !formData.image && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current image:</p>
-                  <img 
+                  <img
                     src={normalizeImageUrl(editingItem.image)}
-                    loading="lazy" 
-                    alt="Current" 
+                    loading="lazy"
+                    alt="Current"
                     style={{ maxWidth: '200px', maxHeight: '200px', marginTop: '10px', borderRadius: '8px' }}
                   />
                   <label className="checkbox-label" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2451,9 +2561,9 @@ const AdminPage = () => {
               {editingItem && editingItem.file_url && !formData.file && (
                 <div style={{ marginTop: '10px' }}>
                   <p style={{ color: '#666', fontSize: '0.9rem' }}>Current file:</p>
-                  <a 
-                    href={editingItem.file_url} 
-                    target="_blank" 
+                  <a
+                    href={editingItem.file_url}
+                    target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: '#1976d2', textDecoration: 'underline' }}
                   >
@@ -2550,14 +2660,14 @@ const AdminPage = () => {
                   <td><strong>Core Values</strong></td>
                   <td>
                     {institutionalInfo.core_values ? (
-                      <div dangerouslySetInnerHTML={{ 
+                      <div dangerouslySetInnerHTML={{
                         __html: institutionalInfo.core_values
                           .replace(/&/g, '&amp;')
                           .replace(/</g, '&lt;')
                           .replace(/>/g, '&gt;')
                           .replace(/"/g, '&quot;')
                           .replace(/'/g, '&#039;')
-                          .replace(/\n/g, '<br/>') 
+                          .replace(/\n/g, '<br/>')
                       }} />
                     ) : 'N/A'}
                   </td>
@@ -2617,7 +2727,7 @@ const AdminPage = () => {
               <p>Manage your website content</p>
             </div>
             <div className="header-actions">
-            {(isMobile || isTablet) && false && (
+              {(isMobile || isTablet) && false && (
                 <button
                   className={`btn btn-secondary btn-sm mobile-menu-button`}
                   onClick={() => setIsMobileMenuOpen(prev => !prev)}
@@ -2628,7 +2738,7 @@ const AdminPage = () => {
                 </button>
               )}
               {user && (
-                <button 
+                <button
                   className="btn btn-secondary btn-sm"
                   onClick={handleLogout}
                   title="Logout"
@@ -2652,8 +2762,8 @@ const AdminPage = () => {
         {/* CRUD Alert Container */}
         <div className="alert-container">
           {alerts.map(alert => (
-            <div 
-              key={alert.id} 
+            <div
+              key={alert.id}
               className={`alert-popup alert-${alert.type}`}
               onClick={() => removeAlert(alert.id)}
             >
@@ -2668,8 +2778,8 @@ const AdminPage = () => {
                   <div className="alert-title">{alert.title}</div>
                   <div className="alert-message">{alert.message}</div>
                 </div>
-                <button 
-                  className="alert-close" 
+                <button
+                  className="alert-close"
                   onClick={(e) => {
                     e.stopPropagation();
                     removeAlert(alert.id);
@@ -2683,10 +2793,10 @@ const AdminPage = () => {
               </div>
             </div>
           ))}
-          
+
           {alerts.length > 0 && (
-            <button 
-              className="alert-clear-all" 
+            <button
+              className="alert-clear-all"
               onClick={clearAllAlerts}
               title="Clear all alerts"
             >
