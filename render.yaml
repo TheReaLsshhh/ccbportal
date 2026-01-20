@@ -41,6 +41,8 @@ services:
     envVars:
       - key: REACT_APP_API_URL
         sync: false
+        # IMPORTANT: Set this to your backend service URL (e.g., https://ccb-portal-backend.onrender.com)
+        # This tells the frontend where to fetch images and API data from
     routes:
       - type: rewrite
         source: /*
