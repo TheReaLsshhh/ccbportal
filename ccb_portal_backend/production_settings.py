@@ -1,6 +1,10 @@
 # Production settings override for Render deployment
 import os
 import dj_database_url
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from cloudinary_storage.storage import MediaCloudinaryStorage
 from .settings import *
 
 # SECURITY: Override with production values
@@ -39,8 +43,29 @@ CORS_ALLOW_HEADERS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_URL = '/static/'
 
+# Cloudinary configuration for media files (persistent storage on free tier)
+# Get credentials from environment variables (set in Render dashboard)
+cloudinary_cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME', '')
+cloudinary_api_key = os.getenv('CLOUDINARY_API_KEY', '')
+cloudinary_api_secret = os.getenv('CLOUDINARY_API_SECRET', '')
+
+if cloudinary_cloud_name and cloudinary_api_key and cloudinary_api_secret:
+    cloudinary.config(
+        cloud_name=cloudinary_cloud_name,
+        api_key=cloudinary_api_key,
+        api_secret=cloudinary_api_secret,
+        secure=True
+    )
+    # Use Cloudinary for media file storage (persists across deployments)
+    MEDIA_URL = f'https://res.cloudinary.com/{cloudinary_cloud_name}/image/upload/'
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+else:
+    # Fallback to local storage if Cloudinary not configured
+    MEDIA_URL = '/media/'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# Keep MEDIA_ROOT for backward compatibility
 MEDIA_ROOT = BASE_DIR / 'media'
-MEDIA_URL = '/media/'
 
 # Ensure WhiteNoise handles static files properly
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -54,9 +79,6 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 # Additional CORS settings for media files
-# Allow requests from any origin for media files (images are public content)
-# This is necessary because browsers may request images directly
-CORS_URLS_REGEX = r'^/(api|media)/.*$'
-
-# Ensure proper content type headers for media files
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+# Cloudinary serves images via CDN, so CORS is handled by Cloudinary
+# Allow requests from any origin for API endpoints
+CORS_URLS_REGEX = r'^/api/.*$'
