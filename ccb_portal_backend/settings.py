@@ -115,6 +115,13 @@ DATABASES = {
             'sql_mode': 'STRICT_TRANS_TABLES',
         },
     }
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=get_env_variable('DATABASE_URL', required=True),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 }
 
 
