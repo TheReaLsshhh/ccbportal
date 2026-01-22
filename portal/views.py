@@ -138,10 +138,23 @@ def index(request):
 
 def api_test(request):
     """Test API endpoint"""
-    return JsonResponse({
+    # Debug info about storage configuration
+    from django.core.files.storage import default_storage
+    
+    debug_info = {
         'message': 'Hello from Django API!',
-        'status': 'success'
-    })
+        'status': 'success',
+        'storage_backend': str(settings.DEFAULT_FILE_STORAGE),
+        'media_url': settings.MEDIA_URL,
+        'media_root': str(settings.MEDIA_ROOT) if settings.MEDIA_ROOT else None,
+        'cloudinary_config': {
+            'CLOUD_NAME': settings.CLOUDINARY_STORAGE.get('CLOUD_NAME'),
+            'has_api_key': bool(settings.CLOUDINARY_STORAGE.get('API_KEY')),
+            'has_api_secret': bool(settings.CLOUDINARY_STORAGE.get('API_SECRET')),
+        },
+        'debug_mode': settings.DEBUG,
+    }
+    return JsonResponse(debug_info)
 
 
 @require_http_methods(["GET"])
