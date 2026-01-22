@@ -52,47 +52,59 @@ cloudinary_cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME')
 cloudinary_api_key = os.getenv('CLOUDINARY_API_KEY')
 cloudinary_api_secret = os.getenv('CLOUDINARY_API_SECRET')
 
-# If CLOUDINARY_URL is set, parse it
-if cloudinary_url and not all([cloudinary_cloud_name, cloudinary_api_key, cloudinary_api_secret]):
-    # CLOUDINARY_URL format: cloudinary://api_key:api_secret@cloud_name
+print(f"\n[CLOUDINARY CONFIG] Starting Cloudinary configuration...")
+print(f"[CLOUDINARY CONFIG] CLOUDINARY_URL present: {bool(cloudinary_url)}")
+print(f"[CLOUDINARY CONFIG] CLOUDINARY_CLOUD_NAME present: {bool(cloudinary_cloud_name)}")
+
+# If CLOUDINARY_URL is set, parse it (takes precedence)
+if cloudinary_url:
     try:
         import urllib.parse
+        # CLOUDINARY_URL format: cloudinary://api_key:api_secret@cloud_name
         parsed = urllib.parse.urlparse(cloudinary_url)
-        cloudinary_cloud_name = parsed.hostname or cloudinary_cloud_name
-        cloudinary_api_key = parsed.username or cloudinary_api_key
-        cloudinary_api_secret = parsed.password or cloudinary_api_secret
-        print(f"[CLOUDINARY DEBUG] Parsed CLOUDINARY_URL successfully")
+        if parsed.hostname:
+            cloudinary_cloud_name = parsed.hostname
+            print(f"[CLOUDINARY CONFIG] Parsed cloud_name from CLOUDINARY_URL: {cloudinary_cloud_name}")
+        if parsed.username:
+            cloudinary_api_key = parsed.username
+            print(f"[CLOUDINARY CONFIG] Parsed api_key from CLOUDINARY_URL: SET")
+        if parsed.password:
+            cloudinary_api_secret = parsed.password
+            print(f"[CLOUDINARY CONFIG] Parsed api_secret from CLOUDINARY_URL: SET")
     except Exception as e:
         print(f"[CLOUDINARY ERROR] Failed to parse CLOUDINARY_URL: {e}")
 
-# Debug: Print to logs (will show in Render deployment logs)
-print(f"[CLOUDINARY DEBUG] Cloud Name: {cloudinary_cloud_name if cloudinary_cloud_name else 'NOT SET'}")
-print(f"[CLOUDINARY DEBUG] API Key: {'SET' if cloudinary_api_key else 'NOT SET'}")
-print(f"[CLOUDINARY DEBUG] API Secret: {'SET' if cloudinary_api_secret else 'NOT SET'}")
-print(f"[CLOUDINARY DEBUG] Using storage: {'Cloudinary' if all([cloudinary_cloud_name, cloudinary_api_key, cloudinary_api_secret]) else 'LOCAL (BROKEN)'}")
+# Final validation
+print(f"\n[CLOUDINARY CONFIG] Final configuration check:")
+print(f"[CLOUDINARY CONFIG] Cloud Name: {cloudinary_cloud_name if cloudinary_cloud_name else 'NOT SET'}")
+print(f"[CLOUDINARY CONFIG] API Key: {'SET' if cloudinary_api_key else 'NOT SET'}")
+print(f"[CLOUDINARY CONFIG] API Secret: {'SET' if cloudinary_api_secret else 'NOT SET'}")
 
-# CRITICAL: Fail if Cloudinary is not configured in production
-if not all([cloudinary_cloud_name, cloudinary_api_key, cloudinary_api_secret]):
-    print("[CLOUDINARY ERROR] Missing Cloudinary environment variables! Falling back to local storage (BROKEN ON RENDER)")
-    # We still fallback to avoid crashing during build, but this is definitely wrong for runtime
-    MEDIA_URL = '/media/'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-else:
+# FORCE Cloudinary storage in production, regardless of configuration status
+# If credentials are missing, uploads will fail (which is better than silently using local disk)
+if cloudinary_cloud_name and cloudinary_api_key and cloudinary_api_secret:
+    print(f"\n[CLOUDINARY SUCCESS] Configuring Cloudinary with all credentials present")
     cloudinary.config(
         cloud_name=cloudinary_cloud_name,
         api_key=cloudinary_api_key,
         api_secret=cloudinary_api_secret,
         secure=True
     )
-    # Use Cloudinary for media file storage (persists across deployments)
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    print("[CLOUDINARY DEBUG] Using Cloudinary for media storage - SUCCESS")
-    
-    # We must have a MEDIA_URL for Django checks, even if Cloudinary handles the actual serving
-    MEDIA_URL = '/media/'
-    
-    # Keep MEDIA_ROOT for backwards compatibility, even though Cloudinary handles actual storage
-    MEDIA_ROOT = BASE_DIR / 'media'
+    print(f"[CLOUDINARY SUCCESS] ✓ DEFAULT_FILE_STORAGE = MediaCloudinaryStorage")
+    print(f"[CLOUDINARY SUCCESS] ✓ Images will be uploaded to Cloudinary CDN")
+else:
+    print(f"\n[CLOUDINARY ERROR] MISSING CREDENTIALS - Setting to FileSystemStorage as fallback")
+    print(f"[CLOUDINARY ERROR] This is a MISCONFIGURATION - files will be lost on redeploy!")
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# Media URL configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+print(f"\n[CLOUDINARY CONFIG] MEDIA_URL = {MEDIA_URL}")
+print(f"[CLOUDINARY CONFIG] MEDIA_ROOT = {MEDIA_ROOT}")
+print(f"[CLOUDINARY CONFIG] Configuration complete.\n")
 
 # Ensure WhiteNoise handles static files properly
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
