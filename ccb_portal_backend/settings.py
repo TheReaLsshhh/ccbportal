@@ -162,9 +162,9 @@ STATICFILES_DIRS = [
 # Cloudinary Configuration
 # Get credentials from environment variables
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': get_env_variable('CLOUDINARY_CLOUD_NAME', ''),
-    'API_KEY': get_env_variable('CLOUDINARY_API_KEY', ''),
-    'API_SECRET': get_env_variable('CLOUDINARY_API_SECRET', ''),
+    'CLOUD_NAME': get_env_variable('CLOUDINARY_CLOUD_NAME', 'dvodewe6g'),
+    'API_KEY': get_env_variable('CLOUDINARY_API_KEY', '618824283564593'),
+    'API_SECRET': get_env_variable('CLOUDINARY_API_SECRET', 'cJGnBgAJGxxDU2bR9-UYx9sGiPA'),
 }
 
 # Media files - Use Cloudinary in production, local storage in development
