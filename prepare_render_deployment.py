@@ -84,15 +84,20 @@ def test_local_setup():
         from portal.utils import build_production_media_url
         from django.core.files.base import ContentFile
         
+        # Create a mock file with URL attribute
         test_file = ContentFile(b'test', name='test.jpg')
         test_file.url = '/media/test.jpg'
-        result = build_production_media_url(test_file)
         
+        result = build_production_media_url(test_file)
         expected = "https://ccb-portal-backend.onrender.com/media/test.jpg"
+        
+        print(f"Image URL generation result: {result}")
+        print(f"Expected: {expected}")
+        
         if result == expected:
-            print(f"✅ Image URL generation working: {result}")
+            print(f"✅ Image URL generation working")
         else:
-            print(f"❌ Image URL generation failed: {result} != {expected}")
+            print(f"❌ Image URL generation failed")
             return False
         
         # Test frontend URL normalization
