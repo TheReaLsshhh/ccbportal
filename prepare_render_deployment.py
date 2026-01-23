@@ -91,13 +91,10 @@ def test_local_setup():
         result = build_production_media_url(test_file)
         expected = "https://ccb-portal-backend.onrender.com/media/test.jpg"
         
-        print(f"Image URL generation result: {result}")
-        print(f"Expected: {expected}")
-        
         if result == expected:
-            print(f"✅ Image URL generation working")
+            print(f"✅ Image URL generation working: {result}")
         else:
-            print(f"❌ Image URL generation failed")
+            print(f"❌ Image URL generation failed: got {result}, expected {expected}")
             return False
         
         # Test frontend URL normalization
