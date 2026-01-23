@@ -78,7 +78,7 @@ def test_local_setup():
         django.setup()
         from django.conf import settings
         
-        print(f"✅ Django settings loaded: DEBUG={settings.DEBUG}")
+        print(f"Django settings loaded: DEBUG={settings.DEBUG}")
         
         # Test image URL generation
         from portal.utils import build_production_media_url
@@ -91,8 +91,11 @@ def test_local_setup():
         result = build_production_media_url(test_file)
         expected = "https://ccb-portal-backend.onrender.com/media/test.jpg"
         
+        print(f"Image URL generation result: {result}")
+        print(f"Expected: {expected}")
+        
         if result == expected:
-            print(f"✅ Image URL generation working: {result}")
+            print(f"✅ Image URL generation working")
         else:
             print(f"❌ Image URL generation failed: got {result}, expected {expected}")
             return False
