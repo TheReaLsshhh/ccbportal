@@ -51,7 +51,8 @@ cloudinary_config(
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Media files configuration for Cloudinary
-MEDIA_URL = f'https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/'
+# We intentionally leave MEDIA_URL relative or standard because CloudinaryStorage handles the full URL generation
+MEDIA_URL = '/media/'
 MEDIA_ROOT = ''  # Not used with Cloudinary
 
 # Static files configuration - Keep local for CSS, JS, etc.

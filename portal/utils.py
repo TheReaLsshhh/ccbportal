@@ -215,7 +215,22 @@ def build_production_media_url(file_field, base_url=None):
         # For Cloudinary, we don't need to prepend base URL - Cloudinary handles it
         from django.conf import settings
         if hasattr(settings, 'DEFAULT_FILE_STORAGE') and 'cloudinary' in settings.DEFAULT_FILE_STORAGE.lower():
-            # Cloudinary URLs are already absolute
+            # If URL is already absolute, return it
+            if url.startswith('http://') or url.startswith('https://'):
+                return url
+            
+            # If we are using Cloudinary but the URL is relative, we need to construct the full Cloudinary URL
+            # This happens if MEDIA_URL was previously set incorrectly
+            cloud_name = getattr(settings, 'CLOUDINARY_CLOUD_NAME', None)
+            if not cloud_name:
+                import os
+                cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME')
+            
+            if cloud_name and 'res.cloudinary.com' not in url:
+                # Remove leading slash if present
+                clean_path = url.lstrip('/')
+                return f"https://res.cloudinary.com/{cloud_name}/image/upload/{clean_path}"
+                
             return url
         
         # Get the base URL from settings or parameter (for local storage)
