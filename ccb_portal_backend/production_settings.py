@@ -48,6 +48,17 @@ cloudinary_config(
 )
 
 # Cloudinary storage configuration - Only for media files (images)
+# Django 4.2+ uses STORAGES dictionary
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Legacy setting for older libraries (optional but good for compatibility)
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Media files configuration for Cloudinary
@@ -59,7 +70,7 @@ MEDIA_ROOT = ''  # Not used with Cloudinary
 # Static files configuration - Keep local for CSS, JS, etc.
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# STATICFILES_STORAGE is deprecated in Django 4.2+ and handled by STORAGES above
 
 # Ensure static files directory exists
 import os
