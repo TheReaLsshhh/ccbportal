@@ -40,12 +40,20 @@ CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME', 'your-cloud-name')
 CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', 'your-api-key')
 CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', 'your-api-secret')
 
-# Initialize Cloudinary
+# Initialize Cloudinary SDK directly (for direct usage)
 cloudinary_config(
     cloud_name=CLOUDINARY_CLOUD_NAME,
     api_key=CLOUDINARY_API_KEY,
     api_secret=CLOUDINARY_API_SECRET
 )
+
+# Configure django-cloudinary-storage specific settings
+# This is CRITICAL: The storage backend looks for this dict, NOT just the SDK config
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+    'API_KEY': CLOUDINARY_API_KEY,
+    'API_SECRET': CLOUDINARY_API_SECRET,
+}
 
 # Cloudinary storage configuration - Only for media files (images)
 # Django 4.2+ uses STORAGES dictionary
