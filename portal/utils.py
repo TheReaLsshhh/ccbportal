@@ -209,29 +209,20 @@ def build_production_media_url(file_field, base_url=None):
             return None
         
         # If URL is already absolute (https:// or http:// or Cloudinary URL), return as-is
+        # Cloudinary URLs typically contain 'cloudinary.com'
         if url.startswith('http://') or url.startswith('https://') or 'cloudinary.com' in url:
             return url
         
         # For Cloudinary, we don't need to prepend base URL - Cloudinary handles it
+        # But if we got a relative path here, something might be wrong with storage configuration
+        # However, let's check if we are in production with Cloudinary
         from django.conf import settings
         if hasattr(settings, 'DEFAULT_FILE_STORAGE') and 'cloudinary' in settings.DEFAULT_FILE_STORAGE.lower():
-            # If URL is already absolute, return it
-            if url.startswith('http://') or url.startswith('https://'):
-                return url
-            
-            # If we are using Cloudinary but the URL is relative, we need to construct the full Cloudinary URL
-            # This happens if MEDIA_URL was previously set incorrectly
-            cloud_name = getattr(settings, 'CLOUDINARY_CLOUD_NAME', None)
-            if not cloud_name:
-                import os
-                cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME')
-            
-            if cloud_name and 'res.cloudinary.com' not in url:
-                # Remove leading slash if present
-                clean_path = url.lstrip('/')
-                return f"https://res.cloudinary.com/{cloud_name}/image/upload/{clean_path}"
-                
-            return url
+            # If we are using Cloudinary but got a relative URL, it might be a local fallback or error.
+            # But usually Cloudinary storage returns full URLs. 
+            # If it IS relative, we might need to construct it manually if we have the public ID, 
+            # but usually this means it's not actually on Cloudinary yet.
+            pass
         
         # Get the base URL from settings or parameter (for local storage)
         if not base_url:

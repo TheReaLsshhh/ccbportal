@@ -51,8 +51,9 @@ cloudinary_config(
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Media files configuration for Cloudinary
-# We intentionally leave MEDIA_URL relative or standard because CloudinaryStorage handles the full URL generation
-MEDIA_URL = '/media/'
+# We do NOT set MEDIA_URL to the Cloudinary domain here because the storage backend
+# handles full URL generation. Setting it to /media/ keeps Django happy.
+MEDIA_URL = '/media/' 
 MEDIA_ROOT = ''  # Not used with Cloudinary
 
 # Static files configuration - Keep local for CSS, JS, etc.
