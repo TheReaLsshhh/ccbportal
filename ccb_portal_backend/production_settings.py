@@ -48,6 +48,10 @@ cloudinary_config(
     api_secret=CLOUDINARY_API_SECRET
 )
 
+# Ensure CLOUDINARY_URL is available for libraries that rely on it
+if not os.getenv('CLOUDINARY_URL') and all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]) and CLOUDINARY_CLOUD_NAME != 'your-cloud-name':
+    os.environ['CLOUDINARY_URL'] = f"cloudinary://{CLOUDINARY_API_KEY}:{CLOUDINARY_API_SECRET}@{CLOUDINARY_CLOUD_NAME}"
+
 # Configure django-cloudinary-storage specific settings
 # This is CRITICAL: The storage backend looks for this dict, NOT just the SDK config
 CLOUDINARY_STORAGE = {
