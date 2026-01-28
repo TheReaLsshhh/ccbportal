@@ -127,13 +127,22 @@ if not DEBUG:
                 engine='django.db.backends.mysql'
             )
         }
-    else:
+    elif db_url:
         DATABASES = {
             'default': dj_database_url.config(
                 default=db_url,
                 conn_max_age=600,
                 conn_health_checks=True,
             )
+        }
+    else:
+        # Fallback to sqlite if no DATABASE_URL is present (e.g. build step)
+        # This prevents the "MySQLdb.OperationalError" when DATABASE_URL is missing
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            }
         }
 
 # Logging configuration for production

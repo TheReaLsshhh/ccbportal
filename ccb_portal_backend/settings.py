@@ -123,7 +123,7 @@ if DEBUG:
     }
 else:
     # Production - PostgreSQL from Render
-    db_url = get_env_variable('DATABASE_URL', required=True)
+    db_url = get_env_variable('DATABASE_URL', '')
     if 'mysql' in db_url:
         # If using MySQL in production (e.g. Cleardb/JawsDB)
         DATABASES = {
@@ -134,7 +134,7 @@ else:
                 engine='django.db.backends.mysql'
             )
         }
-    else:
+    elif db_url:
         # PostgreSQL (Render default)
         DATABASES = {
             'default': dj_database_url.config(
@@ -142,6 +142,15 @@ else:
                 conn_max_age=600,
                 conn_health_checks=True,
             )
+        }
+    else:
+        # Fallback to sqlite if no DATABASE_URL is present
+        # This prevents the "MySQLdb.OperationalError" during build if env vars aren't set
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
         }
 
 
