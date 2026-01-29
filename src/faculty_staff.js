@@ -237,7 +237,7 @@ const FacultyStaff = () => {
                         </ul>
                       </div>
                     )}
-                    <button className="contact-btn">Contact Department</button>
+                    <Link to="/contact" className="contact-btn">Contact Department</Link>
                   </div>
                 ))}
               </div>

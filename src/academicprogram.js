@@ -215,7 +215,7 @@ const AcademicPrograms = () => {
         </div>
       </section>
       
-      <div class="academic-footer">
+      <div className="academic-footer">
         <Footer />
       </div>
       

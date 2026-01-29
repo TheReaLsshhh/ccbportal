@@ -274,34 +274,34 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
       <div className={`secondary-nav-bar ${isHomePage ? "homepage-nav-section" : ""}`}>
         <div className="secondary-nav-container">
           <div className="secondary-nav-links">
-            <a
-              href="/students"
+            <Link
+              to="/students"
               className={getActiveTopLinkClass("/students")}
               onClick={handleNavLinkClick}
             >
               STUDENTS
-            </a>
-            <a
-              href="/faculty"
+            </Link>
+            <Link
+              to="/faculty"
               className={getActiveTopLinkClass("/faculty")}
               onClick={handleNavLinkClick}
             >
               FACULTY & STAFF
-            </a>
-            <a
-              href="/about"
+            </Link>
+            <Link
+              to="/about"
               className={getActiveTopLinkClass("/about")}
               onClick={handleNavLinkClick}
             >
               ABOUT US
-            </a>
-            <a
-              href="/contact"
+            </Link>
+            <Link
+              to="/contact"
               className={getActiveTopLinkClass("/contact")}
               onClick={handleNavLinkClick}
             >
               CONTACT US
-            </a>
+            </Link>
           </div>
           {/* Date Display */}
           <div className="date-display">

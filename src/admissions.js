@@ -398,7 +398,7 @@ const Admissions = () => {
               })()}
               
               <div className="section-cta">
-                <a href="/contact" className="btn btn-secondary">Contact Admissions Office</a>
+                <Link to="/contact" className="btn btn-secondary">Contact Admissions Office</Link>
               </div>
             </div>
 

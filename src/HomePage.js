@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./HomePage.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/footer";
@@ -1222,9 +1223,9 @@ const HomePage = () => {
                               <p className="news-summary">
                                 {truncate(news.description, 120)}
                               </p>
-                              <a href={news.link} className="news-link">
+                              <Link to={news.link} className="news-link">
                                 Read More →
-                              </a>
+                              </Link>
                             </div>
                           </div>
                         ) : (
@@ -1249,9 +1250,9 @@ const HomePage = () => {
                             <p className="news-summary">
                               {truncate(news.description, 200)}
                             </p>
-                            <a href={news.link} className="news-link">
+                            <Link to={news.link} className="news-link">
                               Read More →
-                            </a>
+                            </Link>
                           </div>
                         )}
                       </div>
@@ -1311,12 +1312,12 @@ const HomePage = () => {
                 )}
                 {newsData.length > 0 && (
                   <div className="news-view-all-container">
-                    <a href="/news" className="btn btn-view-all">
+                    <Link to="/news" className="btn btn-view-all">
                       View All News & Events
                       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
                       </svg>
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -1336,12 +1337,12 @@ const HomePage = () => {
                 isCtaButtonsVisible ? "fade-in-visible" : ""
               }`}
             >
-              <a href="/admissions" className="btn btn-primary btn-large">
+              <Link to="/admissions" className="btn btn-primary btn-large">
                 Apply for Admission
-              </a>
-              <a href="/contact" className="btn btn-outline btn-large">
+              </Link>
+              <Link to="/contact" className="btn btn-outline btn-large">
                 Contact Us
-              </a>
+              </Link>
             </div>
           </div>
         </div>
