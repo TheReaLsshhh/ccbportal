@@ -142,23 +142,42 @@
   }
   
   /* Academic Sections */
-  .academics-section {
-    padding: 20px 0;
-    position: relative;
-  }
-  
-  .programs-list-section {
-    background-color: rgba(255, 255, 255, 0.95);
-  }
-  
-  .descriptions-section {
-    background: linear-gradient(180deg, rgba(45, 90, 45, 0.05) 0%, rgba(255, 140, 0, 0.05) 100%);
-  }
-  
-  
-  .application-process-section {
-    background: linear-gradient(180deg, rgba(255, 140, 0, 0.05) 0%, rgba(45, 90, 45, 0.05) 100%);
-  }
+.section-academics {
+  padding: -40px 0 !important;
+}
+
+.academics-section {
+  padding-top: 1px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 100vh;
+}
+
+.academic-page .academics-section {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 35px 0;
+}
+
+.academics-section.navbar-collapsed {
+  padding-top: 60px;
+}
+
+.academics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  margin: 19px 0;
+  overflow: visible;
+  width: 100%;
+  max-width: 100%;
+}
+
+.programs-list-section {
+  width: 100%;
+}
+
+.descriptions-section {
+  width: 100%;
+}
   
   /* Programs Grid */
   .programs-grid {
