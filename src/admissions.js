@@ -194,7 +194,7 @@ const Admissions = () => {
       <Navbar isTopBarVisible={isTopBarVisible} isHomePage={true} />
       
       {/* Admissions Hero Section */}
-      <section className={`news-hero ${!isTopBarVisible ? 'navbar-collapsed' : ''}`}>
+      <section className={`admissions-hero ${!isTopBarVisible ? 'navbar-collapsed' : ''}`}>
         <div className="container">
           <div className="hero-content">
             <h1 className="hero-title">Admissions</h1>
