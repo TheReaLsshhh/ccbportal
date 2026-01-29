@@ -89,8 +89,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 500px;
-    margin-top: 88px;
+    height: 445px !important;
+    margin-top: 0;
   }
   
   .academics-hero::before {
@@ -110,16 +110,36 @@
   }
   
   .academics-hero.navbar-collapsed {
-    margin-top: 48px;
+    margin-top: 0;
   }
   
-  .academics-section .section-title {
+  .section-title {
     text-align: center;
     font-size: 2.5rem;
     font-weight: bold;
     color: #2d5a2d;
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
     position: relative;
+  }
+
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #2d5a2d, #ff8c00);
+    border-radius: 2px;
+  }
+
+  .section-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    line-height: 1.6;
   }
 
    .hero-content {
@@ -129,9 +149,28 @@
     flex-direction: column;
     align-items: center;
   }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    color: white;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: white;
+  }
   
   .hero-motto {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 2rem;
     font-style: italic;
@@ -141,23 +180,34 @@
     animation-delay: 0.5s;
   }
   
-  /* Academic Sections */
-  .academics-section {
-    padding: 20px 0;
-    position: relative;
+  /* Main Academics Section */
+  .section-academics {
+    padding: -40px 0 !important;
   }
-  
-  .programs-list-section {
+
+  .academics-section-main {
+    padding-top: 1px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+  }
+
+  .academic-page .academics-section-main {
     background-color: rgba(255, 255, 255, 0.95);
+    padding: 35px 0;
   }
-  
-  .descriptions-section {
-    background: linear-gradient(180deg, rgba(45, 90, 45, 0.05) 0%, rgba(255, 140, 0, 0.05) 100%);
+
+  .academics-section-main.navbar-collapsed {
+    padding-top: 60px;
   }
-  
-  
-  .application-process-section {
-    background: linear-gradient(180deg, rgba(255, 140, 0, 0.05) 0%, rgba(45, 90, 45, 0.05) 100%);
+
+  .academics-content {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+    margin: 19px 0;
+    overflow: visible;
+    width: 100%;
+    max-width: 100%;
   }
   
   /* Programs Grid */
@@ -449,333 +499,11 @@
     font-size: 1.1rem;
   }
   
-  /* Requirements Content */
-  .requirements-content {
-    margin-top: 3rem;
-  }
-  
-  .general-requirements,
-  .program-specific-requirements {
-    margin-bottom: 3rem;
-  }
-  
-  .general-requirements h3,
-  .program-specific-requirements h3 {
-    color: #2d5a2d;
-    font-size: 1.8rem;
-    margin-bottom: 2rem;
-    font-weight: bold;
-    text-align: center;
-    position: relative;
-  }
-  
-  .general-requirements h3::after,
-  .program-specific-requirements h3::after {
-    content: '';
-    position: absolute;
-    bottom: -0.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #2d5a2d, #ff8c00);
-    border-radius: 2px;
-  }
-  
-  /* Requirements Grid (reusing existing styles from index.css) */
-  .requirements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2rem;
-  }
-  
-  .requirement-category {
-    background: #f8f9fa;
-    border-radius: 12px;
-    padding: 1.5rem;
-    border-left: 4px solid #2d5a2d;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .requirement-category::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #2d5a2d, #4a7c59);
-    transform: scaleX(0);
-    transition: all 0.3s ease;
-  }
-  
-  .requirement-category:hover::before {
-    transform: scaleX(1);
-    background: linear-gradient(90deg, #ff8c00, #ff9f1a);
-  }
-  
-  .requirement-category:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    border-left-color: #ff8c00;
-  }
-  
-  .category-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
-    border-radius: 50%;
-    margin: 0 auto 1rem;
-    color: white;
-    transition: all 0.3s ease;
-  }
-  
-  .requirement-category:hover .category-icon {
-    background: linear-gradient(135deg, #ff8c00, #ff9f1a);
-    transform: scale(1.1);
-  }
-  
-  .requirement-category h4 {
-    color: #2d5a2d;
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  
-  .requirement-category ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .requirement-category li {
-    color: #666;
-    padding: 0.5rem 0;
-    position: relative;
-    padding-left: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-  
-  .requirement-category li:last-child {
-    border-bottom: none;
-  }
-  
-  .requirement-category li::before {
-    content: '✓';
-    color: #2d5a2d;
-    font-weight: bold;
-    position: absolute;
-    left: 0;
-    font-size: 1.1rem;
-  }
-  
-  /* Program-Specific Requirements */
-  .specific-requirements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-  }
-  
-  .specific-req-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    border-top: 4px solid #ff8c00;
-    transition: all 0.3s ease;
-  }
-  
-  .specific-req-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    border-top-color: #ff8c00;
-  }
-  
-  .specific-req-card h4 {
-    color: #2d5a2d;
-    font-size: 1.3rem;
-    margin-bottom: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .specific-req-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .specific-req-card li {
-    color: #666;
-    padding: 0.7rem 0;
-    position: relative;
-    padding-left: 1.8rem;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-  
-  .specific-req-card li:last-child {
-    border-bottom: none;
-  }
-  
-  .specific-req-card li::before {
-    content: '●';
-    color: #ff8c00;
-    font-weight: bold;
-    position: absolute;
-    left: 0;
-    font-size: 1.2rem;
-  }
-  
-  
-  /* Application Process Timeline */
-  .process-timeline {
-    margin-top: 3rem;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .timeline-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-    position: relative;
-  }
-  
-  .timeline-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 25px;
-    top: 28px;
-    width: 2px;
-    height: calc(100% + 1rem);
-    background: linear-gradient(180deg, #2d5a2d, #ff8c00);
-    z-index: 1;
-  }
-  
-  .timeline-number {
-    background: linear-gradient(135deg, #2d5a2d, #4a7c59);
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(45, 90, 45, 0.3);
-    position: relative;
-    z-index: 2;
-  }
-  
-  .timeline-content {
-    flex: 1;
-    text-align: left;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(45, 90, 45, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .timeline-content:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    border-color: #2d5a2d;
-  }
-  
-  .timeline-content h4 {
-    color: #2d5a2d;
-    font-size: 1.2rem;
-    margin-bottom: 0.8rem;
-    font-weight: bold;
-  }
-  
-  .timeline-content p {
-    color: #666;
-    margin: 0;
-    line-height: 1.6;
-  }
-  
-  /* Section CTA */
-  .section-cta {
-    text-align: center;
-    margin-top: 4rem;
-    padding: 2rem 0;
-    display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .section-cta .btn {
-    font-size: 1.1rem;
-    padding: 15px 35px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  .section-cta .btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-  }
-  
-  .section-cta .btn:hover::before {
-    left: 100%;
-  }
-  
-  .section-cta .btn-primary {
-    background-color: #2d5a2d;
-    color: white;
-    border-color: #2d5a2d;
-  }
-  
-  .section-cta .btn-primary:hover {
-    background-color: #1e3d1e;
-    border-color: #1e3d1e;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(45, 90, 45, 0.3);
-  }
-  
-  .section-cta .btn-secondary {
-    background-color: transparent;
-    color: #2d5a2d;
-    border-color: #2d5a2d;
-  }
-  
-  .section-cta .btn-secondary:hover {
-    background-color: #2d5a2d;
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(45, 90, 45, 0.3);
+  /* Container */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
   }
 
 .academic-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
@@ -815,12 +543,6 @@
       gap: 1.75rem;
     }
 
-    .requirements-grid,
-    .specific-requirements-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.75rem;
-    }
-
     .core-courses ul,
     .career-prospects ul {
       grid-template-columns: repeat(2, 1fr);
@@ -850,10 +572,6 @@
     
     .hero-motto {
       font-size: 1rem;
-    }
-    
-    .academics-section {
-      padding: 10px 0;
     }
     
     .section-title {
@@ -895,55 +613,6 @@
       grid-template-columns: 1fr;
     }
     
-    .timeline-item {
-      gap: 1.5rem;
-    }
-    
-    .timeline-item:not(:last-child)::after {
-      left: 20px;
-    }
-    
-    .timeline-number {
-      width: 40px;
-      height: 40px;
-      font-size: 1rem;
-    }
-    
-    .timeline-content {
-      padding: 1.2rem;
-    }
-
-    .timeline-content h4 {
-      font-size: 1.15rem;
-    }
-
-    .timeline-content p {
-      font-size: 0.95rem;
-    }
-    
-    .section-cta {
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      padding: 0 20px;
-    }
-    
-    .section-cta .btn {
-      width: 100%;
-      max-width: 300px;
-      padding: 14px 28px;
-    }
-    
-    .requirements-grid,
-    .specific-requirements-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .requirement-category {
-      padding: 1.25rem;
-    }
-
     .container {
       padding: 0 20px;
     }
@@ -972,10 +641,6 @@
     
     .hero-motto {
       font-size: 0.9rem;
-    }
-    
-    .academics-section {
-      padding: 10px 0;
     }
     
     .section-title {
@@ -1024,73 +689,7 @@
       font-size: 0.9rem;
     }
     
-    .timeline-item {
-      gap: 1.25rem;
-    }
-
-    .timeline-item:not(:last-child)::after {
-      left: 18px;
-    }
-    
-    .timeline-number {
-      width: 36px;
-      height: 36px;
-      font-size: 0.95rem;
-    }
-    
-    .timeline-content {
-      padding: 1rem;
-    }
-    
-    .timeline-content h4 {
-      font-size: 1.1rem;
-    }
-
-    .timeline-content p {
-      font-size: 0.9rem;
-    }
-    
-    .section-cta {
-      padding: 0 15px;
-    }
-
-    .section-cta .btn {
-      padding: 12px 25px;
-      font-size: 0.95rem;
-      max-width: 280px;
-    }
-
-    .requirements-grid,
-    .specific-requirements-grid {
-      gap: 1.25rem;
-    }
-
-    .requirement-category {
-      padding: 1.15rem;
-    }
-
-    .requirement-category h4 {
-      font-size: 1.1rem;
-    }
-
-    .requirement-category li {
-      font-size: 0.9rem;
-    }
-
-    .specific-req-card {
-      padding: 1.5rem;
-    }
-
-    .specific-req-card h4 {
-      font-size: 1.2rem;
-    }
-
-    .specific-req-card li {
-      font-size: 0.9rem;
-    }
-
     .container {
       padding: 0 15px;
     }
   }
-  
