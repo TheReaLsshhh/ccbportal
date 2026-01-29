@@ -90,7 +90,7 @@
     align-items: center;
     justify-content: center;
     min-height: 500px;
-    margin-top: 0;
+    margin-top: 88px;
   }
   
   .academics-hero::before {
@@ -128,33 +128,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-
-  .hero-title {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    color: white;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 0.5s ease forwards;
-    animation-delay: 0.2s;
-  }
-
-  .hero-subtitle {
-    font-size: 1.25rem;
-    opacity: 0.9;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: white;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 0.5s ease forwards;
-    animation-delay: 0.3s;
   }
   
   .hero-motto {
@@ -979,13 +952,13 @@
   /* Responsive Design - Small Mobile (max-width: 480px) */
   @media (max-width: 480px) {
     .academics-hero {
-      padding: 80px 0 50px;
-      margin-top: 0;
-      height: 300px !important;
+      padding: 90px 0 50px;
+      margin-top: 100px;
+      min-height: 350px;
     }
     
     .academics-hero.navbar-collapsed {
-      margin-top: 0;
+      margin-top: 48px;
     }
     
     .hero-title {
