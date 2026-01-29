@@ -100,59 +100,7 @@ class AdmissionNoteAdmin(admin.ModelAdmin):
         return obj.note_text[:80] + '...' if len(obj.note_text) > 80 else obj.note_text
     note_text_short.short_description = 'Note'
 
-@admin.register(News)
-class NewsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'date', 'has_image', 'is_active', 'display_order')
-    list_filter = ('is_active', 'date')
-    search_fields = ('title', 'body', 'details')
-    ordering = ('display_order', '-date')
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('title', 'date', 'body', 'details')
-        }),
-        ('Image', {
-            'fields': ('image',)
-        }),
-        ('Display Settings', {
-            'fields': ('is_active', 'display_order')
-        }),
-    )
-    form = type('NewsAdminForm', (forms.ModelForm,), {
-        'Meta': type('Meta', (), {'model': News, 'fields': '__all__'}),
-        'clean_image': lambda self: self.cleaned_data.get('image')
-    })
-
-    def has_image(self, obj):
-        return 'Yes' if obj.image else 'No'
-    has_image.short_description = 'Has Image'
-    has_image.boolean = False
-
-    def save_model(self, request, obj, form, change):
-        old_image = None
-        if change and obj.pk:
-            try:
-                old = News.objects.get(pk=obj.pk)
-                old_image = old.image
-            except News.DoesNotExist:
-                old_image = None
-        try:
-            super().save_model(request, obj, form, change)
-        except Exception as e:
-            if old_image is not None:
-                obj.image = old_image
-                super().save_model(request, obj, form, change)
-            else:
-                obj.image = None
-                super().save_model(request, obj, form, change)
-            messages.error(request, f"Image upload error: {e}")
-
-    def delete_model(self, request, obj):
-        try:
-            if obj.image:
-                obj.image.delete(save=False)
-        except Exception:
-            pass
-        super().delete_model(request, obj)
+admin.site.register(News)
 
 @admin.register(InstitutionalInfo)
 class InstitutionalInfoAdmin(admin.ModelAdmin):
