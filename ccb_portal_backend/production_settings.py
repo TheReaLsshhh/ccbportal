@@ -15,6 +15,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Update allowed hosts for production
 ALLOWED_HOSTS = [
+    'ccbeacademyportal-backend.onrender.com',
     'ccb-portal-backend.onrender.com',
     'localhost',
     '127.0.0.1',
@@ -22,13 +23,14 @@ ALLOWED_HOSTS = [
 
 # CORS configuration for production
 CORS_ALLOWED_ORIGINS = [
+    "https://ccbeacademyportal-frontend.onrender.com",
     "https://ccb-portal-frontend.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
 
 # Ensure the backend URL is properly set
-PUBLIC_BASE_URL = os.getenv('PUBLIC_BASE_URL', 'https://ccb-portal-backend.onrender.com')
+PUBLIC_BASE_URL = os.getenv('PUBLIC_BASE_URL', 'https://ccbeacademyportal-backend.onrender.com')
 
 # Cloudinary Configuration for Production
 # Use Cloudinary for image storage in production
