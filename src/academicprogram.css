@@ -490,7 +490,7 @@ html, body {
 /* Custom wave colors for Academic page footer */
 .academic-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .academic-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.academic-page .footer-wave .shape-fill-3 { fill: rgba(249, 249, 249, 1); }
+.academic-page .footer-wave .shape-fill-3 { fill: rgb(236, 236, 236); }
 
 /* Responsive Design */
 @media (max-width: 768px) {
