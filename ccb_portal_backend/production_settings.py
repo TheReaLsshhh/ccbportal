@@ -14,12 +14,16 @@ SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Update allowed hosts for production
-ALLOWED_HOSTS = [
-    'ccbeacademyportal-backend.onrender.com',
-    'ccb-portal-backend.onrender.com',
-    'localhost',
-    '127.0.0.1',
-]
+# If environment variable ALLOWED_HOSTS is set to '*', allow all hosts
+if os.getenv('ALLOWED_HOSTS') == '*':
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = [
+        'ccbeacademyportal-backend.onrender.com',
+        'ccb-portal-backend.onrender.com',
+        'localhost',
+        '127.0.0.1',
+    ]
 
 # CORS configuration for production
 CORS_ALLOWED_ORIGINS = [
