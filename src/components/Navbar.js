@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import apiService from "../services/api";
 
@@ -11,6 +11,7 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     const newMenuState = !isMobileMenuOpen;
@@ -361,57 +362,57 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
           <div className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""}`}>
             {/* Secondary Navigation - Mobile Only */}
             <div className="mobile-secondary-nav">
-              <a
-                href="/students"
+              <Link
+                to="/students"
                 className={getActiveNavClass("/students")}
                 onClick={handleNavLinkClick}
               >
                 STUDENTS
-              </a>
-              <a
-                href="/faculty"
+              </Link>
+              <Link
+                to="/faculty"
                 className={getActiveNavClass("/faculty")}
                 onClick={handleNavLinkClick}
               >
                 FACULTY & STAFF
-              </a>
-              <a
-                href="/about"
+              </Link>
+              <Link
+                to="/about"
                 className={getActiveNavClass("/about")}
                 onClick={handleNavLinkClick}
               >
                 ABOUT US
-              </a>
-              <a
-                href="/contact"
+              </Link>
+              <Link
+                to="/contact"
                 className={getActiveNavClass("/contact")}
                 onClick={handleNavLinkClick}
               >
                 CONTACT US
-              </a>
+              </Link>
             </div>
             {/* Main Navigation */}
-            <a
-              href="/"
+            <Link
+              to="/"
               className={getActiveNavClass("/")}
               onClick={handleNavLinkClick}
             >
               HOME
-            </a>
-            <a
-              href="/academics"
+            </Link>
+            <Link
+              to="/academics"
               className={getActiveNavClass("/academics")}
               onClick={handleNavLinkClick}
             >
               ACADEMICS
-            </a>
-            <a
-              href="/admissions"
+            </Link>
+            <Link
+              to="/admissions"
               className={getActiveNavClass("/admissions")}
               onClick={handleNavLinkClick}
             >
               ADMISSIONS
-            </a>
+            </Link>
             {/* Services Dropdown */}
             <div
               className="services-dropdown-container"
