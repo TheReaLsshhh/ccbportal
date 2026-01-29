@@ -474,10 +474,10 @@ html, body {
 
 /* Footer Styles */
 .footer-section-academics .footer {
-  background: linear-gradient(135deg, #2d5a2d, #1a3d1a);
+  background: #2d5a2d;
   color: #fff;
-  padding: 50px 0 20px;
-  margin-top: 80px;
+  padding: 0 0 20px;
+  margin-top: 0;
 }
 
 /* Container */
@@ -490,7 +490,7 @@ html, body {
 /* Custom wave colors for Academic page footer */
 .academic-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .academic-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.academic-page .footer-wave .shape-fill-3 { fill: rgba(238, 239, 242, 1); }
+.academic-page .footer-wave .shape-fill-3 { fill: rgba(249, 249, 249, 1); }
 
 /* Responsive Design */
 @media (max-width: 768px) {
