@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/footer';
@@ -7,54 +7,55 @@ import apiService from './services/api';
 import './downloads.css';
 
 const Downloads = () => {
-  const [isPoliciesVisible, setIsPoliciesVisible] = useState(false);
-  const [isFormsVisible, setIsFormsVisible] = useState(false);
+  const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [navAnimationsComplete, setNavAnimationsComplete] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [downloads, setDownloads] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Pagination state
+  // Pagination state for each section
   const [formsPage, setFormsPage] = useState(1);
   const [documentsPage, setDocumentsPage] = useState(1);
   const [policiesPage, setPoliciesPage] = useState(1);
-  const [hrFormsPage, setHrFormsPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 6; // Match news_events items per page
 
-  // Category mapping for display
+  // Category mapping
   const categoryConfig = {
     'forms-enrollment': {
-      title: 'Enrollment',
-      description: 'These relate to student registration and academic load:',
+      title: 'Enrollment Forms',
+      description: 'Registration and academic load documents',
       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8'
     },
     'forms-clearance': {
-      title: 'Clearance',
-      description: 'These are likely used for approvals or exits:',
+      title: 'Clearance Forms',
+      description: 'Approvals and exit clearance documents',
       icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
     },
     'forms-request': {
-      title: 'Request',
-      description: 'These involve formal requests or documentation:',
+      title: 'Request Forms',
+      description: 'Formal request documentation',
       icon: 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z'
     },
     'forms-shift-change': {
-      title: 'Shift / Change',
-      description: 'Used for schedule or program adjustments:',
+      title: 'Shift / Change Forms',
+      description: 'Schedule or program adjustments',
       icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'
     },
     'hr-policies': {
       title: 'HR Policies',
-      description: 'Access important HR policies and guidelines',
+      description: 'Important HR policies and guidelines',
       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8'
     },
     'hr-forms': {
       title: 'HR Forms',
-      description: 'Downloadable forms for faculty and staff',
+      description: 'Forms for faculty and staff',
       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8'
     },
     'syllabi': {
       title: 'Syllabi',
-      description: 'Course syllabi and academic resources',
+      description: 'Course syllabi and resources',
       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8'
     },
     'manuals': {
@@ -68,13 +69,90 @@ const Downloads = () => {
       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8'
     },
     'other': {
-      title: 'Other Downloads',
-      description: 'Additional downloadable resources',
+      title: 'Other Resources',
+      description: 'Additional downloadable content',
       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8'
     }
   };
 
-  // Fetch downloads on component mount
+  // Scroll-based navbar visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsTopBarVisible(false);
+      } else if (currentScrollY < lastScrollY && currentScrollY < 50) {
+        setIsTopBarVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // Track scroll progress - Real-time dynamic for laptop/desktop
+  useEffect(() => {
+    let ticking = false;
+    let isMobile = window.innerWidth <= 768;
+    let isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight - windowHeight;
+          const scrolled = window.scrollY;
+          
+          // Calculate progress
+          let progress = (scrolled / documentHeight) * 100;
+          
+          // Device-specific easing for optimal smoothness
+          if (isMobile) {
+            // Mobile: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else if (isTablet) {
+            // Tablet: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else {
+            // Desktop/Laptop: Real-time dynamic progression for mouse control
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
+    };
+
+    // Update device type on resize
+    const handleResize = () => {
+      isMobile = window.innerWidth <= 768;
+      isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    // Initial calculation
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Fetch downloads
   useEffect(() => {
     const fetchDownloads = async () => {
       try {
@@ -82,10 +160,6 @@ const Downloads = () => {
         const response = await apiService.getDownloads();
         if (response.status === 'success') {
           setDownloads(response.downloads || {});
-          setFormsPage(1); // Reset page when new data loads
-          setDocumentsPage(1); // Reset page when new data loads
-          setPoliciesPage(1); // Reset page when new data loads
-          setHrFormsPage(1); // Reset page when new data loads
         } else {
           setError('Failed to load downloads');
         }
@@ -100,33 +174,45 @@ const Downloads = () => {
     fetchDownloads();
   }, []);
 
-  const handleDownload = (fileUrl, title) => {
-    if (fileUrl) {
-      // Open download in new tab
-      window.open(fileUrl, '_blank');
-    }
+  // Animation observers
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in-visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    document.querySelectorAll('.downloads-grid').forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [downloads, formsPage, documentsPage, policiesPage]);
+
+  const handleDownload = (fileUrl) => {
+    if (fileUrl) window.open(fileUrl, '_blank');
   };
 
   // Pagination helpers
-  const changePage = (targetPage, totalItems, currentPageSetter, currentPageValue, sectionKey) => {
+  const changePage = (targetPage, totalItems, currentPageSetter, currentPageValue, sectionId) => {
     const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
     const nextPage = Math.min(Math.max(targetPage, 1), totalPages);
     if (nextPage === currentPageValue) return;
     currentPageSetter(nextPage);
-    // Scroll to section
-    const section = document.querySelector(sectionKey);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-      const yOffset = -80;
-      const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    
+    const el = document.getElementById(sectionId);
+    if (el) {
+      const yOffset = -100;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
   const buildPageList = (totalPages, currentPage) => {
-    if (totalPages <= 9) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
+    if (totalPages <= 9) return Array.from({ length: totalPages }, (_, i) => i + 1);
     const pages = [1];
     const left = Math.max(2, currentPage - 2);
     const right = Math.min(totalPages - 1, currentPage + 2);
@@ -137,7 +223,7 @@ const Downloads = () => {
     return pages;
   };
 
-  const renderPagination = (sectionKey, totalItems, currentPage, setPage) => {
+  const renderPagination = (sectionId, totalItems, currentPage, setPage) => {
     const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
     if (totalPages <= 1) return null;
     const pageList = buildPageList(totalPages, currentPage);
@@ -145,7 +231,7 @@ const Downloads = () => {
       <div className="pagination-controls numbered">
         <button
           className="load-more-btn secondary"
-          onClick={() => changePage(currentPage - 1, totalItems, setPage, currentPage, sectionKey)}
+          onClick={() => changePage(currentPage - 1, totalItems, setPage, currentPage, sectionId)}
           disabled={currentPage === 1}
         >
           « Previous
@@ -158,7 +244,7 @@ const Downloads = () => {
               <button
                 key={page}
                 className={`page-number ${page === currentPage ? 'active' : ''}`}
-                onClick={() => changePage(page, totalItems, setPage, currentPage, sectionKey)}
+                onClick={() => changePage(page, totalItems, setPage, currentPage, sectionId)}
               >
                 {page}
               </button>
@@ -167,7 +253,7 @@ const Downloads = () => {
         </div>
         <button
           className="load-more-btn"
-          onClick={() => changePage(currentPage + 1, totalItems, setPage, currentPage, sectionKey)}
+          onClick={() => changePage(currentPage + 1, totalItems, setPage, currentPage, sectionId)}
           disabled={currentPage === totalPages}
         >
           Next »
@@ -176,331 +262,142 @@ const Downloads = () => {
     );
   };
 
-  // Intersection Observer for policies section
-  useEffect(() => {
-    if (loading) {
-      setIsPoliciesVisible(false);
-      return;
-    }
-    
-    if (!downloads['hr-policies'] || downloads['hr-policies'].length === 0) {
-      setIsPoliciesVisible(false);
-      return;
-    }
-    
-    // Make visible immediately when data is available
-    setIsPoliciesVisible(true);
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsPoliciesVisible(true);
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+  // Group data
+  const getPagedData = (keys, page) => {
+    let allItems = [];
+    keys.forEach(key => {
+      if (downloads[key]) {
+        // Add category info to each item for display
+        const categoryItems = downloads[key].map(item => ({
+          ...item,
+          categoryTitle: categoryConfig[key]?.title || 'Download',
+          categoryIcon: categoryConfig[key]?.icon || categoryConfig['other'].icon
+        }));
+        allItems = [...allItems, ...categoryItems];
       }
-    );
-
-    // Use setTimeout to ensure DOM is updated
-    const timeoutId = setTimeout(() => {
-      const policiesElement = document.querySelector('.policies-grid');
-      if (policiesElement) {
-        observer.observe(policiesElement);
-      }
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      const policiesElement = document.querySelector('.policies-grid');
-      if (policiesElement) {
-        observer.unobserve(policiesElement);
-      }
+    });
+    const start = (page - 1) * itemsPerPage;
+    return {
+      items: allItems.slice(start, start + itemsPerPage),
+      total: allItems.length
     };
-  }, [loading, downloads]);
+  };
 
-  // Intersection Observer for forms section
+  const formsData = getPagedData(['forms-enrollment', 'forms-clearance', 'forms-request', 'forms-shift-change'], formsPage);
+  const policiesData = getPagedData(['hr-policies', 'hr-forms'], policiesPage);
+  const documentsData = getPagedData(['syllabi', 'manuals', 'handbooks', 'other'], documentsPage);
+
+  const renderGrid = (data) => (
+    <div className="downloads-grid">
+      {data.items.map(item => (
+        <div key={item.id} className="download-item">
+          <div className="download-icon-wrapper">
+             <div className="download-icon">
+               <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                 <path d={item.categoryIcon} />
+               </svg>
+             </div>
+          </div>
+          <div className="download-content">
+            <h4>{item.title}</h4>
+            <p className="download-category-tag">{item.categoryTitle}</p>
+            <p>{item.description || 'Click below to download this resource.'}</p>
+            <button className="read-more" onClick={() => handleDownload(item.file_url)}>
+              Download File
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   useEffect(() => {
-    if (loading) {
-      setIsFormsVisible(false);
-      return;
-    }
-    
-    if (!downloads['hr-forms'] || downloads['hr-forms'].length === 0) {
-      setIsFormsVisible(false);
-      return;
-    }
-    
-    // Make visible immediately when data is available
-    setIsFormsVisible(true);
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsFormsVisible(true);
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      }
-    );
+    const animationTimeout = setTimeout(() => {
+      setNavAnimationsComplete(true);
+    }, 1500);
 
-    // Use setTimeout to ensure DOM is updated
-    const timeoutId = setTimeout(() => {
-      const formsElement = document.querySelector('.forms-grid');
-      if (formsElement) {
-        observer.observe(formsElement);
-      }
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      const formsElement = document.querySelector('.forms-grid');
-      if (formsElement) {
-        observer.unobserve(formsElement);
-      }
-    };
-  }, [loading, downloads]);
+    return () => clearTimeout(animationTimeout);
+  }, []);
 
   return (
-    <div className="App downloads-page nav-animations-complete">
+    <div className={`App downloads-page ${navAnimationsComplete ? 'nav-animations-complete' : ''}`}>
+      {/* Dynamic Scroll Progress Bar */}
+      <div 
+        className="scroll-progress-bar" 
+        style={{ width: `${scrollProgress}%` }}
+      />
       <SEO
         title="Downloads"
-        description="Download essential forms, documents, policies, syllabi, manuals, and handbooks from City College of Bayawan. Access enrollment forms, clearance documents, HR policies, and academic resources."
-        keywords="downloads, forms, documents, enrollment forms, clearance forms, HR policies, syllabi, manuals, handbooks, City College of Bayawan downloads"
+        description="Access essential forms, documents, policies, and resources at City College of Bayawan."
+        keywords="downloads, forms, policies, syllabi, manuals, CCB downloads"
         url="/downloads"
       />
-      <Navbar isHomePage={true} />
-
-      {/* Downloads Hero Section */}
-      <section className="news-hero">
+      <Navbar isTopBarVisible={isTopBarVisible} isHomePage={true} />
+      
+      {/* Hero Section */}
+      <section className={`downloads-hero ${!isTopBarVisible ? 'navbar-collapsed' : ''}`}>
         <div className="container">
           <div className="hero-content">
-            <h1 className="hero-title">Downloads</h1>
-            <p className="hero-subtitle">Find all the recent downloads and resources at City College of Bayawan</p>
-            <p className="hero-motto">Explore our updated files, helpful guides, and important downloads</p>
+            <h1 className="hero-title">Downloads & Resources</h1>
+            <p className="hero-subtitle">Essential documents for students, faculty, and staff</p>
+            <p className="hero-motto">Access enrollment forms, manuals, policies, and more</p>
           </div>
         </div>
       </section>
 
-      {/* Forms Section */}
-      <section id="forms" className="section forms-section">
+      {/* Main Content */}
+      <section className="section downloads-section">
         <div className="container">
-          <h2 className="section-title">Forms</h2>
-          <p className="section-subtitle">Download essential forms for enrollment, clearance, leave, and other academic processes</p>
-          
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Loading downloads...</p>
+          <div className="downloads-content-wrapper">
+            
+            {/* Forms Section */}
+            <div id="forms-section" className="content-block">
+              <h2>Forms</h2>
+              {loading ? (
+                <div className="loading-container"><div className="loading-spinner"></div><p>Loading forms...</p></div>
+              ) : error ? (
+                <div className="error-container"><p className="error-message">{error}</p></div>
+              ) : (
+                <>
+                  {renderGrid(formsData)}
+                  {renderPagination('forms-section', formsData.total, formsPage, setFormsPage)}
+                </>
+              )}
             </div>
-          ) : error ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#d32f2f' }}>
-              <p>{error}</p>
+
+            {/* HR & Policies Section */}
+            <div id="policies-section" className="content-block">
+              <h2>HR Policies & Forms</h2>
+              {loading ? (
+                <div className="loading-container"><div className="loading-spinner"></div><p>Loading policies...</p></div>
+              ) : !error && (
+                <>
+                  {renderGrid(policiesData)}
+                  {renderPagination('policies-section', policiesData.total, policiesPage, setPoliciesPage)}
+                </>
+              )}
             </div>
-          ) : (() => {
-            // Get all form categories
-            const formCategories = Object.entries(downloads)
-              .filter(([category]) => category.startsWith('forms-'))
-              .map(([category, items]) => ({ category, items, config: categoryConfig[category] || categoryConfig['other'] }));
-            
-            const totalFormCategories = formCategories.length;
-            const pagedFormCategories = formCategories.slice((formsPage - 1) * itemsPerPage, formsPage * itemsPerPage);
-            
-            return (
-              <>
-                <div className="downloads-grid">
-                  {pagedFormCategories.map(({ category, items, config }) => (
-                    <div key={category} className="download-category">
-                      <div className="category-icon">
-                        <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
-                          <path d={config.icon}/>
-                        </svg>
-                      </div>
-                      <h3>{config.title}</h3>
-                      <p className="category-description">{config.description}</p>
-                      <div className="download-links">
-                        {items.map((item) => (
-                          <button
-                            key={item.id}
-                            className="download-link"
-                            onClick={() => handleDownload(item.file_url, item.title)}
-                          >
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                              <path d="M5 20h14v-2H5v2zM12 2v12l4-4h-3V2h-2v8H8l4 4z"/>
-                            </svg>
-                            <div className="download-link-content">
-                              <strong>{item.title}</strong>
-                              {item.description && <span style={{ display: 'block', fontSize: '0.85em', color: '#666', marginTop: '4px' }}>{item.description}</span>}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  {totalFormCategories === 0 && (
-                    <div style={{ textAlign: 'center', padding: '40px', gridColumn: '1 / -1' }}>
-                      <p>No forms available at this time.</p>
-                    </div>
-                  )}
-                </div>
-                {renderPagination('#forms', totalFormCategories, formsPage, setFormsPage)}
-              </>
-            );
-          })()}
+
+            {/* Documents Section */}
+            <div id="documents-section" className="content-block">
+              <h2>Syllabi, Manuals & Handbooks</h2>
+              {loading ? (
+                 <div className="loading-container"><div className="loading-spinner"></div><p>Loading documents...</p></div>
+              ) : !error && (
+                <>
+                  {renderGrid(documentsData)}
+                  {renderPagination('documents-section', documentsData.total, documentsPage, setDocumentsPage)}
+                </>
+              )}
+            </div>
+
+          </div>
         </div>
       </section>
 
-      {/* HR Policies and Downloadable Forms Section (moved from Faculty & Staff) */}
-      <section id="hr-policies" className="faculty-staff-section hr-section">
-        <div className="container">
-          <h2 className="section-title">HR Policies and Downloadable Forms</h2>
-          <p className="section-subtitle">Access important HR documents, policies, and forms for faculty and staff</p>
-          
-          {!loading && !error && (() => {
-            const hrPolicies = downloads['hr-policies'] || [];
-            const hrForms = downloads['hr-forms'] || [];
-            const totalPolicies = hrPolicies.length;
-            const totalHrForms = hrForms.length;
-            const pagedPolicies = hrPolicies.slice((policiesPage - 1) * itemsPerPage, policiesPage * itemsPerPage);
-            const pagedHrForms = hrForms.slice((hrFormsPage - 1) * itemsPerPage, hrFormsPage * itemsPerPage);
-            
-            return (
-              <div className="hr-content">
-                {/* HR Policies */}
-                {totalPolicies > 0 && (
-                  <>
-                    <div className={`policies-grid ${isPoliciesVisible ? 'fade-in-visible' : ''}`}>
-                      {pagedPolicies.map((item) => (
-                        <div key={item.id} className="policy-card">
-                          <div className="policy-icon">
-                            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
-                              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
-                              <path d="M14 2v6h6"/>
-                              <path d="M16 13H8"/>
-                              <path d="M16 17H8"/>
-                              <path d="M10 9H8"/>
-                            </svg>
-                          </div>
-                          <h3>{item.title}</h3>
-                          <p>{item.description || 'HR policy document'}</p>
-                          <button 
-                            className="download-btn"
-                            onClick={() => handleDownload(item.file_url, item.title)}
-                          >
-                            Download {item.file_type || 'PDF'}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    {renderPagination('#hr-policies', totalPolicies, policiesPage, setPoliciesPage)}
-                  </>
-                )}
-                
-                {/* HR Forms */}
-                {totalHrForms > 0 && (
-                  <div id="hr-forms" className="forms-section">
-                    <h3>Downloadable Forms</h3>
-                    <div className={`forms-grid ${isFormsVisible ? 'fade-in-visible' : ''}`}>
-                      {pagedHrForms.map((item) => (
-                        <div key={item.id} className="form-card">
-                          <h4>{item.title}</h4>
-                          <p>{item.description || 'HR form document'}</p>
-                          <button 
-                            className="form-btn"
-                            onClick={() => handleDownload(item.file_url, item.title)}
-                          >
-                            Download Form
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    {renderPagination('#hr-forms', totalHrForms, hrFormsPage, setHrFormsPage)}
-                  </div>
-                )}
-                
-                {totalPolicies === 0 && totalHrForms === 0 && (
-                  <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <p>No HR documents available at this time.</p>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-      </section>
-
-      {/* Syllabi, Manuals, and Handbooks Section */}
-      <section id="documents" className="section documents-section">
-        <div className="container">
-          <h2 className="section-title">Syllabi, Manuals, and Handbooks</h2>
-          <p className="section-subtitle">Access comprehensive academic resources, guidelines, and reference materials</p>
-          
-          {!loading && !error && (() => {
-            // Get all document categories
-            const documentCategories = ['syllabi', 'manuals', 'handbooks', 'other']
-              .filter(category => downloads[category] && downloads[category].length > 0)
-              .map(category => ({ 
-                category, 
-                items: downloads[category], 
-                config: categoryConfig[category] || categoryConfig['other'] 
-              }));
-            
-            const totalDocumentCategories = documentCategories.length;
-            const pagedDocumentCategories = documentCategories.slice((documentsPage - 1) * itemsPerPage, documentsPage * itemsPerPage);
-            
-            return (
-              <>
-                <div className="downloads-grid">
-                  {pagedDocumentCategories.map(({ category, items, config }) => (
-                    <div key={category} className="download-category">
-                      <div className="category-icon">
-                        <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
-                          <path d={config.icon}/>
-                        </svg>
-                      </div>
-                      <h3>{config.title}</h3>
-                      <p className="category-description">{config.description}</p>
-                      <div className="download-links">
-                        {items.map((item) => (
-                          <button
-                            key={item.id}
-                            className="download-link"
-                            onClick={() => handleDownload(item.file_url, item.title)}
-                          >
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                              <path d="M5 20h14v-2H5v2zM12 2v12l4-4h-3V2h-2v8H8l4 4z"/>
-                            </svg>
-                            <div className="download-link-content">
-                              <strong>{item.title}</strong>
-                              {item.description && <span style={{ display: 'block', fontSize: '0.85em', color: '#666', marginTop: '4px' }}>{item.description}</span>}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  {totalDocumentCategories === 0 && (
-                    <div style={{ textAlign: 'center', padding: '40px', gridColumn: '1 / -1' }}>
-                      <p>No documents available at this time.</p>
-                    </div>
-                  )}
-                </div>
-                {renderPagination('#documents', totalDocumentCategories, documentsPage, setDocumentsPage)}
-              </>
-            );
-          })()}
-        </div>
-      </section>
-
-      <Footer />
-
-      {/* Scroll to Top Button */}
+      <div className="footer-section-downloads">
+        <Footer />
+      </div>
       <ScrollToTop />
     </div>
   );

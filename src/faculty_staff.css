@@ -1,4 +1,74 @@
+/* Faculty & Staff Page Styles */
+
+/* Dynamic Scroll Progress Bar */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background-color: #2d5a2dfa;
+  z-index: 9999;
+  transition: width 0.05s linear;
+  box-shadow: 0 2px 4px rgba(45, 90, 45, 0.3);
+  will-change: width;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Mobile and Tablet specific progress bar adjustments */
+@media (max-width: 1024px) {
+  .scroll-progress-bar {
+    height: 3px;
+    background-color: #2d5a2df0;
+    transition: width 0.08s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de8;
+    transition: width 0.1s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de5;
+    transition: width 0.12s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 /* Loading, Error, and Empty States */
+
+/* Keyframe for Dropdown Item Slide In */
+@keyframes homepageMobileDropdownItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
 html, body {
   overflow-x: hidden;
 }
@@ -43,6 +113,223 @@ html, body {
   padding: 1rem 1.5rem;
   border-radius: 8px;
   border: 1px solid #fecaca;
+}
+
+/* Ensure mobile menu works correctly on Faculty & Staff Page - Copied from HomePage.css */
+@media (max-width: 1024px) {
+
+  /* Ensure mobile menu overlay is above all elements but below header sections */
+  .faculty-staff-page .mobile-menu-overlay,
+  .faculty-staff-page-navbar .mobile-menu-overlay {
+    z-index: 1002 !important;
+    position: fixed !important;
+    top: 66px !important; /* Start below header-top and secondary-nav-bar */
+    height: calc(100vh - 10px) !important;
+  }
+
+  /* Ensure mobile menu is above all elements but below header sections */
+  .faculty-staff-page .nav-links.mobile-open,
+  .faculty-staff-page-navbar .nav-links.mobile-open {
+    z-index: 1003 !important;
+    position: fixed !important;
+    top: 66px !important; /* Start below header-top and secondary-nav-bar */
+    height: calc(100vh - 10px) !important;
+    background-color: rgba(45, 90, 45, 0.98) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  /* Ensure mobile menu button is accessible */
+  .faculty-staff-page .mobile-menu-btn,
+  .faculty-staff-page-navbar .mobile-menu-btn {
+    z-index: 1004 !important;
+    position: absolute !important;
+    background-color: #ffffff00 !important; /* transparent background for menu button */
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  /* Ensure mobile menu button active state works */
+  .faculty-staff-page .mobile-menu-btn.active span:nth-child(1),
+  .faculty-staff-page-navbar .mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px) !important;
+  }
+
+  .faculty-staff-page .mobile-menu-btn.active span:nth-child(2),
+  .faculty-staff-page-navbar .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0 !important;
+    transform: scaleX(0) !important;
+  }
+
+  .faculty-staff-page .mobile-menu-btn.active span:nth-child(3),
+  .faculty-staff-page-navbar .mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px) !important;
+  }
+
+  /* Services Dropdown Mobile - Match HomePage functionality */
+  /* Ensure dropdown container works properly in mobile menu */
+  .faculty-staff-page .services-dropdown-container,
+  .faculty-staff-page-navbar .services-dropdown-container {
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+
+  /* Smooth dropdown arrow transition and active state for mobile */
+  .faculty-staff-page .services-dropdown-container .dropdown-arrow,
+  .faculty-staff-page-navbar .services-dropdown-container .dropdown-arrow {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: inline-block !important;
+    transform-origin: center !important;
+  }
+
+  .faculty-staff-page .services-dropdown-container .dropdown-arrow.open,
+  .faculty-staff-page-navbar .services-dropdown-container .dropdown-arrow.open {
+    transform: rotate(180deg) !important;
+  }
+
+  /* Services Dropdown Menu - Mobile/Tablet View with enhanced smooth animation */
+  .faculty-staff-page .services-dropdown,
+  .faculty-staff-page-navbar .services-dropdown {
+    position: relative !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-12px) scale(0.96) !important;
+    filter: blur(2px);
+    transition: max-height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    z-index: auto !important;
+    top: auto !important;
+    left: auto !important;
+    transform-origin: top center !important;
+  }
+
+  /* Smooth dropdown open state for mobile */
+  .faculty-staff-page .services-dropdown.dropdown-open,
+  .faculty-staff-page-navbar .services-dropdown.dropdown-open {
+    max-height: 1000px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    filter: blur(0);
+    overflow: visible !important;
+  }
+
+  /* Dropdown Items - Mobile/Tablet View with enhanced staggered animation */
+  .faculty-staff-page .services-dropdown .dropdown-item,
+  .faculty-staff-page-navbar .services-dropdown .dropdown-item {
+    color: #fff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 12px 20px 12px 28px !important;
+    text-align: left !important;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+
+  .faculty-staff-page .services-dropdown.dropdown-open .dropdown-item,
+  .faculty-staff-page-navbar .services-dropdown.dropdown-open .dropdown-item {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+    animation: homepageMobileDropdownItemSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .faculty-staff-page .services-dropdown .dropdown-item:nth-child(1),
+  .faculty-staff-page-navbar .services-dropdown .dropdown-item:nth-child(1) {
+    animation-delay: 0.08s;
+  }
+
+  .faculty-staff-page .services-dropdown .dropdown-item:nth-child(2),
+  .faculty-staff-page-navbar .services-dropdown .dropdown-item:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+
+  .faculty-staff-page .services-dropdown .dropdown-item:nth-child(3),
+  .faculty-staff-page-navbar .services-dropdown .dropdown-item:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+
+  .faculty-staff-page .services-dropdown .dropdown-item:nth-child(4),
+  .faculty-staff-page-navbar .services-dropdown .dropdown-item:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  .faculty-staff-page .services-dropdown .dropdown-item:last-child,
+  .faculty-staff-page-navbar .services-dropdown .dropdown-item:last-child {
+    border-bottom: none !important;
+  }
+
+  .faculty-staff-page .services-dropdown .dropdown-item:hover,
+  .faculty-staff-page-navbar .services-dropdown .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    padding-left: 32px !important;
+    transform: translateX(8px) translateY(-2px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Mobile secondary nav - ensure STUDENTS and other secondary links are visible */
+  .faculty-staff-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .faculty-staff-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav .nav-link {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Ensure active nav states work properly in mobile menu */
+  .faculty-staff-page .nav-link.active-nav {
+    background-color: #fff;
+    color: #2d5a2d;
+    font-weight: 600;
+  }
+
+  .faculty-staff-page .nav-link.active-nav:hover {
+    background-color: #f5f5f5;
+    color: #2d5a2d;
+  }
+
+  .faculty-staff-page .mobile-secondary-nav .nav-link.active-nav {
+    background-color: #ff8c00;
+    color: #fff;
+    transform: translateX(8px);
+  }
+
+  /* Match mobile menu button positioning from Navbar.css for max-width: 768px */
+  .faculty-staff-page .mobile-menu-btn,
+  .faculty-staff-page-navbar .mobile-menu-btn {
+    padding: 12px !important;
+    right: 15px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .faculty-staff-page .mobile-menu-btn span,
+  .faculty-staff-page-navbar .mobile-menu-btn span {
+    width: 26px;
+    height: 3px;
+  }
 }
 
 /* Faculty & Staff Page Specific Styles */
@@ -918,3 +1205,21 @@ html, body {
 }
 
 /* Footer styles to match existing design */
+
+/* Mobile menu button styles for smaller screens */
+@media (max-width: 480px) {
+  .faculty-staff-page .mobile-menu-btn,
+  .faculty-staff-page-navbar .mobile-menu-btn {
+    padding: 8px !important;
+    right: 12px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .faculty-staff-page .mobile-menu-btn span,
+  .faculty-staff-page-navbar .mobile-menu-btn span {
+    width: 24px;
+    height: 2.5px;
+  }
+}

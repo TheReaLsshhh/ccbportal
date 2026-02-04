@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import "./footer.css";
 
 const Footer = () => {
@@ -21,8 +20,7 @@ const Footer = () => {
           <div className="footer-section">
             <h3>City College of Bayawan</h3>
             <p>Honor and Excellence for the Highest Good</p>
-            <p>Honus et Excellentia Ad Summum Bonum</p>
-            <Link to="/ccb-logo">CCB Logo</Link>
+            <a href="/ccb-logo">CCB Logo</a>
           </div>
           <div className="footer-section">
             <h4>Contact Information</h4>
@@ -38,10 +36,10 @@ const Footer = () => {
           </div>
           <div className="footer-section">
             <h4>Quick Links</h4>
-            <Link to="/">Home</Link>
-            <Link to="/academics">Academic Programs</Link>
-            <Link to="/admissions">Admissions</Link>
-            <Link to="/news">News & Events</Link>
+            <a href="/">Home</a>
+            <a href="/academics">Academic Programs</a>
+            <a href="/admissions">Admissions</a>
+            <a href="/news">News & Events</a>
           </div>
         </div>
         <div className="footer-bottom">

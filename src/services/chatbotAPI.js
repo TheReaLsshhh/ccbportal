@@ -2,6 +2,11 @@ import { getOrCreateSessionId } from './sessionManager';
 
 // Get backend URL and construct full API path
 const getApiBase = () => {
+  // In development, prefer localhost to ensure local testing works
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:5000/api';
+  }
+
   const backendUrl = process.env.REACT_APP_API_URL;
   if (backendUrl) {
     return `${backendUrl.replace(/\/$/, '')}/api`;

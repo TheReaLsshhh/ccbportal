@@ -4,11 +4,13 @@ import Navbar from './components/Navbar';
 import Footer from './components/footer';
 import ScrollToTop from './components/ScrollToTop';
 import SEO from './components/SEO';
+import apiService from './services/api';
 
 const ContactUs = () => {
-  // Get backend URL and ensure it doesn't have trailing slash
-  const backendUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-  const API_BASE = backendUrl.replace(/\/$/, '');
+  const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [navAnimationsComplete, setNavAnimationsComplete] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,6 +24,94 @@ const ContactUs = () => {
 
   // Animation state
   const [isMapContainerVisible, setIsMapContainerVisible] = useState(false);
+
+  // Scroll-based navbar visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsTopBarVisible(false);
+      } else if (currentScrollY < lastScrollY && currentScrollY < 50) {
+        setIsTopBarVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
+
+  // Track scroll progress - Real-time dynamic for laptop/desktop
+  useEffect(() => {
+    let ticking = false;
+    let isMobile = window.innerWidth <= 768;
+    let isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight - windowHeight;
+          const scrolled = window.scrollY;
+          
+          // Calculate progress
+          let progress = (scrolled / documentHeight) * 100;
+          
+          // Device-specific easing for optimal smoothness
+          if (isMobile) {
+            // Mobile: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else if (isTablet) {
+            // Tablet: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else {
+            // Desktop/Laptop: Real-time dynamic progression for mouse control
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
+    };
+
+    // Update device type on resize
+    const handleResize = () => {
+      isMobile = window.innerWidth <= 768;
+      isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    // Initial calculation
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const animationTimeout = setTimeout(() => {
+      setNavAnimationsComplete(true);
+    }, 1500);
+
+    return () => clearTimeout(animationTimeout);
+  }, []);
 
   // Safe character filtering: keep letters, numbers, punctuation, and spaces; optionally keep newlines
   const stripUnsafe = (value, preserveNewlines = false) => {
@@ -139,7 +229,6 @@ const ContactUs = () => {
     setErrorMessage('');
   
     try {
-      // Prepare sanitized data
       const sanitizedData = {
         name: sanitizedName,
         email: sanitizedEmail,
@@ -147,43 +236,29 @@ const ContactUs = () => {
         subject: sanitizedSubject,
         message: sanitizedMessage
       };
-      
-      const response = await fetch(`${API_BASE}/api/contact/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sanitizedData),
-      });
-      
-      let result = {};
-      try {
-        result = await response.json();
-      } catch (_) {}
 
-      if (response.ok && result.status === "success") {
+      const result = await apiService.submitContactForm(sanitizedData);
+
+      if (result && result.status === "success") {
         setSubmitStatus("success");
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
-        // Auto-hide success message after 10 seconds
-        setTimeout(() => {
-          setSubmitStatus("");
-        }, 10000);
+        setTimeout(() => setSubmitStatus(""), 10000);
       } else {
-        // Handle specific error cases
-        if (response.status === 429) {
-          const retryAfter = result.retry_after || 60;
-          const minutes = Math.floor(retryAfter / 60);
-          setErrorMessage(result.message || `Too many submissions. Please try again in ${minutes} minutes.`);
-        } else if (response.status === 413) {
-          setErrorMessage('Message too long. Please reduce the size of your message.');
-        } else {
-          const msg = (result && (result.message || result.detail)) || response.statusText || 'Unknown error';
-          setErrorMessage(msg);
-        }
+        setErrorMessage((result && result.message) || 'Unknown error. Please try again.');
         setSubmitStatus("error");
       }
     } catch (error) {
-      setErrorMessage(error?.message || 'Network error. Please check your connection and try again.');
+      let msg = error?.message || 'Network error. Please check your connection and try again.';
+      if (error?.status === 429) {
+        const retryAfter = error?.data?.retry_after ?? 60;
+        const minutes = Math.floor(retryAfter / 60);
+        msg = error?.data?.message || `Too many submissions. Please try again in ${minutes} minutes.`;
+      } else if (error?.status === 413) {
+        msg = 'Message too long. Please reduce the size of your message.';
+      } else if (error?.data?.message) {
+        msg = error.data.message;
+      }
+      setErrorMessage(msg);
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -219,7 +294,12 @@ const ContactUs = () => {
   }, []);
 
   return (
-    <div className="App contactus-page nav-animations-complete">
+    <div className={`App contactus-page ${navAnimationsComplete ? 'nav-animations-complete' : ''}`}>
+      {/* Dynamic Scroll Progress Bar */}
+      <div 
+        className="scroll-progress-bar" 
+        style={{ width: `${scrollProgress}%` }}
+      />
       <SEO
         title="Contact Us"
         description="Get in touch with City College of Bayawan. Find our address, phone numbers, email addresses, office hours, and location. Send us a message or visit our campus in Bayawan City, Negros Oriental."
@@ -227,7 +307,7 @@ const ContactUs = () => {
         url="/contact"
       />
       <ScrollToTop />
-      <Navbar isHomePage={true} />
+      <Navbar isTopBarVisible={isTopBarVisible} isHomePage={true} />
       {/* Hero Section */}
       <section className="contact-hero">
         <div className="hero-overlay"></div>
@@ -256,8 +336,8 @@ const ContactUs = () => {
                   </div>
                   <h3>Address</h3>
                   <p>City College of Bayawan<br />
-                  Government Center, Banga, Bayawan City<br />
-                  Negros Oriental<br/>(035) 430-0263<br />
+                  Government Center, Banga<br />Bayawan City,
+                  Negros Oriental<br/>(035) xxx-xxxx<br />
                   Philippines 6221</p>
                 </div>
 
@@ -281,8 +361,8 @@ const ContactUs = () => {
                     </svg>
                   </div>
                   <h3>Email</h3>
-                  <p className='ccbemail'>citycollegeofbayawan<br/>@gmail.com<br /></p>
-                  <p className='registraremail'>ccbregistrar@gmail.com<br /></p>
+                  <p className='ccbemail'>citycollegeofbayawan@gmail.com</p>
+                  <p className='registraremail'>ccbregistrar@gmail.com</p>
                 </div>
 
                 <div className="contact-card">
@@ -293,7 +373,7 @@ const ContactUs = () => {
                   </div>
                   <h3>Office Hours</h3>
                   <p>Monday - Friday:<br/>8:00 AM - 5:00 PM<br />
-                  Saturday: Closed<br />
+                  Saturday: ROTC Schedule<br />
                   Sunday: Closed</p>
                 </div>
               </div>

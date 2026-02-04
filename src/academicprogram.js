@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/footer';
@@ -10,33 +9,14 @@ import './academicprogram.css';
 const AcademicPrograms = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [activeTab, setActiveTab] = useState('overview');
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDescriptionsVisible, setIsDescriptionsVisible] = useState(false);
+  const [navAnimationsComplete, setNavAnimationsComplete] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Scroll-based navbar visibility
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsTopBarVisible(false);
-      } else if (currentScrollY < lastScrollY && currentScrollY < 50) {
-        setIsTopBarVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [lastScrollY]);
-
-  // Fetch academic programs
+  // Fetch academic programs from API
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
@@ -58,17 +38,140 @@ const AcademicPrograms = () => {
     fetchPrograms();
   }, []);
 
+  // Scroll-based navbar visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down and past initial 100px
+        setIsTopBarVisible(false);
+      } else if (currentScrollY < lastScrollY && currentScrollY < 50) {
+        // Scrolling up and almost at the top (within 50px)
+        setIsTopBarVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
+
+  // Track scroll progress
+  useEffect(() => {
+    let ticking = false;
+    let isMobile = window.innerWidth <= 768;
+    let isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight - windowHeight;
+          const scrolled = window.scrollY;
+          
+          // Calculate progress
+          let progress = (scrolled / documentHeight) * 100;
+          
+          // Device-specific easing for optimal smoothness
+          if (isMobile) {
+            // Mobile: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else if (isTablet) {
+            // Tablet: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else {
+            // Desktop/Laptop: Real-time dynamic progression for mouse control
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
+    };
+
+    // Update device type on resize
+    const handleResize = () => {
+      isMobile = window.innerWidth <= 768;
+      isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    // Initial calculation
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Intersection Observer for descriptions section
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsDescriptionsVisible(true);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of the element is visible
+        rootMargin: '0px 0px -50px 0px' // Start animation 50px before element comes into view
+      }
+    );
+
+    const descriptionsElement = document.querySelector('.descriptions-content');
+    if (descriptionsElement) {
+      observer.observe(descriptionsElement);
+    }
+
+    return () => {
+      if (descriptionsElement) {
+        observer.unobserve(descriptionsElement);
+      }
+    };
+  }, [programs]); // Re-run when programs are loaded
+
+  useEffect(() => {
+    const animationTimeout = setTimeout(() => {
+      setNavAnimationsComplete(true);
+    }, 1500);
+
+    return () => clearTimeout(animationTimeout);
+  }, []);
+
   return (
-    <div className="App academic-page nav-animations-complete">
+    <div className={`App academic-page ${navAnimationsComplete ? 'nav-animations-complete' : ''}`}>
+      {/* Dynamic Scroll Progress Bar */}
+      <div 
+        className="scroll-progress-bar" 
+        style={{ width: `${scrollProgress}%` }}
+      />
       <SEO
         title="Academic Programs"
-        description="Explore our comprehensive academic programs at City College of Bayawan. Discover degree programs in Business Administration, Information Technology, Education, and Hospitality Management."
-        keywords="academic programs, degree programs, college courses, Business Administration, Information Technology, Education, Hospitality Management"
+        description="Explore our comprehensive academic programs at City College of Bayawan. Discover degree programs in Business Administration, Information Technology, Education, and Hospitality Management with detailed course information and career prospects."
+        keywords="academic programs, degree programs, college courses, Business Administration, Information Technology, Education, Hospitality Management, City College of Bayawan programs"
         url="/academics"
       />
       <Navbar isTopBarVisible={isTopBarVisible} isHomePage={true} />
       
-      {/* Hero Section */}
+      {/* Academic Programs Hero Section */}
       <section className={`academics-hero ${!isTopBarVisible ? 'navbar-collapsed' : ''}`}>
         <div className="container">
           <div className="hero-content">
@@ -79,159 +182,123 @@ const AcademicPrograms = () => {
         </div>
       </section>
 
-      {/* Navigation Tabs */}
-      <section className="academics-navigation">
-        <div className="container">
-          <div className="nav-tabs">
-            <button 
-              className={`nav-tab ${activeTab === 'overview' ? 'active' : ''}`}
-              onClick={() => setActiveTab('overview')}
-            >
-              Degree Programs
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'curriculum' ? 'active' : ''}`}
-              onClick={() => setActiveTab('curriculum')}
-            >
-              Curriculum & Courses
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'careers' ? 'active' : ''}`}
-              onClick={() => setActiveTab('careers')}
-            >
-              Career Prospects
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content Section */}
-      <section className="section-academics academics-section">
+      {/* Main Academics Section */}
+      <section className="section-academics academics-section-main">
         <div className="container">
           <div className="academics-content">
             
-            {loading ? (
-              <div className="loading-container">
-                <div className="loading-spinner"></div>
-                <p>Loading programs...</p>
-              </div>
-            ) : error ? (
-              <div className="error-container">
-                <p className="error-message">{error}</p>
-                <button onClick={() => window.location.reload()} className="btn btn-secondary">
-                  Try Again
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Overview Tab Content */}
-                {activeTab === 'overview' && (
-                  <div className="tab-content fade-in-visible">
-                    <h2 className="section-title">Our Degree Programs</h2>
-                    <p className="section-subtitle">Choose from our diverse selection of undergraduate programs</p>
-                    
-                    <div className="programs-grid">
-                      {programs.map((program) => (
-                        <div key={program.id} className="program-card">
-                          <div className="program-icon">
-                            <svg viewBox="0 0 24 24" width="64" height="64" fill="currentColor">
-                              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                            </svg>
-                          </div>
-                          <h3>{program.title}</h3>
-                          <div className="program-details">
-                            <p className="program-description">{program.description}</p>
-                            <div className="program-meta">
-                              <div className="meta-row">
-                                <span className="meta-label">Duration:</span>
-                                <span className="meta-value">{program.duration_text}</span>
-                              </div>
-                              <div className="meta-row">
-                                <span className="meta-label">Units:</span>
-                                <span className="meta-value">{program.units_text}</span>
-                              </div>
-                            </div>
-                          </div>
+            {/* List of Degree Programs Section */}
+            <div className="programs-list-wrapper">
+              <h2 className="section-title">List of Degree Programs</h2>
+              <p className="section-subtitle">Choose from our diverse selection of undergraduate programs</p>
+              
+              {loading ? (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p>Loading programs...</p>
+                </div>
+              ) : error ? (
+                <div className="error-container">
+                  <p className="error-message">{error}</p>
+                  <button onClick={() => window.location.reload()} className="btn btn-primary">
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                <div className="programs-grid">
+                  {programs.map((program) => (
+                    <div key={program.id} className="program-card">
+                      <div className="program-icon">
+                        <svg viewBox="0 0 24 24" width="64" height="64" fill="currentColor">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                      </div>
+                      <h3>{program.title}</h3>
+                      <div className="program-details">
+                        <p className="program-description">{program.description}</p>
+                        <div className="program-duration">
+                          <span className="duration-label">Duration:</span>
+                          <span className="duration-value">{program.duration_text}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Curriculum Tab Content */}
-                {activeTab === 'curriculum' && (
-                  <div className="tab-content fade-in-visible">
-                    <h2 className="section-title">Course Outlines</h2>
-                    <p className="section-subtitle">Comprehensive curriculum designed for industry readiness</p>
-                    
-                    <div className="curriculum-list">
-                      {programs.map((program) => (
-                        <div key={program.id} className="detail-card">
-                          <h3>{program.title}</h3>
-                          <div className="card-section">
-                            <h4>Program Overview</h4>
-                            <p>{program.program_overview || 'Program overview details will be available soon.'}</p>
-                          </div>
-                          <div className="card-section">
-                            <h4>Core Courses</h4>
-                            <ul className="check-list">
-                              {program.core_courses && program.core_courses.length > 0 ? (
-                                program.core_courses.map((course, index) => (
-                                  <li key={index}>{course}</li>
-                                ))
-                              ) : (
-                                <li>Core course details will be available soon.</li>
-                              )}
-                            </ul>
-                          </div>
+                        <div className="program-units">
+                          <span className="units-label">Total Units:</span>
+                          <span className="units-value">{program.units_text}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Careers Tab Content */}
-                {activeTab === 'careers' && (
-                  <div className="tab-content fade-in-visible">
-                    <h2 className="section-title">Career Opportunities</h2>
-                    <p className="section-subtitle">Pathways to your professional future</p>
-                    
-                    <div className="careers-list">
-                      {programs.map((program) => (
-                        <div key={program.id} className="detail-card">
-                          <h3>{program.title}</h3>
-                          <div className="card-section">
-                            <h4>Career Prospects</h4>
-                            <ul className="check-list">
-                              {program.career_prospects && program.career_prospects.split('\n').filter(item => item.trim()).length > 0 ? (
-                                program.career_prospects.split('\n').filter(item => item.trim()).map((prospect, index) => (
-                                  <li key={index}>{prospect.trim()}</li>
-                                ))
-                              ) : (
-                                <li>Career prospects information will be available soon.</li>
-                              )}
-                            </ul>
-                          </div>
+                        <div className="program-enhancements">
+                          <span className="enhancements-label">Enhancements:</span>
+                          <span className="enhancements-value">{program.enhancements_text}</span>
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <div className="section-cta">
-              <Link to="/admissions" className="btn btn-primary">Apply Now</Link>
+            {/* Program Descriptions and Course Outlines Section */}
+            <div className="descriptions-wrapper">
+              <h2 className="section-title">Program Descriptions & Course Outlines</h2>
+              <p className="section-subtitle">Detailed information about each program's curriculum and learning outcomes</p>
+              
+              {loading ? (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p>Loading program details...</p>
+                </div>
+              ) : error ? (
+                <div className="error-container">
+                  <p className="error-message">{error}</p>
+                </div>
+              ) : (
+                <div className={`descriptions-content ${isDescriptionsVisible ? 'fade-in-visible' : ''}`}>
+                  {programs.map((program) => (
+                    <div key={`desc-${program.id}`} className="description-card">
+                      <h3>{program.title}</h3>
+                      <div className="description-details">
+                        <div className="program-overview">
+                          <h4>Program Overview</h4>
+                          <p>{program.program_overview || 'Program overview details will be available soon.'}</p>
+                        </div>
+                        <div className="core-courses">
+                          <h4>Core Courses</h4>
+                          <ul>
+                            {program.core_courses && program.core_courses.length > 0 ? (
+                              program.core_courses.map((course, index) => (
+                                <li key={index}>{course}</li>
+                              ))
+                            ) : (
+                              <li>Core course details will be available soon.</li>
+                            )}
+                          </ul>
+                        </div>
+                        <div className="career-prospects">
+                          <h4>Career Prospects</h4>
+                          <ul>
+                            {program.career_prospects && program.career_prospects.split('\n').filter(item => item.trim()) && program.career_prospects.split('\n').filter(item => item.trim()).length > 0 ? (
+                              program.career_prospects.split('\n').filter(item => item.trim()).map((prospect, index) => (
+                                <li key={index}>{prospect.trim()}</li>
+                              ))
+                            ) : (
+                              <li>Career prospects information will be available soon.</li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>
         </div>
       </section>
       
-      <div className="footer-section-academics">
+      <div className="academic-footer">
         <Footer />
       </div>
       
+      {/* Scroll to Top Button */}
       <ScrollToTop />
     </div>
   );

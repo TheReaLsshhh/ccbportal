@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import apiService from "../services/api";
 
@@ -11,7 +10,6 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
-  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     const newMenuState = !isMobileMenuOpen;
@@ -259,14 +257,14 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
     : "main-nav with-bg";
 
   // Check if we're on the academic, admissions, news_events, downloads, students, faculty_staff, aboutus, or contactus page
-  const isAcademicPage = activePage === "/academics" || activePage.startsWith("/academics");
-  const isAdmissionsPage = activePage === "/admissions" || activePage.startsWith("/admissions");
-  const isNewsEventsPage = activePage === "/news" || activePage.startsWith("/news");
-  const isDownloadsPage = activePage === "/downloads" || activePage.startsWith("/downloads");
-  const isStudentsPage = activePage === "/students" || activePage.startsWith("/students");
-  const isFacultyStaffPage = activePage === "/faculty-staff" || activePage.startsWith("/faculty-staff");
-  const isAboutUsPage = activePage === "/about" || activePage.startsWith("/about");
-  const isContactUsPage = activePage === "/contact" || activePage.startsWith("/contact");
+  const isAcademicPage = window.location.pathname === "/academics" || window.location.pathname.startsWith("/academics");
+  const isAdmissionsPage = window.location.pathname === "/admissions" || window.location.pathname.startsWith("/admissions");
+  const isNewsEventsPage = window.location.pathname === "/news" || window.location.pathname.startsWith("/news");
+  const isDownloadsPage = window.location.pathname === "/downloads" || window.location.pathname.startsWith("/downloads");
+  const isStudentsPage = window.location.pathname === "/students" || window.location.pathname.startsWith("/students");
+  const isFacultyStaffPage = window.location.pathname === "/faculty-staff" || window.location.pathname.startsWith("/faculty-staff");
+  const isAboutUsPage = window.location.pathname === "/about" || window.location.pathname.startsWith("/about");
+  const isContactUsPage = window.location.pathname === "/contact" || window.location.pathname.startsWith("/contact");
 
   return (
     <nav className={`navbar ${isHomePage ? (isAcademicPage ? "academic-page-navbar homepage-navbar" : isAdmissionsPage ? "admissions-page-navbar homepage-navbar" : isNewsEventsPage ? "news-events-page-navbar homepage-navbar" : isDownloadsPage ? "downloads-page-navbar homepage-navbar" : isStudentsPage ? "students-page-navbar homepage-navbar" : isFacultyStaffPage ? "faculty-staff-page-navbar homepage-navbar" : isAboutUsPage ? "aboutus-page-navbar homepage-navbar" : isContactUsPage ? "contactus-page-navbar homepage-navbar" : "homepage-navbar") : ""}`}>
@@ -274,34 +272,34 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
       <div className={`secondary-nav-bar ${isHomePage ? "homepage-nav-section" : ""}`}>
         <div className="secondary-nav-container">
           <div className="secondary-nav-links">
-            <Link
-              to="/students"
+            <a
+              href="/students"
               className={getActiveTopLinkClass("/students")}
               onClick={handleNavLinkClick}
             >
               STUDENTS
-            </Link>
-            <Link
-              to="/faculty"
+            </a>
+            <a
+              href="/faculty"
               className={getActiveTopLinkClass("/faculty")}
               onClick={handleNavLinkClick}
             >
               FACULTY & STAFF
-            </Link>
-            <Link
-              to="/about"
+            </a>
+            <a
+              href="/about"
               className={getActiveTopLinkClass("/about")}
               onClick={handleNavLinkClick}
             >
               ABOUT US
-            </Link>
-            <Link
-              to="/contact"
+            </a>
+            <a
+              href="/contact"
               className={getActiveTopLinkClass("/contact")}
               onClick={handleNavLinkClick}
             >
               CONTACT US
-            </Link>
+            </a>
           </div>
           {/* Date Display */}
           <div className="date-display">
@@ -362,57 +360,57 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
           <div className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""}`}>
             {/* Secondary Navigation - Mobile Only */}
             <div className="mobile-secondary-nav">
-              <Link
-                to="/students"
+              <a
+                href="/students"
                 className={getActiveNavClass("/students")}
                 onClick={handleNavLinkClick}
               >
                 STUDENTS
-              </Link>
-              <Link
-                to="/faculty"
+              </a>
+              <a
+                href="/faculty"
                 className={getActiveNavClass("/faculty")}
                 onClick={handleNavLinkClick}
               >
                 FACULTY & STAFF
-              </Link>
-              <Link
-                to="/about"
+              </a>
+              <a
+                href="/about"
                 className={getActiveNavClass("/about")}
                 onClick={handleNavLinkClick}
               >
                 ABOUT US
-              </Link>
-              <Link
-                to="/contact"
+              </a>
+              <a
+                href="/contact"
                 className={getActiveNavClass("/contact")}
                 onClick={handleNavLinkClick}
               >
                 CONTACT US
-              </Link>
+              </a>
             </div>
             {/* Main Navigation */}
-            <Link
-              to="/"
+            <a
+              href="/"
               className={getActiveNavClass("/")}
               onClick={handleNavLinkClick}
             >
               HOME
-            </Link>
-            <Link
-              to="/academics"
+            </a>
+            <a
+              href="/academics"
               className={getActiveNavClass("/academics")}
               onClick={handleNavLinkClick}
             >
               ACADEMICS
-            </Link>
-            <Link
-              to="/admissions"
+            </a>
+            <a
+              href="/admissions"
               className={getActiveNavClass("/admissions")}
               onClick={handleNavLinkClick}
             >
               ADMISSIONS
-            </Link>
+            </a>
             {/* Services Dropdown */}
             <div
               className="services-dropdown-container"
@@ -497,20 +495,20 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
                 </a>
               </div>
             </div>
-            <Link
-              to="/news"
+            <a
+              href="/news"
               className={getActiveNavClass("/news")}
               onClick={handleNavLinkClick}
             >
               NEWS & EVENTS
-            </Link>
-            <Link
-              to="/downloads"
+            </a>
+            <a
+              href="/downloads"
               className={getActiveNavClass("/downloads")}
               onClick={handleNavLinkClick}
             >
               DOWNLOADS
-            </Link>
+            </a>
 
             {/* Search icon with hover popover */}
             <div className="nav-search">

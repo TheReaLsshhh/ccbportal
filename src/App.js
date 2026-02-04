@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from './components/ErrorBoundary';
-import ChatbotWidget from './components/ChatbotWidget';
 import Admin from './admin/admin';
 const HomePage = lazy(() => import('./HomePage'));
 const AcademicPrograms = lazy(() => import('./academicprogram'));
@@ -35,7 +34,6 @@ function App() {
             <Route path="/ccb-logo" element={<CCBlogo />} />
           </Routes>
           </Suspense>
-          <ChatbotWidget />
         </Router>
       </HelmetProvider>
     </ErrorBoundary>

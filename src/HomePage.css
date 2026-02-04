@@ -1,4 +1,60 @@
 /* HomePage Styles */
+
+/* Dynamic Scroll Progress Bar */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background-color: #2d5a2dfa;
+  z-index: 9999;
+  transition: width 0.05s linear;
+  box-shadow: 0 2px 4px rgba(45, 90, 45, 0.3);
+  will-change: width;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Mobile and Tablet specific progress bar adjustments */
+@media (max-width: 1024px) {
+  .scroll-progress-bar {
+    height: 3px;
+    background-color: #2d5a2df0;
+    transition: width 0.08s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de8;
+    transition: width 0.1s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de5;
+    transition: width 0.12s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 .homepage {
   margin-top: 0;
   min-height: 100vh;

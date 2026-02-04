@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/footer';
@@ -10,6 +9,8 @@ import './faculty_staff.css';
 const FacultyStaff = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [navAnimationsComplete, setNavAnimationsComplete] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [departments, setDepartments] = useState([]);
   const [loadingDepartments, setLoadingDepartments] = useState(true);
   const [departmentsError, setDepartmentsError] = useState(null);
@@ -41,6 +42,65 @@ const FacultyStaff = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [lastScrollY]);
+
+  // Track scroll progress - Real-time dynamic for laptop/desktop
+  useEffect(() => {
+    let ticking = false;
+    let isMobile = window.innerWidth <= 768;
+    let isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight - windowHeight;
+          const scrolled = window.scrollY;
+          
+          // Calculate progress
+          let progress = (scrolled / documentHeight) * 100;
+          
+          // Device-specific easing for optimal smoothness
+          if (isMobile) {
+            // Mobile: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else if (isTablet) {
+            // Tablet: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else {
+            // Desktop/Laptop: Real-time dynamic progression for mouse control
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
+    };
+
+    // Update device type on resize
+    const handleResize = () => {
+      isMobile = window.innerWidth <= 768;
+      isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    // Initial calculation
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Load departments data
   useEffect(() => {
@@ -157,8 +217,21 @@ const FacultyStaff = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const animationTimeout = setTimeout(() => {
+      setNavAnimationsComplete(true);
+    }, 1500);
+
+    return () => clearTimeout(animationTimeout);
+  }, []);
+
   return (
-    <div className="App faculty-staff-page nav-animations-complete">
+    <div className={`App faculty-staff-page ${navAnimationsComplete ? 'nav-animations-complete' : ''}`}>
+      {/* Dynamic Scroll Progress Bar */}
+      <div 
+        className="scroll-progress-bar" 
+        style={{ width: `${scrollProgress}%` }}
+      />
       <SEO
         title="Faculty & Staff Portal"
         description="Resources and information for faculty and administrative staff at City College of Bayawan. Access department directory, teaching resources, administrative systems, and support services."
@@ -238,7 +311,7 @@ const FacultyStaff = () => {
                         </ul>
                       </div>
                     )}
-                    <Link to="/contact" className="contact-btn">Contact Department</Link>
+                    <button className="contact-btn">Contact Department</button>
                   </div>
                 ))}
               </div>

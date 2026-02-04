@@ -13,6 +13,8 @@ const Admissions = () => {
   const [isRequirementsNoteVisible, setIsRequirementsNoteVisible] = useState(false);
   const [isProcessTimelineVisible, setIsProcessTimelineVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('new-scholar');
+  const [navAnimationsComplete, setNavAnimationsComplete] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [admissionsData, setAdmissionsData] = useState({
     requirements: {},
     processSteps: {},
@@ -48,6 +50,65 @@ const Admissions = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [lastScrollY]);
+
+  // Track scroll progress - Real-time dynamic for laptop/desktop
+  useEffect(() => {
+    let ticking = false;
+    let isMobile = window.innerWidth <= 768;
+    let isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight - windowHeight;
+          const scrolled = window.scrollY;
+          
+          // Calculate progress
+          let progress = (scrolled / documentHeight) * 100;
+          
+          // Device-specific easing for optimal smoothness
+          if (isMobile) {
+            // Mobile: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else if (isTablet) {
+            // Tablet: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else {
+            // Desktop/Laptop: Real-time dynamic progression for mouse control
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
+    };
+
+    // Update device type on resize
+    const handleResize = () => {
+      isMobile = window.innerWidth <= 768;
+      isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    // Initial calculation
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Intersection Observer for requirements-note section
   useEffect(() => {
@@ -120,7 +181,15 @@ const Admissions = () => {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [admissionsData.processSteps, selectedCategory, loading]);
+  }, [admissionsData, selectedCategory]);
+
+  useEffect(() => {
+    const animationTimeout = setTimeout(() => {
+      setNavAnimationsComplete(true);
+    }, 1500);
+
+    return () => clearTimeout(animationTimeout);
+  }, []);
 
   // Fetch admissions data
   useEffect(() => {
@@ -184,7 +253,12 @@ const Admissions = () => {
   }, []);
 
   return (
-    <div className="App admissions-page nav-animations-complete">
+    <div className={`App admissions-page ${navAnimationsComplete ? 'nav-animations-complete' : ''}`}>
+      {/* Dynamic Scroll Progress Bar */}
+      <div 
+        className="scroll-progress-bar" 
+        style={{ width: `${scrollProgress}%` }}
+      />
       <SEO
         title="Admissions"
         description="Begin your journey at City College of Bayawan. Find complete admission requirements, enrollment process steps, and important dates for new and continuing students. Apply now for quality education."

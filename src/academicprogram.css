@@ -1,5 +1,72 @@
 /* Academic Programs Page Styles - Recreated to match Admissions UI */
 
+/* Dynamic Scroll Progress Bar */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background-color: #2d5a2dfa;
+  z-index: 9999;
+  transition: width 0.05s linear;
+  box-shadow: 0 2px 4px rgba(45, 90, 45, 0.3);
+  will-change: width;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Mobile and Tablet specific progress bar adjustments */
+@media (max-width: 1024px) {
+  .scroll-progress-bar {
+    height: 3px;
+    background-color: #2d5a2df0;
+    transition: width 0.08s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de8;
+    transition: width 0.1s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de5;
+    transition: width 0.12s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Keyframe for Dropdown Item Slide In */
+@keyframes homepageMobileDropdownItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
 /* Prevent horizontal scroll */
 html, body {
   overflow-x: hidden;
@@ -36,7 +103,6 @@ html, body {
   margin-bottom: 1rem;
 }
 
-/* Animation Keyframes */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -45,6 +111,235 @@ html, body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Keyframe for Dropdown Item Slide In (Copied from HomePage expectation) */
+@keyframes homepageMobileDropdownItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
+/* Ensure mobile menu works correctly on Academic Page - Copied from HomePage.css */
+@media (max-width: 1024px) {
+
+  /* Ensure mobile menu overlay is above all elements but below header sections */
+  .academic-page .mobile-menu-overlay,
+  .academic-page-navbar .mobile-menu-overlay {
+    z-index: 1002 !important;
+    position: fixed !important;
+    top: 66px !important; /* Start below header-top and secondary-nav-bar */
+    height: calc(100vh - 10px) !important;
+  }
+
+  /* Ensure mobile menu is above all elements but below header sections */
+  .academic-page .nav-links.mobile-open,
+  .academic-page-navbar .nav-links.mobile-open {
+    z-index: 1003 !important;
+    position: fixed !important;
+    top: 66px !important; /* Start below header-top and secondary-nav-bar */
+    height: calc(100vh - 10px) !important;
+    background-color: rgba(45, 90, 45, 0.98) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  /* Ensure mobile menu button is accessible */
+  .academic-page .mobile-menu-btn,
+  .academic-page-navbar .mobile-menu-btn {
+    background-color: #ffffff00 !important;
+    z-index: 1004 !important;
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  /* Ensure mobile menu button active state works */
+  .academic-page .mobile-menu-btn.active span:nth-child(1),
+  .academic-page-navbar .mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px) !important;
+  }
+
+  .academic-page .mobile-menu-btn.active span:nth-child(2),
+  .academic-page-navbar .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0 !important;
+    transform: scaleX(0) !important;
+  }
+
+  .academic-page .mobile-menu-btn.active span:nth-child(3),
+  .academic-page-navbar .mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px) !important;
+  }
+
+  /* Services Dropdown Mobile - Match HomePage functionality */
+  /* Ensure dropdown container works properly in mobile menu */
+  .academic-page .services-dropdown-container,
+  .academic-page-navbar .services-dropdown-container {
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+
+  /* Smooth dropdown arrow transition and active state for mobile */
+  .academic-page .services-dropdown-container .dropdown-arrow,
+  .academic-page-navbar .services-dropdown-container .dropdown-arrow {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: inline-block !important;
+    transform-origin: center !important;
+  }
+
+  .academic-page .services-dropdown-container .dropdown-arrow.open,
+  .academic-page-navbar .services-dropdown-container .dropdown-arrow.open {
+    transform: rotate(180deg) !important;
+  }
+
+  /* Services Dropdown Menu - Mobile/Tablet View with enhanced smooth animation */
+  .academic-page .services-dropdown,
+  .academic-page-navbar .services-dropdown {
+    position: relative !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-12px) scale(0.96) !important;
+    filter: blur(2px);
+    transition: max-height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    z-index: auto !important;
+    top: auto !important;
+    left: auto !important;
+    transform-origin: top center !important;
+  }
+
+  /* Smooth dropdown open state for mobile */
+  .academic-page .services-dropdown.dropdown-open,
+  .academic-page-navbar .services-dropdown.dropdown-open {
+    max-height: 1000px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    filter: blur(0);
+    overflow: visible !important;
+  }
+
+  /* Dropdown Items - Mobile/Tablet View with enhanced staggered animation */
+  .academic-page .services-dropdown .dropdown-item,
+  .academic-page-navbar .services-dropdown .dropdown-item {
+    color: #fff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 12px 20px 12px 28px !important;
+    text-align: left !important;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+
+  .academic-page .services-dropdown.dropdown-open .dropdown-item,
+  .academic-page-navbar .services-dropdown.dropdown-open .dropdown-item {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+    animation: homepageMobileDropdownItemSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .academic-page .services-dropdown .dropdown-item:nth-child(1),
+  .academic-page-navbar .services-dropdown .dropdown-item:nth-child(1) {
+    animation-delay: 0.08s;
+  }
+
+  .academic-page .services-dropdown .dropdown-item:nth-child(2),
+  .academic-page-navbar .services-dropdown .dropdown-item:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+
+  .academic-page .services-dropdown .dropdown-item:nth-child(3),
+  .academic-page-navbar .services-dropdown .dropdown-item:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+
+  .academic-page .services-dropdown .dropdown-item:nth-child(4),
+  .academic-page-navbar .services-dropdown .dropdown-item:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  .academic-page .services-dropdown .dropdown-item:last-child,
+  .academic-page-navbar .services-dropdown .dropdown-item:last-child {
+    border-bottom: none !important;
+  }
+
+  .academic-page .services-dropdown .dropdown-item:hover,
+  .academic-page-navbar .services-dropdown .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    padding-left: 32px !important;
+    transform: translateX(8px) translateY(-2px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Mobile secondary nav - ensure STUDENTS and other secondary links are visible */
+  .academic-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .academic-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav .nav-link {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Ensure active nav states work properly in mobile menu */
+  .academic-page .nav-link.active-nav {
+    background-color: #fff;
+    color: #2d5a2d;
+    font-weight: 600;
+  }
+
+  .academic-page .nav-link.active-nav:hover {
+    background-color: #f5f5f5;
+    color: #2d5a2d;
+  }
+
+  .academic-page .mobile-secondary-nav .nav-link.active-nav {
+    background-color: #ff8c00;
+    color: #fff;
+    transform: translateX(8px);
+  }
+
+  /* Match mobile menu button positioning from Navbar.css for max-width: 768px */
+  .academic-page .mobile-menu-btn,
+  .academic-page-navbar .mobile-menu-btn {
+    padding: 12px !important;
+    right: 15px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .academic-page .mobile-menu-btn span,
+  .academic-page-navbar .mobile-menu-btn span {
+    width: 26px;
+    height: 3px;
   }
 }
 
@@ -474,10 +769,64 @@ html, body {
 
 /* Footer Styles */
 .footer-section-academics .footer {
-  background: #2d5a2d;
+  background-color: #2d5a2d;
   color: #fff;
   padding: 0 0 20px;
   margin-top: 0;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  margin-bottom: 30px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-section {
+  text-align: left;
+}
+
+.footer-section h3,
+.footer-section h4 {
+  color: #fff;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.footer-section h3 {
+  font-size: 1.1rem;
+}
+
+.footer-section h4 {
+  font-size: 1.1rem;
+}
+
+.footer-section p {
+  margin-bottom: 8px;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+
+.footer-section a {
+  color: #e0e0e0;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+  color: #ff8c00;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 20px;
+  text-align: center;
+  color: #e0e0e0;
 }
 
 /* Container */
@@ -490,7 +839,7 @@ html, body {
 /* Custom wave colors for Academic page footer */
 .academic-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .academic-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.academic-page .footer-wave .shape-fill-3 { fill: rgb(236, 236, 236); }
+.academic-page .footer-wave .shape-fill-3 { fill: rgb(255, 255, 255); }
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -536,6 +885,12 @@ html, body {
   .detail-card {
     padding: 20px;
   }
+
+  /* Footer Responsive Design */
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -563,5 +918,21 @@ html, body {
   .academics-navigation .nav-tab {
     padding: 8px 12px;
     font-size: 12px;
+  }
+
+  /* Match mobile menu button positioning from Navbar.css for max-width: 480px */
+  .academic-page .mobile-menu-btn,
+  .academic-page-navbar .mobile-menu-btn {
+    padding: 8px !important;
+    right: 12px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .academic-page .mobile-menu-btn span,
+  .academic-page-navbar .mobile-menu-btn span {
+    width: 24px;
+    height: 2.5px;
   }
 }

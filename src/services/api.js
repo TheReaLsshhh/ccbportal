@@ -1,8 +1,13 @@
-// API service for communicating with Django backend
+// API service for communicating with Node.js backend
 
 // If REACT_APP_API_URL is provided (full backend URL), append /api
-// Otherwise use relative /api for local development
+// Otherwise use relative /api for local development (proxy will handle it)
 const getApiBaseUrl = () => {
+  // For development with proxy, use relative URL
+  if (process.env.NODE_ENV === 'development') {
+    return '/api';
+  }
+
   const backendUrl = process.env.REACT_APP_API_URL;
   if (backendUrl) {
     // Remove trailing slash if present, then add /api
@@ -20,6 +25,7 @@ class ApiService {
 
     async makeRequest(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
+        
         const isFormData = options.body instanceof FormData;
         const headers = isFormData
             ? { ...(options.headers || {}) } // let browser set Content-Type for FormData
@@ -296,7 +302,7 @@ class ApiService {
 
     // Submit contact form
     async submitContactForm(formData) {
-        return this.makeRequest('/contact-form/', {
+        return this.makeRequest('/contact/', {
             method: 'POST',
             body: JSON.stringify(formData),
         });
@@ -365,7 +371,7 @@ class ApiService {
     }
 
     async deleteAcademicProgram(programId) {
-        return this.makeRequest(`/admin/academic-programs/${programId}/delete/`, {
+        return this.makeRequest(`/admin/academic-programs/${programId}/`, {
             method: 'DELETE',
         });
     }
@@ -380,7 +386,7 @@ class ApiService {
     }
 
     async updateEvent(eventId, payload) {
-        // For updates with an image (FormData), use POST so Django reliably
+        // For updates with an image (FormData), use POST so the backend reliably
         // parses multipart/form-data (similar pattern to updateNews).
         if (payload instanceof FormData) {
             const url = `${this.baseURL}/admin/events/${eventId}/`;
@@ -546,8 +552,8 @@ class ApiService {
 
     async updateNews(newsId, formData) {
         // Use FormData for file uploads
-        // Note: Django doesn't parse multipart/form-data for PUT requests automatically
-        // So we use POST with a method override header
+        // Note: Some backends don't parse multipart/form-data for PUT requests automatically.
+        // So we use POST with a method override header.
         const url = `${this.baseURL}/admin/news/${newsId}/`;
         
         // Add _method field to FormData to indicate it's an update
@@ -556,7 +562,7 @@ class ApiService {
         }
         
         const config = {
-            method: 'POST', // Use POST for multipart data (Django handles this correctly)
+            method: 'POST', // Use POST for multipart data
             body: formData,
             credentials: 'include',
             headers: {

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import "./HomePage.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/footer";
@@ -20,6 +19,7 @@ const HomePage = () => {
   const [isCtaButtonsVisible, setIsCtaButtonsVisible] = useState(false);
   const [isNewsSectionTitleVisible, setIsNewsSectionTitleVisible] = useState(false);
   const [navAnimationsComplete, setNavAnimationsComplete] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Carousel state for news section
   const [currentNewsPage, setCurrentNewsPage] = useState(0);
@@ -44,6 +44,65 @@ const HomePage = () => {
     }, 1500);
 
     return () => clearTimeout(animationTimeout);
+  }, []);
+
+  // Track scroll progress
+  useEffect(() => {
+    let ticking = false;
+    let isMobile = window.innerWidth <= 768;
+    let isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight - windowHeight;
+          const scrolled = window.scrollY;
+          
+          // Calculate progress
+          let progress = (scrolled / documentHeight) * 100;
+          
+          // Device-specific easing for optimal smoothness
+          if (isMobile) {
+            // Mobile: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else if (isTablet) {
+            // Tablet: Real-time dynamic progression for touch scrolling
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          } else {
+            // Desktop/Laptop: Real-time dynamic progression for mouse control
+            // No easing - immediate response to scroll position
+            // Cap progress at 100% and ensure it doesn't go below 0%
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
+    };
+
+    // Update device type on resize
+    const handleResize = () => {
+      isMobile = window.innerWidth <= 768;
+      isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    // Initial calculation
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // Check if device is mobile/tablet
@@ -429,6 +488,11 @@ const HomePage = () => {
 
   return (
     <div className={`homepage ${navAnimationsComplete ? "nav-animations-complete" : ""}`}>
+      {/* Dynamic Scroll Progress Bar */}
+      <div 
+        className="scroll-progress-bar" 
+        style={{ width: `${scrollProgress}%` }}
+      />
       <SEO
         title="City College of Bayawan"
         description="City College of Bayawan - Honor and Excellence for the Highest Good. Quality higher education in Bayawan City, Negros Oriental. Explore academic programs, admissions, news, and campus life."
@@ -1223,9 +1287,9 @@ const HomePage = () => {
                               <p className="news-summary">
                                 {truncate(news.description, 120)}
                               </p>
-                              <Link to={news.link} className="news-link">
+                              <a href={news.link} className="news-link">
                                 Read More →
-                              </Link>
+                              </a>
                             </div>
                           </div>
                         ) : (
@@ -1250,9 +1314,9 @@ const HomePage = () => {
                             <p className="news-summary">
                               {truncate(news.description, 200)}
                             </p>
-                            <Link to={news.link} className="news-link">
+                            <a href={news.link} className="news-link">
                               Read More →
-                            </Link>
+                            </a>
                           </div>
                         )}
                       </div>
@@ -1312,12 +1376,12 @@ const HomePage = () => {
                 )}
                 {newsData.length > 0 && (
                   <div className="news-view-all-container">
-                    <Link to="/news" className="btn btn-view-all">
+                    <a href="/news" className="btn btn-view-all">
                       View All News & Events
                       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
                       </svg>
-                    </Link>
+                    </a>
                   </div>
                 )}
               </div>
@@ -1337,12 +1401,12 @@ const HomePage = () => {
                 isCtaButtonsVisible ? "fade-in-visible" : ""
               }`}
             >
-              <Link to="/admissions" className="btn btn-primary btn-large">
+              <a href="/admissions" className="btn btn-primary btn-large">
                 Apply for Admission
-              </Link>
-              <Link to="/contact" className="btn btn-outline btn-large">
+              </a>
+              <a href="/contact" className="btn btn-outline btn-large">
                 Contact Us
-              </Link>
+              </a>
             </div>
           </div>
         </div>

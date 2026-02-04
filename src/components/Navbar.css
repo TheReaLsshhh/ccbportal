@@ -235,6 +235,7 @@
   justify-content: center;
   padding: 0;
   position: relative;
+  cursor: default !important;
 }
 
 .nav-link {
@@ -242,7 +243,7 @@
   align-items: center;
   color: #fff;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
   padding: 12px 16px;
   transition: all 0.3s ease;
@@ -264,7 +265,7 @@
 .nav-link.active-nav {
   background-color: #fff;
   color: #2d5a2d;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .nav-link.active-nav:hover {
@@ -283,7 +284,7 @@
 .admissions-nav-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 0px;
 }
 
 /* Ensure services button looks identical to links */
@@ -292,10 +293,36 @@
   background: transparent;
   appearance: none;
   line-height: 1;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transform: none !important;
 }
 
 .services-nav-link:focus {
   outline: none;
+}
+
+.services-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.services-nav-link.active-nav {
+  background-color: #fff;
+  color: #2d5a2d;
+  font-weight: 700;
+  transform: none !important;
+}
+
+.services-nav-link.active-nav:hover {
+  background-color: #f5f5f5;
+  color: #2d5a2d;
 }
 
 .dropdown-arrow {
@@ -457,6 +484,23 @@
   align-items: center;
   flex-shrink: 0;
   margin-left: 0;
+  cursor: pointer !important;
+}
+
+.nav-search svg {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 0;
+  cursor: pointer !important;
+}
+
+.nav-search svg path {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 0;
+  cursor: pointer !important;
 }
 
 
@@ -775,7 +819,6 @@
   .mobile-secondary-nav .nav-link.active-nav {
     background-color: #ff8c00;
     color: #fff;
-    transform: translateX(8px);
     box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
   }
 
@@ -788,22 +831,11 @@
     margin-top: 0.2rem;
   }
 
-  /* Show date display in header for mobile - Fixed at top corner */
-  .header-date-display {
-    display: flex;
-    align-items: center;
-    position: fixed;
-    top: 8px;
-    right: 12px;
-    z-index: 1100;
-  }
-
-  .header-date-display .date-text {
-    font-size: 10px;
-    padding: 4px 8px;
-    white-space: nowrap;
-    background-color: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Hide date display completely on mobile and tablet devices */
+  .date-display,
+  .header-date-display,
+  .secondary-nav-bar .date-display {
+    display: none !important;
   }
 
   .nav-container {
@@ -917,7 +949,6 @@
   .nav-link.active-nav {
     background-color: #fff;
     color: #2d5a2d;
-    transform: translateX(8px);
     box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
   }
 
@@ -939,6 +970,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: -10px;
   }
   
   .services-nav-link,
@@ -1145,16 +1177,6 @@
     line-height: 1.2;
   }
 
-  .header-date-display {
-    top: 6px;
-    right: 10px;
-  }
-
-  .header-date-display .date-text {
-    font-size: 9px;
-    padding: 3px 6px;
-  }
-
   .brand-logo {
     width: 50px;
     height: 50px;
@@ -1281,16 +1303,6 @@
     font-size: 0.7rem;
     margin-top: 0.01rem;
     line-height: 1.1;
-  }
-
-  .header-date-display {
-    top: 5px;
-    right: 8px;
-  }
-
-  .header-date-display .date-text {
-    font-size: 8px;
-    padding: 3px 5px;
   }
 
   .mobile-menu-btn {

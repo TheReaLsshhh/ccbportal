@@ -1,6 +1,6 @@
 /**
  * Utility function to normalize image URLs to work with backend
- * Images are served from Django backend (Cloudinary) or local storage
+ * Images are served from Cloudinary or the backend (when using relative URLs)
  * 
  * @param {string} imageUrl - The image URL from the backend (can be absolute or relative)
  * @returns {string} - Normalized URL pointing to backend
@@ -37,7 +37,13 @@ export const normalizeImageUrl = (imageUrl) => {
   }
   
   // Get backend URL from environment variable (without /api suffix for media files)
-  const backendUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+  let backendUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
+  
+  // In development, prefer localhost to ensure local testing works
+  if (process.env.NODE_ENV === 'development') {
+    backendUrl = 'http://localhost:5000';
+  }
+
   const BACKEND_URL = backendUrl.replace(/\/$/, ''); // Remove trailing slash
   
   try {

@@ -1,8 +1,335 @@
-/* Admissions Page Styles */
+/* Admissions Page Styles - Recreated to match Academic Programs UI */
+
+/* Dynamic Scroll Progress Bar */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background-color: #2d5a2dfa;
+  z-index: 9999;
+  transition: width 0.05s linear;
+  box-shadow: 0 2px 4px rgba(45, 90, 45, 0.3);
+  will-change: width;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Mobile and Tablet specific progress bar adjustments */
+@media (max-width: 1024px) {
+  .scroll-progress-bar {
+    height: 3px;
+    background-color: #2d5a2df0;
+    transition: width 0.08s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de8;
+    transition: width 0.1s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-progress-bar {
+    height: 2px;
+    background-color: #2d5a2de5;
+    transition: width 0.12s linear;
+    will-change: width;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Keyframe for Dropdown Item Slide In */
+@keyframes homepageMobileDropdownItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
 
 /* Prevent horizontal scroll */
 html, body {
   overflow-x: hidden;
+}
+
+/* Loading and Error States */
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1a472a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #dc3545;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ensure mobile menu works correctly on Admissions Page - Copied from HomePage.css */
+@media (max-width: 1024px) {
+
+  /* Ensure mobile menu overlay is above all elements but below header sections */
+  .admissions-page .mobile-menu-overlay,
+  .admissions-page-navbar .mobile-menu-overlay {
+    z-index: 1002 !important;
+    position: fixed !important;
+    top: 66px !important; /* Start below header-top and secondary-nav-bar */
+    height: calc(100vh - 10px) !important;
+  }
+
+  /* Ensure mobile menu is above all elements but below header sections */
+  .admissions-page .nav-links.mobile-open,
+  .admissions-page-navbar .nav-links.mobile-open {
+    z-index: 1003 !important;
+    position: fixed !important;
+    top: 66px !important; /* Start below header-top and secondary-nav-bar */
+    height: calc(100vh - 10px) !important;
+    background-color: rgba(45, 90, 45, 0.98) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  /* Ensure mobile menu button is accessible */
+  .admissions-page .mobile-menu-btn,
+  .admissions-page-navbar .mobile-menu-btn {
+    background-color: #ffffff00 !important; /* transparent background for menu button */
+    z-index: 1004 !important;
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  /* Ensure mobile menu button active state works */
+  .admissions-page .mobile-menu-btn.active span:nth-child(1),
+  .admissions-page-navbar .mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px) !important;
+  }
+
+  .admissions-page .mobile-menu-btn.active span:nth-child(2),
+  .admissions-page-navbar .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0 !important;
+    transform: scaleX(0) !important;
+  }
+
+  .admissions-page .mobile-menu-btn.active span:nth-child(3),
+  .admissions-page-navbar .mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px) !important;
+  }
+
+  /* Services Dropdown Mobile - Match HomePage functionality */
+  /* Ensure dropdown container works properly in mobile menu */
+  .admissions-page .services-dropdown-container,
+  .admissions-page-navbar .services-dropdown-container {
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+
+  /* Smooth dropdown arrow transition and active state for mobile */
+  .admissions-page .services-dropdown-container .dropdown-arrow,
+  .admissions-page-navbar .services-dropdown-container .dropdown-arrow {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: inline-block !important;
+    transform-origin: center !important;
+  }
+
+  .admissions-page .services-dropdown-container .dropdown-arrow.open,
+  .admissions-page-navbar .services-dropdown-container .dropdown-arrow.open {
+    transform: rotate(180deg) !important;
+  }
+
+  /* Services Dropdown Menu - Mobile/Tablet View with enhanced smooth animation */
+  .admissions-page .services-dropdown,
+  .admissions-page-navbar .services-dropdown {
+    position: relative !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-12px) scale(0.96) !important;
+    filter: blur(2px);
+    transition: max-height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    z-index: auto !important;
+    top: auto !important;
+    left: auto !important;
+    transform-origin: top center !important;
+  }
+
+  /* Smooth dropdown open state for mobile */
+  .admissions-page .services-dropdown.dropdown-open,
+  .admissions-page-navbar .services-dropdown.dropdown-open {
+    max-height: 1000px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    filter: blur(0);
+    overflow: visible !important;
+  }
+
+  /* Dropdown Items - Mobile/Tablet View with enhanced staggered animation */
+  .admissions-page .services-dropdown .dropdown-item,
+  .admissions-page-navbar .services-dropdown .dropdown-item {
+    color: #fff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 12px 20px 12px 28px !important;
+    text-align: left !important;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+
+  .admissions-page .services-dropdown.dropdown-open .dropdown-item,
+  .admissions-page-navbar .services-dropdown.dropdown-open .dropdown-item {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+    animation: homepageMobileDropdownItemSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .admissions-page .services-dropdown .dropdown-item:nth-child(1),
+  .admissions-page-navbar .services-dropdown .dropdown-item:nth-child(1) {
+    animation-delay: 0.08s;
+  }
+
+  .admissions-page .services-dropdown .dropdown-item:nth-child(2),
+  .admissions-page-navbar .services-dropdown .dropdown-item:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+
+  .admissions-page .services-dropdown .dropdown-item:nth-child(3),
+  .admissions-page-navbar .services-dropdown .dropdown-item:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+
+  .admissions-page .services-dropdown .dropdown-item:nth-child(4),
+  .admissions-page-navbar .services-dropdown .dropdown-item:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  .admissions-page .services-dropdown .dropdown-item:last-child,
+  .admissions-page-navbar .services-dropdown .dropdown-item:last-child {
+    border-bottom: none !important;
+  }
+
+  .admissions-page .services-dropdown .dropdown-item:hover,
+  .admissions-page-navbar .services-dropdown .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    padding-left: 32px !important;
+    transform: translateX(8px) translateY(-2px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Mobile secondary nav - ensure STUDENTS and other secondary links are visible */
+  .admissions-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .admissions-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav .nav-link {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Ensure active nav states work properly in mobile menu */
+  .admissions-page .nav-link.active-nav {
+    background-color: #fff;
+    color: #2d5a2d;
+    font-weight: 600;
+  }
+
+  .admissions-page .nav-link.active-nav:hover {
+    background-color: #f5f5f5;
+    color: #2d5a2d;
+  }
+
+  .admissions-page .mobile-secondary-nav .nav-link.active-nav {
+    background-color: #ff8c00;
+    color: #fff;
+    transform: translateX(8px);
+  }
+
+  /* Match mobile menu button positioning from Navbar.css for max-width: 768px */
+  .admissions-page .mobile-menu-btn,
+  .admissions-page-navbar .mobile-menu-btn {
+    padding: 12px !important;
+    right: 15px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .admissions-page .mobile-menu-btn span,
+  .admissions-page-navbar .mobile-menu-btn span {
+    width: 26px;
+    height: 3px;
+  }
 }
 
 /* Admissions Navigation Tabs */
@@ -61,190 +388,6 @@ html, body {
   border-color: #2d5a2d;
   color: white;
   box-shadow: 0 4px 12px rgba(45, 90, 45, 0.3);
-}
-
-/* Section Subtitle */
-.section-subtitle {
-  color: #666;
-  font-size: 1.1rem;
-  text-align: center;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-/* Requirements Content */
-.requirements-content {
-  margin-top: 2rem;
-}
-
-.general-requirements {
-  margin-bottom: 2rem;
-}
-
-.general-requirements h3 {
-  color: #2d5a2d;
-  font-size: 1.8rem;
-  margin-bottom: 2rem;
-  font-weight: bold;
-  text-align: center;
-  position: relative;
-}
-
-.general-requirements h3::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, #2d5a2d, #ff8c00);
-  border-radius: 2px;
-}
-
-/* Enrollment Requirements Styling */
-.enrollment-requirements,
-.transferee-requirements {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.6s ease forwards;
-}
-
-.admissions-content .timeline-content h4 {
-  font-size: 1.1rem;
-  margin-top: -2px;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #343a40;
-}
-
-.enrollment-requirements h4,
-.transferee-requirements h4 {
-  color: #1a472a;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #1a472a;
-  padding-bottom: 0.5rem;
-  text-align: center;
-}
-
-.enrollment-requirements ul,
-.transferee-requirements ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.enrollment-requirements li,
-.transferee-requirements li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #e9ecef;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: #495057;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0.5rem;
-  text-align: center;
-}
-
-.requirement-checkmark {
-  color: #2d5a2d;
-  font-weight: bold;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-}
-
-.enrollment-requirements li:last-child,
-.transferee-requirements li:last-child {
-  border-bottom: none;
-}
-
-.enrollment-requirements li:hover,
-.transferee-requirements li:hover {
-  background-color: #f1f3f4;
-  padding-left: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-/* Staggered animation delays for requirements */
-.enrollment-requirements {
-  animation-delay: 0.1s;
-}
-
-.transferee-requirements {
-  animation-delay: 0.2s;
-}
-
-/* Requirements Note */
-.requirements-note {
-  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-  border: 1px solid #ffeaa7;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-top: 2rem;
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s ease-out;
-}
-
-.requirements-note.fade-in-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.note-icon {
-  color: #856404;
-  flex-shrink: 0;
-  margin-top: 0.25rem;
-}
-
-.note-content h5 {
-  color: #856404;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  margin-top: 0;
-  text-align: left;
-}
-
-.note-content ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  text-align: left;
-}
-
-.note-content li {
-  color: #856404;
-  padding: 0.25rem 0;
-  position: relative;
-  padding-left: 1.25rem;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  text-align: left;
-}
-
-.note-content li::before {
-  content: 'ℹ';
-  color: #856404;
-  font-weight: bold;
-  position: absolute;
-  left: 0;
-  font-size: 0.9rem;
 }
 
 /* Hero Section */
@@ -329,6 +472,7 @@ html, body {
   animation-delay: 0.5s;
 }
 
+/* Main Section */
 .section-admissions {
   padding: -40px 0 !important;
 }
@@ -358,29 +502,17 @@ html, body {
   max-width: 100%;
 }
 
-.process-section {
-  width: 100%;
-  max-width: 100%;
-  overflow: visible;
-}
-
 /* Section Headers */
-.requirements-section h2,
-.process-section h2,
-.dates-section h2,
-.application-form-section h2 {
+.section-title {
   text-align: center;
   font-size: 2.5rem;
   font-weight: bold;
   color: #2d5a2d;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
   position: relative;
 }
 
-.requirements-section h2::after,
-.process-section h2::after,
-.dates-section h2::after,
-.application-form-section h2::after {
+.section-title::after {
   content: '';
   position: absolute;
   bottom: -10px;
@@ -392,464 +524,239 @@ html, body {
   border-radius: 2px;
 }
 
-/* Requirements Section */
-.requirements-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
-  width: 100%;
-  max-width: 100%;
-}
-
-.requirement-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 20px;
-  background: #fff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.requirement-item:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
-}
-
-.requirement-icon {
-  flex-shrink: 0;
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  transition: all 0.3s ease;
-}
-
-.requirement-item:hover .requirement-icon {
-  background: linear-gradient(135deg, #ff8c00, #ff9f1a);
-}
-
-.requirement-text h4 {
-  color: #2d5a2d;
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.requirement-text p {
+.section-subtitle {
   color: #666;
-  margin: 0;
-  line-height: 1.5;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  line-height: 1.6;
 }
 
-/* Process Section */
-.process-steps {
+/* Tab Content Animation */
+.tab-content {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.3s ease-out;
+}
+
+.tab-content.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Details Container */
+.details-container {
   display: flex;
   flex-direction: column;
   gap: 30px;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   width: 100%;
-  box-sizing: border-box;
 }
 
-.step-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 25px;
+.detail-card {
   background: #fff;
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  border-left: 5px solid #2d5a2d;
+}
+
+.detail-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  border-left-color: #ff8c00;
+}
+
+.detail-card h3 {
+  color: #2d5a2d;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.card-section {
+  margin-bottom: 1.5rem;
+}
+
+.card-section:last-child {
+  margin-bottom: 0;
+}
+
+.card-section h4 {
+  color: #1a472a;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Check List */
+.check-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.check-list li {
+  position: relative;
+  padding-left: 30px;
+  color: #495057;
+  line-height: 1.6;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.check-list li:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.check-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #2d5a2d;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Process Timeline */
+.process-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
   position: relative;
 }
 
-.step-item:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 45px;
+  bottom: -25px;
+  width: 2px;
+  background: #e9ecef;
+  z-index: 0;
 }
 
-.step-number {
+.timeline-number {
   flex-shrink: 0;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
+  width: 40px;
+  height: 40px;
+  background: #2d5a2d;
+  color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 1.5rem;
   font-weight: bold;
-  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  z-index: 1;
+  box-shadow: 0 4px 10px rgba(45, 90, 45, 0.2);
 }
 
-.step-item:hover .step-number {
-  background: linear-gradient(135deg, #ff8c00, #ff9f1a);
+.timeline-content {
+  flex-grow: 1;
+  padding-bottom: 10px;
 }
 
-.step-content h4 {
-  color: #2d5a2d;
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.step-content p {
-  color: #666;
-  margin: 0;
-  line-height: 1.6;
-  font-size: 1rem;
-}
-
-/* Dates Section */
-.dates-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 25px;
-  width: 100%;
-  max-width: 100%;
-}
-
-.date-item {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  text-align: center;
-  gap: 12px;
-  background: #fff;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.date-item:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
-}
-
-.date-icon {
-  flex-shrink: 0;
-  width: 45px;
-  height: 45px;
-  background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  transition: all 0.3s ease;
-  align-self: center;
-}
-
-.date-item:hover .date-icon {
-  background: linear-gradient(135deg, #ff8c00, #ff9f1a);
-}
-
-.date-text h4 {
+.timeline-content h4 {
   color: #2d5a2d;
   font-size: 1.1rem;
+  margin: 0 0 5px 0;
   font-weight: bold;
-  margin-bottom: 5px;
-  text-align: center;
+  text-transform: none;
 }
 
-.date-text p {
+.timeline-content p {
   color: #666;
   margin: 0;
-  line-height: 1.4;
   font-size: 0.95rem;
-  text-align: center;
+  line-height: 1.5;
 }
 
-/* Application Form Section */
-.application-form-section {
-  background: #fff;
-  padding: 50px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.application-form {
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 30px;
-}
-
-.form-group {
-  margin-bottom: 25px;
-}
-
-.form-group label {
-  display: block;
-  color: #2d5a2d;
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 15px 18px;
-  border: 2px solid #e9ecef;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: #f8f9fa;
-  color: #333;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #2d5a2d;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(45, 90, 45, 0.1);
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: #999;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 120px;
-  font-family: inherit;
-}
-
-.form-group select {
-  cursor: pointer;
-}
-
-/* Section CTA */
+/* CTA Section */
 .section-cta {
   display: flex;
   justify-content: center;
   margin-top: 40px;
 }
 
-/* Submit Button */
-.submit-btn {
-  background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
-  color: #fff;
-  border: none;
-  padding: 16px 40px;
-  font-size: 1.1rem;
-  font-weight: bold;
+.btn {
+  display: inline-block;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  border: 1px solid transparent;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
   border-radius: 50px;
-  cursor: pointer;
   transition: all 0.3s ease;
-  width: 100%;
-  max-width: 300px;
-  margin: 0 auto;
-  display: block;
-  position: relative;
-  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
+  border-color: #2d5a2d;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.submit-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.submit-btn:hover:not(:disabled)::before {
-  left: 100%;
-}
-
-.submit-btn:hover:not(:disabled) {
+.btn-primary:hover {
   background: linear-gradient(135deg, #1e3d1e, #2d5a2d);
   box-shadow: 0 8px 25px rgba(45, 90, 45, 0.3);
+  transform: translateY(-2px);
 }
 
-.submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Success Message */
-.success-message {
-  background: linear-gradient(135deg, #d4edda, #c3e6cb);
-  color: #155724;
-  padding: 15px 20px;
-  border-radius: 10px;
-  margin-top: 20px;
-  text-align: center;
-  font-weight: 600;
-  border: 1px solid #c3e6cb;
-  animation: fadeInUp 0.5s ease;
-}
-
-/* Footer Styles (inherited from main CSS) */
-.footer {
-  background: linear-gradient(135deg, #2d5a2d, #1a3d1a);
+.btn-secondary {
   color: #fff;
-  padding: 50px 0 20px;
-  margin-top: 80px;
+  background-color: #6c757d;
+  border-color: #6c757d;
 }
 
-.footer-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
-  margin-bottom: 30px;
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
 }
 
-.footer-section h3,
-.footer-section h4 {
-  color: #ff8c00;
-  margin-bottom: 20px;
-  font-weight: bold;
-}
-
-.footer-section a {
-  color: #fff;
-  text-decoration: none;
-  display: block;
-  margin: 8px 0;
-  transition: color 0.3s ease;
-}
-
-.footer-section a:hover {
-  color: #ff8c00;
-}
-
-.footer-bottom {
-  text-align: center;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ccc;
-}
-
-/* Process Timeline */
-.process-timeline {
-  opacity: 1;
-  transform: translateY(0);
-  width: 100%;
-  max-width: 100%;
-  overflow: visible;
-  position: relative;
-  /* Start visible by default - animation is optional enhancement */
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-}
-
-.process-timeline.fade-in-visible {
-  opacity: 1;
-  transform: translateY(0);
-  /* Animation class for smooth fade-in when element comes into view */
-  animation: fadeInUp 0.8s ease-out;
-}
-
-.timeline-number {
-  background: linear-gradient(135deg, #2d5a2d, #4a7c59);
-  color: white;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(45, 90, 45, 0.3);
-  position: relative;
-  z-index: 2;
-  margin-top: 36px;
-}
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: 11px;
-  top: 45px;
-  width: 20px;
-  height: 20px;
+/* Footer Styles */
+.footer-section-admissions .footer {
   background: #2d5a2d;
-  border: 4px solid white;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 3;
+  color: #fff;
+  padding: 0 0 20px;
+  margin-top: 0;
 }
 
-.timeline-item {
-  position: relative;
-  margin-bottom: 30px;
-  padding-left: 60px;
-  min-height: 60px;
-  width: 100%;
-  overflow: visible;
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.timeline-item:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 24px;
-  top: 86px;
-  width: 2px;
-  height: calc(100% - 20px);
-  min-height: 30px;
-  background: linear-gradient(180deg, #2d5a2d, #ff8c00);
-  z-index: 1;
-}
-
-.timeline-content {
-  width: 100%;
-  max-width: 100%;
-  overflow: visible;
-  padding-right: 20px;
-}
-
-.timeline-content h4 {
-  font-size: 1.1rem;
-  margin-top: 10px;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #343a40;
-}
-
-.timeline-content p {
-  color: #666;
-  line-height: 1.6;
-  margin: 0;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+/* Custom wave colors for Admissions page footer */
+.admissions-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
+.admissions-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
+.admissions-page .footer-wave .shape-fill-3 { fill: rgb(244, 244, 244); }
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -883,85 +790,8 @@ html, body {
     font-size: 13px;
   }
 
-  .requirements-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .requirement-item {
-    padding: 25px 20px;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .process-steps {
-    gap: 20px;
-  }
-
-  .step-item {
-    padding: 25px 20px;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .step-number {
-    align-self: center;
-  }
-
-  .timeline-item {
-    margin-bottom: 25px;
-    padding-left: 50px;
-  }
-
-  .timeline-number {
-    width: 45px;
-    height: 45px;
-    font-size: 1.1rem;
-    margin-top: 30px;
-  }
-
-  .timeline-item::before {
-    left: 10px;
-    top: 38px;
-    width: 18px;
-    height: 18px;
-  }
-
-  .timeline-item:not(:last-child)::after {
-    left: 21px;
-    top: 73px;
-  }
-
-  .timeline-content {
-    padding-right: 10px;
-  }
-
-  .dates-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .date-item {
+  .detail-card {
     padding: 20px;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .date-icon {
-    align-self: center;
-  }
-
-  .application-form-section {
-    padding: 30px 20px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .submit-btn {
-    max-width: 100%;
   }
 }
 
@@ -983,14 +813,6 @@ html, body {
     font-size: 0.9rem;
   }
 
-  .admissions-section {
-    padding-top: 25px;
-  }
-
-  .admissions-content {
-    gap: 40px;
-  }
-
   .admissions-navigation {
     padding: 12px 0;
   }
@@ -1000,116 +822,19 @@ html, body {
     font-size: 12px;
   }
 
-  .requirement-item {
-    padding: 20px 15px;
+  /* Match mobile menu button positioning from Navbar.css for max-width: 480px */
+  .admissions-page .mobile-menu-btn,
+  .admissions-page-navbar .mobile-menu-btn {
+    padding: 8px !important;
+    right: 12px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    transform: translateY(-50%) !important;
   }
 
-  .step-item {
-    padding: 20px 15px;
-  }
-
-  .timeline-item {
-    margin-bottom: 20px;
-    padding-left: 45px;
-  }
-
-  .timeline-number {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-    margin-top: 25px;
-  }
-
-  .timeline-item::before {
-    left: 8px;
-    top: 32px;
-    width: 16px;
-    height: 16px;
-  }
-
-  .timeline-item:not(:last-child)::after {
-    left: 19px;
-    top: 62px;
-  }
-
-  .timeline-content h4 {
-    font-size: 1rem;
-  }
-
-  .timeline-content p {
-    font-size: 0.9rem;
-  }
-
-  .date-item {
-    padding: 15px;
-  }
-
-  .application-form-section {
-    padding: 25px 15px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 12px 15px;
-    font-size: 0.95rem;
+  .admissions-page .mobile-menu-btn span,
+  .admissions-page-navbar .mobile-menu-btn span {
+    width: 24px;
+    height: 2.5px;
   }
 }
-
-/* Custom wave colors for Admissions page footer */
-.admissions-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
-.admissions-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.admissions-page .footer-wave .shape-fill-3 { fill: rgba(238, 239, 242, 1); }
-
-/* Animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
-}
-
-/* Hover Effects */
-.requirement-item:hover .requirement-text h4 {
-  color: #ff8c00;
-}
-
-.step-item:hover .step-content h4 {
-  color: #ff8c00;
-}
-
-.date-item:hover .date-text h4 {
-  color: #ff8c00;
-}
-
-/* Focus States for Accessibility */
-.application-form input:focus,
-.application-form textarea:focus,
-.application-form select:focus {
-  outline: none;
-  border-color: #2d5a2d;
-  box-shadow: 0 0 0 3px rgba(45, 90, 45, 0.2);
-}
-
-.submit-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(45, 90, 45, 0.3);
-}
-
-
