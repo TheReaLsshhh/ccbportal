@@ -8,7 +8,6 @@ const cookieParser = require('cookie-parser');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const multer = require('multer');
-const mysql = require('mysql2/promise');
 
 // Load env vars from root .env BEFORE importing services
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -48,10 +47,6 @@ const upload = multer({
 let pool = null;
 let dbReady = false;
 
-// Database Setup (MySQL - XAMPP)
-let mysqlPool = null;
-let mysqlDbReady = false;
-let useMySQL = process.env.USE_MYSQL === 'true';
 
 function getPgConfig() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -76,19 +71,6 @@ function getPgConfig() {
   return cfg;
 }
 
-function getMySQLConfig() {
-  return {
-    host: process.env.MYSQL_HOST || 'localhost',
-    port: parseInt(process.env.MYSQL_PORT || '3306', 10),
-    user: process.env.MYSQL_USER || 'root',
-    password: process.env.MYSQL_PASSWORD || '',
-    database: process.env.MYSQL_DATABASE || 'ccb_portal_db', // Same name as PostgreSQL
-    acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true,
-    multipleStatements: true
-  };
-}
 
 async function ensureDatabaseExists() {
   const cfg = getPgConfig();
@@ -324,431 +306,43 @@ async function initDb() {
   }
 }
 
-async function initMySQL() {
-  try {
-    console.log('Initializing MySQL database...');
-    
-    // Create MySQL connection
-    mysqlPool = mysql.createPool(getMySQLConfig());
-    
-    // Test connection
-    const connection = await mysqlPool.getConnection();
-    await connection.ping();
-    connection.release();
-
-    // Create database if not exists
-    await mysqlPool.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQL_DATABASE || 'ccb_portal_db'}\``);
-    
-    // Switch to the database
-    await mysqlPool.query(`USE \`${process.env.MYSQL_DATABASE || 'ccb_portal_db'}\``);
-
-    // Create tables
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS contacts (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255),
-        email VARCHAR(255),
-        phone VARCHAR(50),
-        subject VARCHAR(255),
-        message TEXT,
-        verification_token VARCHAR(255),
-        is_verified BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS admin_users (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS news (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        body TEXT NOT NULL,
-        details TEXT,
-        date DATE NOT NULL,
-        image_url VARCHAR(500),
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS events (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        details TEXT,
-        event_date DATE NOT NULL,
-        start_time TIME,
-        end_time TIME,
-        location VARCHAR(255),
-        image_url VARCHAR(500),
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS announcements (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        date DATE NOT NULL,
-        body TEXT NOT NULL,
-        details TEXT,
-        image_url VARCHAR(500),
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS achievements (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        details TEXT,
-        achievement_date DATE NOT NULL,
-        category VARCHAR(100),
-        image_url VARCHAR(500),
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS academic_programs (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        degree_type VARCHAR(50),
-        duration_years INT DEFAULT 4,
-        total_units INT DEFAULT 120,
-        with_enhancements INT DEFAULT 0,
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS departments (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        department_type VARCHAR(50) DEFAULT 'academic',
-        description TEXT,
-        office_location VARCHAR(255),
-        phone VARCHAR(50),
-        email VARCHAR(255),
-        head_name VARCHAR(255),
-        head_title VARCHAR(255),
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS personnel (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        full_name VARCHAR(255) NOT NULL,
-        title VARCHAR(255),
-        department_id BIGINT,
-        email VARCHAR(255),
-        phone VARCHAR(50),
-        bio TEXT,
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS admission_requirements (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        category VARCHAR(50) DEFAULT 'new-scholar',
-        requirement_text TEXT NOT NULL,
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS enrollment_steps (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        category VARCHAR(50) DEFAULT 'new-scholar',
-        step_number INT DEFAULT 1,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS admission_notes (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        note_text TEXT,
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS institutional_info (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        vision TEXT,
-        mission TEXT,
-        goals TEXT,
-        core_values TEXT,
-        is_active BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    await mysqlPool.query(`
-      CREATE TABLE IF NOT EXISTS downloads (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        category VARCHAR(50) DEFAULT 'other',
-        file_url VARCHAR(500),
-        is_active BOOLEAN DEFAULT TRUE,
-        display_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
-    mysqlDbReady = true;
-    console.log('Connected to MySQL database.');
-
-  } catch (err) {
-    console.error('Error initializing MySQL database:', err);
-    mysqlDbReady = false;
-  }
-}
-
 // Initialize DB on startup
 initDb();
-if (useMySQL) {
-  initMySQL();
-}
 
 // Database helper functions
 function getDatabase() {
-  return useMySQL ? mysqlPool : pool;
+  return pool;
 }
 
 function isDatabaseReady() {
-  return useMySQL ? mysqlDbReady : dbReady;
+  return dbReady;
 }
 
-// Dual database helper functions
-async function queryBothDatabases(query, params = []) {
-  const results = { postgresql: null, mysql: null, errors: [] };
+// Single database helper functions for PostgreSQL
+async function insertIntoDatabase(table, data) {
+  const columns = Object.keys(data);
+  const values = Object.values(data);
+  const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
   
-  // Query PostgreSQL
-  if (dbReady && pool) {
-    try {
-      const result = await pool.query(query, params);
-      results.postgresql = result;
-    } catch (error) {
-      results.errors.push(`PostgreSQL: ${error.message}`);
-    }
-  }
-  
-  // Query MySQL
-  if (mysqlDbReady && mysqlPool) {
-    try {
-      // Convert PostgreSQL parameter syntax ($1, $2) to MySQL (?)
-      const mysqlQuery = query.replace(/\$\d+/g, '?');
-      const [rows] = await mysqlPool.execute(mysqlQuery, params);
-      results.mysql = { rows };
-    } catch (error) {
-      results.errors.push(`MySQL: ${error.message}`);
-    }
-  }
-  
-  return results;
+  const query = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+  const result = await pool.query(query, values);
+  return result;
 }
 
-async function insertIntoBothDatabases(table, data) {
-  const results = { postgresql: null, mysql: null, errors: [] };
+async function updateDatabase(table, data, whereCondition, whereParams) {
+  const setClause = Object.keys(data).map((key, i) => `${key} = $${i + 1}`).join(', ');
+  const values = [...Object.values(data), ...whereParams];
+  const whereClauseWithParams = whereCondition.replace(/\$(\d+)/g, (match, num) => `$${parseInt(num) + Object.keys(data).length}`);
   
-  // Insert into PostgreSQL
-  if (dbReady && pool) {
-    try {
-      const columns = Object.keys(data);
-      const values = Object.values(data);
-      const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
-      
-      const query = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders}) RETURNING *`;
-      const result = await pool.query(query, values);
-      results.postgresql = result;
-    } catch (error) {
-      results.errors.push(`PostgreSQL: ${error.message}`);
-    }
-  }
-  
-  // Insert into MySQL
-  if (mysqlDbReady && mysqlPool) {
-    try {
-      const columns = Object.keys(data);
-      const values = Object.values(data);
-      const placeholders = columns.map(() => '?').join(', ');
-      const quotedColumns = columns.map(col => `\`${col}\``).join(', ');
-      
-      const query = `INSERT INTO ${table} (${quotedColumns}) VALUES (${placeholders})`;
-      const insertResult = await mysqlPool.execute(query, values);
-      const result = insertResult[0];
-      
-      // Get the inserted row to return
-      const insertedResult = await mysqlPool.execute(`SELECT * FROM ${table} WHERE id = ?`, [result.insertId]);
-      const insertedRows = insertedResult[0];
-      results.mysql = { rows: insertedRows };
-    } catch (error) {
-      results.errors.push(`MySQL: ${error.message}`);
-    }
-  }
-  
-  return results;
+  const query = `UPDATE ${table} SET ${setClause}, updated_at = NOW() WHERE ${whereClauseWithParams} RETURNING *`;
+  const result = await pool.query(query, values);
+  return result;
 }
 
-async function updateBothDatabases(table, data, whereCondition, whereParams) {
-  const results = { postgresql: null, mysql: null, errors: [] };
-  
-  // Update PostgreSQL
-  if (dbReady && pool) {
-    try {
-      const setClause = Object.keys(data).map((key, i) => `${key} = $${i + 1}`).join(', ');
-      const values = [...Object.values(data), ...whereParams];
-      const whereClauseWithParams = whereCondition.replace(/\$(\d+)/g, (match, num) => `$${parseInt(num) + Object.keys(data).length}`);
-      
-      const query = `UPDATE ${table} SET ${setClause}, updated_at = NOW() WHERE ${whereClauseWithParams} RETURNING *`;
-      const result = await pool.query(query, values);
-      results.postgresql = result;
-    } catch (error) {
-      results.errors.push(`PostgreSQL: ${error.message}`);
-    }
-  }
-  
-  // Update MySQL - find the record by name if ID-based update fails
-  if (mysqlDbReady && mysqlPool) {
-    try {
-      let updateSuccess = false;
-      
-      // First try the direct ID update
-      const setClause = Object.keys(data).map((key) => `\`${key}\` = ?`).join(', ');
-      const values = [...Object.values(data), ...whereParams];
-      const whereClauseWithParams = whereCondition.replace(/\$\d+/g, '?');
-      
-      const query = `UPDATE ${table} SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE ${whereClauseWithParams}`;
-      const result = await mysqlPool.execute(query, values);
-      const updateResult = result[0];
-      
-      if (updateResult.affectedRows > 0) {
-        updateSuccess = true;
-        // Get the updated row to return
-        const selectQuery = `SELECT * FROM ${table} WHERE ${whereClauseWithParams}`;
-        const selectResult = await mysqlPool.execute(selectQuery, whereParams);
-        const updatedRows = selectResult[0];
-        results.mysql = { rows: updatedRows };
-      } else {
-        // If ID-based update fails, try to find by original name (for academic_programs)
-        if (table === 'academic_programs' && whereCondition.includes('id =')) {
-          // Get the original record from PostgreSQL to find the original name
-          const originalId = whereParams[0];
-          const originalRecord = await pool.query(`SELECT name FROM academic_programs WHERE id = $1`, [originalId]);
-          
-          if (originalRecord.rows.length > 0) {
-            const originalName = originalRecord.rows[0].name;
-            const nameCheckResult = await mysqlPool.execute('SELECT id FROM academic_programs WHERE name = ?', [originalName]);
-            const nameCheck = nameCheckResult[0];
-            
-            if (nameCheck.length > 0) {
-              const mysqlId = nameCheck[0].id;
-              const nameValues = [...Object.values(data), mysqlId];
-              const nameUpdateResult = await mysqlPool.execute(
-                `UPDATE academic_programs SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-                nameValues
-              );
-              const nameResult = nameUpdateResult[0];
-              
-              if (nameResult.affectedRows > 0) {
-                const updatedRowsResult = await mysqlPool.execute('SELECT * FROM academic_programs WHERE id = ?', [mysqlId]);
-                const updatedRows = updatedRowsResult[0];
-                results.mysql = { rows: updatedRows };
-                updateSuccess = true;
-              }
-            }
-          }
-        }
-      }
-      
-      if (!updateSuccess) {
-        results.errors.push('MySQL: UPDATE failed - no rows affected');
-      }
-    } catch (error) {
-      results.errors.push(`MySQL: ${error.message}`);
-    }
-  }
-  
-  return results;
-}
-
-async function deleteFromBothDatabases(table, whereCondition, whereParams) {
-  const results = { postgresql: null, mysql: null, errors: [] };
-  
-  // Delete from PostgreSQL
-  if (dbReady && pool) {
-    try {
-      const query = `DELETE FROM ${table} WHERE ${whereCondition} RETURNING *`;
-      const result = await pool.query(query, whereParams);
-      results.postgresql = result;
-    } catch (error) {
-      results.errors.push(`PostgreSQL: ${error.message}`);
-    }
-  }
-  
-  // Delete from MySQL
-  if (mysqlDbReady && mysqlPool) {
-    try {
-      const mysqlQuery = `DELETE FROM ${table} WHERE ${whereCondition.replace(/\$\d+/g, '?')}`;
-      const deleteResult = await mysqlPool.execute(mysqlQuery, whereParams);
-      const result = deleteResult[0];
-      results.mysql = { rows: result };
-    } catch (error) {
-      results.errors.push(`MySQL: ${error.message}`);
-    }
-  }
-  
-  return results;
+async function deleteFromDatabase(table, whereCondition, whereParams) {
+  const query = `DELETE FROM ${table} WHERE ${whereCondition} RETURNING *`;
+  const result = await pool.query(query, whereParams);
+  return result;
 }
 
 // Brevo Email Service is imported and ready to use
@@ -758,14 +352,12 @@ async function deleteFromBothDatabases(table, whereCondition, whereParams) {
 app.get('/api/health/db', async (req, res) => {
   try {
     const pgReady = dbReady && pool;
-    const mysqlReady = mysqlDbReady && mysqlPool;
     const currentReady = isDatabaseReady();
     
     return res.json({ 
       ok: currentReady, 
       postgres: { ready: pgReady },
-      mysql: { ready: mysqlReady, enabled: useMySQL },
-      current: useMySQL ? 'mysql' : 'postgresql'
+      current: 'postgresql'
     });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
@@ -1063,7 +655,7 @@ app.post('/api/admin/events/create/', requireAdmin, upload.single('image'), asyn
       return res.status(400).json({ status: 'error', message: 'Title and event date are required' });
     }
     
-    console.log('Events Create - Inserting data into both databases:', { title, description, details, event_date, start_time, end_time, location, is_active, display_order });
+    console.log('Events Create - Creating event:', { title, description, details, event_date, start_time, end_time, location, is_active, display_order });
     
     const eventData = {
       title: title,
@@ -1077,29 +669,16 @@ app.post('/api/admin/events/create/', requireAdmin, upload.single('image'), asyn
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('events', eventData);
+    const result = await insertIntoDatabase('events', eventData);
     
-    if (results.errors.length > 0) {
-      console.error('Events Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Events Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create event in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create event' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdEvent = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Events Create - Success:', createdEvent);
-    res.json({ 
-      status: 'success', 
-      event: createdEvent,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+
+    console.log('Events Create - Successfully created:', result.rows[0]);
+    return res.status(201).json({
+      status: 'success',
+      event: result.rows[0]
     });
   } catch (err) {
     console.error('Event creation error:', err);
@@ -1119,7 +698,7 @@ app.put('/api/admin/events/:id/', requireAdmin, upload.single('image'), async (r
       return res.status(400).json({ status: 'error', message: 'Title and event date are required' });
     }
     
-    console.log('Events Update - Updating data in both databases:', { id, title, description, details, event_date, start_time, end_time, location, is_active, display_order });
+    console.log('Events Update - Updating event:', { id, title, description, details, event_date, start_time, end_time, location, is_active, display_order });
     
     const updateData = {
       title: title,
@@ -1133,29 +712,16 @@ app.put('/api/admin/events/:id/', requireAdmin, upload.single('image'), async (r
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await updateBothDatabases('events', updateData, 'id = $1', [parseInt(id)]);
+    const result = await updateDatabase('events', updateData, 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('Events Update - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Events Update - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to update event in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Event not found or update failed' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const updatedEvent = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Events Update - Success:', updatedEvent);
-    res.json({ 
-      status: 'success', 
-      event: updatedEvent,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+
+    console.log('Events Update - Successfully updated:', result.rows[0]);
+    return res.json({
+      status: 'success',
+      event: result.rows[0]
     });
   } catch (err) {
     console.error('Event update error:', err);
@@ -1169,36 +735,18 @@ app.delete('/api/admin/events/:id/', requireAdmin, async (req, res) => {
     console.log('Events Delete - ID:', req.params.id);
     const { id } = req.params;
     
-    console.log('Events Delete - Deleting from both databases:', { id });
+    console.log('Events Delete - Deleting event:', { id });
     
-    const results = await deleteFromBothDatabases('events', 'id = $1', [parseInt(id)]);
+    const result = await deleteFromDatabase('events', 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('Events Delete - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Events Delete - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to delete event in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Event not found or already deleted' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const deletedEvent = successResult.rows[0] || successResult.rows[0];
-    
-    if (!deletedEvent) {
-      return res.status(404).json({ status: 'error', message: 'Event not found' });
-    }
-    
-    console.log('Events Delete - Success:', deletedEvent);
-    res.json({ 
-      status: 'success', 
-      message: 'Event deleted successfully',
-      deleted_event: deletedEvent,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+
+    console.log('Events Delete - Successfully deleted:', result.rows[0]);
+    return res.json({
+      status: 'success',
+      deleted_event: result.rows[0]
     });
   } catch (err) {
     console.error('Event deletion error:', err);
@@ -1226,7 +774,7 @@ app.post('/api/admin/news/create/', requireAdmin, upload.single('image'), async 
       return res.status(400).json({ status: 'error', message: 'Title, body, and date are required' });
     }
     
-    console.log('News Create - Inserting data into both databases:', { title, body, details, date, is_active, display_order });
+    console.log('News Create - Creating news article:', { title, body, details, date, is_active, display_order });
     
     const newsData = {
       title: title,
@@ -1237,29 +785,16 @@ app.post('/api/admin/news/create/', requireAdmin, upload.single('image'), async 
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('news', newsData);
+    const result = await insertIntoDatabase('news', newsData);
     
-    if (results.errors.length > 0) {
-      console.error('News Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('News Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create news in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create news article' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdNews = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('News Create - Success:', createdNews);
-    res.json({ 
-      status: 'success', 
-      news: createdNews,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+
+    console.log('News Create - Successfully created:', result.rows[0]);
+    return res.status(201).json({
+      status: 'success',
+      news: result.rows[0]
     });
   } catch (err) {
     console.error('News creation error:', err);
@@ -1279,7 +814,7 @@ app.put('/api/admin/news/:id/', requireAdmin, upload.single('image'), async (req
       return res.status(400).json({ status: 'error', message: 'Title, body, and date are required' });
     }
     
-    console.log('News Update - Updating data in both databases:', { id, title, body, details, date, is_active, display_order });
+    console.log('News Update - Updating news article:', { id, title, body, details, date, is_active, display_order });
     
     const updateData = {
       title: title,
@@ -1290,29 +825,16 @@ app.put('/api/admin/news/:id/', requireAdmin, upload.single('image'), async (req
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await updateBothDatabases('news', updateData, 'id = $1', [parseInt(id)]);
+    const result = await updateDatabase('news', updateData, 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('News Update - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('News Update - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to update news in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'News not found or update failed' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const updatedNews = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('News Update - Success:', updatedNews);
+
+    console.log('News Update - Successfully updated:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      news: updatedNews,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      news: result.rows[0]
     });
   } catch (err) {
     console.error('News update error:', err);
@@ -1326,36 +848,19 @@ app.delete('/api/admin/news/:id/', requireAdmin, async (req, res) => {
     console.log('News Delete - ID:', req.params.id);
     const { id } = req.params;
     
-    console.log('News Delete - Deleting from both databases:', { id });
+    console.log('News Delete - Deleting news:', { id });
     
-    const results = await deleteFromBothDatabases('news', 'id = $1', [parseInt(id)]);
+    const result = await deleteFromDatabase('news', 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('News Delete - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('News Delete - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to delete news in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'News not found or already deleted' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const deletedNews = successResult.rows[0] || successResult.rows[0];
-    
-    if (!deletedNews) {
-      return res.status(404).json({ status: 'error', message: 'News not found' });
-    }
-    
-    console.log('News Delete - Success:', deletedNews);
+
+    console.log('News Delete - Successfully deleted:', result.rows[0]);
     res.json({ 
       status: 'success', 
       message: 'News deleted successfully',
-      deleted_news: deletedNews,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      deleted_news: result.rows[0]
     });
   } catch (err) {
     console.error('News deletion error:', err);
@@ -1383,7 +888,7 @@ app.post('/api/admin/announcements/create/', requireAdmin, upload.single('image'
       return res.status(400).json({ status: 'error', message: 'Title, date, and body are required' });
     }
     
-    console.log('Announcements Create - Inserting data into both databases:', { title, date, body, details, is_active, display_order });
+    console.log('Announcements Create - Creating announcement:', { title, date, body, details, is_active, display_order });
     
     const announcementData = {
       title: title,
@@ -1394,29 +899,16 @@ app.post('/api/admin/announcements/create/', requireAdmin, upload.single('image'
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('announcements', announcementData);
+    const result = await insertIntoDatabase('announcements', announcementData);
     
-    if (results.errors.length > 0) {
-      console.error('Announcements Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Announcements Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create announcement in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create announcement' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdAnnouncement = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Announcements Create - Success:', createdAnnouncement);
+
+    console.log('Announcements Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      announcement: createdAnnouncement,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      announcement: result.rows[0]
     });
   } catch (err) {
     console.error('Announcement creation error:', err);
@@ -1436,7 +928,7 @@ app.put('/api/admin/announcements/:id/', requireAdmin, upload.single('image'), a
       return res.status(400).json({ status: 'error', message: 'Title, date, and body are required' });
     }
     
-    console.log('Announcements Update - Updating data in both databases:', { id, title, date, body, details, is_active, display_order });
+    console.log('Announcements Update - Updating announcement:', { id, title, date, body, details, is_active, display_order });
     
     const updateData = {
       title: title,
@@ -1447,29 +939,16 @@ app.put('/api/admin/announcements/:id/', requireAdmin, upload.single('image'), a
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await updateBothDatabases('announcements', updateData, 'id = $1', [parseInt(id)]);
+    const result = await updateDatabase('announcements', updateData, 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('Announcements Update - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Announcements Update - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to update announcement in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Announcement not found or update failed' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const updatedAnnouncement = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Announcements Update - Success:', updatedAnnouncement);
+
+    console.log('Announcements Update - Successfully updated:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      announcement: updatedAnnouncement,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      announcement: result.rows[0]
     });
   } catch (err) {
     console.error('Announcement update error:', err);
@@ -1483,36 +962,19 @@ app.delete('/api/admin/announcements/:id/', requireAdmin, async (req, res) => {
     console.log('Announcements Delete - ID:', req.params.id);
     const { id } = req.params;
     
-    console.log('Announcements Delete - Deleting from both databases:', { id });
+    console.log('Announcements Delete - Deleting announcement:', { id });
     
-    const results = await deleteFromBothDatabases('announcements', 'id = $1', [parseInt(id)]);
+    const result = await deleteFromDatabase('announcements', 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('Announcements Delete - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Announcements Delete - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to delete announcement in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Announcement not found or already deleted' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const deletedAnnouncement = successResult.rows[0] || successResult.rows[0];
-    
-    if (!deletedAnnouncement) {
-      return res.status(404).json({ status: 'error', message: 'Announcement not found' });
-    }
-    
-    console.log('Announcements Delete - Success:', deletedAnnouncement);
+
+    console.log('Announcements Delete - Successfully deleted:', result.rows[0]);
     res.json({ 
       status: 'success', 
       message: 'Announcement deleted successfully',
-      deleted_announcement: deletedAnnouncement,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      deleted_announcement: result.rows[0]
     });
   } catch (err) {
     console.error('Announcement deletion error:', err);
@@ -1540,7 +1002,7 @@ app.post('/api/admin/achievements/create/', requireAdmin, upload.single('image')
       return res.status(400).json({ status: 'error', message: 'Title and achievement date are required' });
     }
     
-    console.log('Achievements Create - Inserting data into both databases:', { title, description, details, achievement_date, category, is_active, display_order });
+    console.log('Achievements Create - Creating achievement:', { title, description, details, achievement_date, category, is_active, display_order });
     
     const achievementData = {
       title: title,
@@ -1552,29 +1014,16 @@ app.post('/api/admin/achievements/create/', requireAdmin, upload.single('image')
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('achievements', achievementData);
+    const result = await insertIntoDatabase('achievements', achievementData);
     
-    if (results.errors.length > 0) {
-      console.error('Achievements Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Achievements Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create achievement in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create achievement' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdAchievement = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Achievements Create - Success:', createdAchievement);
+
+    console.log('Achievements Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      achievement: createdAchievement,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      achievement: result.rows[0]
     });
   } catch (err) {
     console.error('Achievement creation error:', err);
@@ -1602,7 +1051,7 @@ app.post('/api/admin/academic-programs/create/', requireAdmin, async (req, res) 
       return res.status(400).json({ status: 'error', message: 'Program title is required' });
     }
     
-    console.log('Academic Programs Create - Inserting data into both databases:', { title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order });
+    console.log('Academic Programs Create - Creating academic program:', { title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order });
     
     const programData = {
       name: title,
@@ -1615,31 +1064,16 @@ app.post('/api/admin/academic-programs/create/', requireAdmin, async (req, res) 
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('academic_programs', programData);
+    const result = await insertIntoDatabase('academic_programs', programData);
     
-    if (results.errors.length > 0) {
-      console.error('Academic Programs Create - Database errors:', results.errors);
-      // Still return success if at least one database worked
-      if (results.postgresql || results.mysql) {
-        console.log('Academic Programs Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create academic program in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create academic program' });
     }
-    
-    // Return the PostgreSQL result (primary), or MySQL if PostgreSQL failed
-    const successResult = results.postgresql || results.mysql;
-    const createdProgram = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Academic Programs Create - Success:', createdProgram);
+
+    console.log('Academic Programs Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      program: createdProgram,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      program: result.rows[0]
     });
   } catch (err) {
     console.error('Academic program creation error:', err);
@@ -1658,7 +1092,7 @@ app.put('/api/admin/academic-programs/:id/', requireAdmin, async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Program title is required' });
     }
     
-    console.log('Academic Programs Update - Updating data in both databases:', { id, title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order });
+    console.log('Academic Programs Update - Updating academic program:', { id, title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order });
     
     const updateData = {
       name: title,
@@ -1671,29 +1105,16 @@ app.put('/api/admin/academic-programs/:id/', requireAdmin, async (req, res) => {
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await updateBothDatabases('academic_programs', updateData, 'id = $1', [parseInt(id)]);
+    const result = await updateDatabase('academic_programs', updateData, 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('Academic Programs Update - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Academic Programs Update - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to update academic program in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Academic program not found or update failed' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const updatedProgram = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Academic Programs Update - Success:', updatedProgram);
+
+    console.log('Academic Programs Update - Successfully updated:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      program: updatedProgram,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      program: result.rows[0]
     });
   } catch (err) {
     console.error('Academic program update error:', err);
@@ -1706,36 +1127,19 @@ app.delete('/api/admin/academic-programs/:id/', requireAdmin, async (req, res) =
     console.log('Academic Programs Delete - ID:', req.params.id);
     const { id } = req.params;
     
-    console.log('Academic Programs Delete - Deleting from both databases:', { id });
+    console.log('Academic Programs Delete - Deleting program:', { id });
     
-    const results = await deleteFromBothDatabases('academic_programs', 'id = $1', [parseInt(id)]);
+    const result = await deleteFromDatabase('academic_programs', 'id = $1', [parseInt(id)]);
     
-    if (results.errors.length > 0) {
-      console.error('Academic Programs Delete - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Academic Programs Delete - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to delete academic program in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Academic program not found or already deleted' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const deletedProgram = successResult.rows[0] || successResult.rows[0];
-    
-    if (!deletedProgram) {
-      return res.status(404).json({ status: 'error', message: 'Academic program not found' });
-    }
-    
-    console.log('Academic Programs Delete - Success:', deletedProgram);
+
+    console.log('Academic Programs Delete - Successfully deleted:', result.rows[0]);
     res.json({ 
       status: 'success', 
       message: 'Academic program deleted successfully',
-      deleted_program: deletedProgram,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      deleted_program: result.rows[0]
     });
   } catch (err) {
     console.error('Academic program deletion error:', err);
@@ -1763,7 +1167,7 @@ app.post('/api/admin/departments/create/', requireAdmin, async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Department name is required' });
     }
     
-    console.log('Departments Create - Inserting data into both databases:', { name, department_type, description, office_location, phone, email, head_name, head_title, is_active, display_order });
+    console.log('Departments Create - Creating department:', { name, department_type, description, office_location, phone, email, head_name, head_title, is_active, display_order });
     
     const departmentData = {
       name: name,
@@ -1778,29 +1182,16 @@ app.post('/api/admin/departments/create/', requireAdmin, async (req, res) => {
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('departments', departmentData);
+    const result = await insertIntoDatabase('departments', departmentData);
     
-    if (results.errors.length > 0) {
-      console.error('Departments Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Departments Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create department in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create department' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdDepartment = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Departments Create - Success:', createdDepartment);
+
+    console.log('Departments Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      department: createdDepartment,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      department: result.rows[0]
     });
   } catch (err) {
     console.error('Department creation error:', err);
@@ -1828,7 +1219,7 @@ app.post('/api/admin/personnel/create/', requireAdmin, async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Full name is required' });
     }
     
-    console.log('Personnel Create - Inserting data into both databases:', { full_name, title, department_id, email, phone, bio, is_active, display_order });
+    console.log('Personnel Create - Creating personnel:', { full_name, title, department_id, email, phone, bio, is_active, display_order });
     
     const personnelData = {
       full_name: full_name,
@@ -1841,29 +1232,16 @@ app.post('/api/admin/personnel/create/', requireAdmin, async (req, res) => {
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('personnel', personnelData);
+    const result = await insertIntoDatabase('personnel', personnelData);
     
-    if (results.errors.length > 0) {
-      console.error('Personnel Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Personnel Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create personnel in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create personnel' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdPersonnel = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Personnel Create - Success:', createdPersonnel);
+
+    console.log('Personnel Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      personnel: createdPersonnel,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      personnel: result.rows[0]
     });
   } catch (err) {
     console.error('Personnel creation error:', err);
@@ -1891,7 +1269,7 @@ app.post('/api/admin/admission-requirements/create/', requireAdmin, async (req, 
       return res.status(400).json({ status: 'error', message: 'Requirement text is required' });
     }
     
-    console.log('Admission Requirements Create - Inserting data into both databases:', { category, requirement_text, is_active, display_order });
+    console.log('Admission Requirements Create - Creating admission requirement:', { category, requirement_text, is_active, display_order });
     
     const requirementData = {
       category: category || 'new-scholar',
@@ -1900,29 +1278,16 @@ app.post('/api/admin/admission-requirements/create/', requireAdmin, async (req, 
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('admission_requirements', requirementData);
+    const result = await insertIntoDatabase('admission_requirements', requirementData);
     
-    if (results.errors.length > 0) {
-      console.error('Admission Requirements Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Admission Requirements Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create admission requirement in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create admission requirement' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdRequirement = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Admission Requirements Create - Success:', createdRequirement);
+
+    console.log('Admission Requirements Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      requirement: createdRequirement,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      requirement: result.rows[0]
     });
   } catch (err) {
     console.error('Admission requirement creation error:', err);
@@ -1950,7 +1315,7 @@ app.post('/api/admin/enrollment-steps/create/', requireAdmin, async (req, res) =
       return res.status(400).json({ status: 'error', message: 'Title is required' });
     }
     
-    console.log('Enrollment Steps Create - Inserting data into both databases:', { category, step_number, title, description, is_active, display_order });
+    console.log('Enrollment Steps Create - Creating enrollment step:', { category, step_number, title, description, is_active, display_order });
     
     const stepData = {
       category: category || 'new-scholar',
@@ -1961,29 +1326,16 @@ app.post('/api/admin/enrollment-steps/create/', requireAdmin, async (req, res) =
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('enrollment_steps', stepData);
+    const result = await insertIntoDatabase('enrollment_steps', stepData);
     
-    if (results.errors.length > 0) {
-      console.error('Enrollment Steps Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Enrollment Steps Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create enrollment step in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create enrollment step' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdStep = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Enrollment Steps Create - Success:', createdStep);
+
+    console.log('Enrollment Steps Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      step: createdStep,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      step: result.rows[0]
     });
   } catch (err) {
     console.error('Enrollment step creation error:', err);
@@ -2011,7 +1363,7 @@ app.post('/api/admin/admission-notes/create/', requireAdmin, async (req, res) =>
       return res.status(400).json({ status: 'error', message: 'Title is required' });
     }
     
-    console.log('Admission Notes Create - Inserting data into both databases:', { title, note_text, is_active, display_order });
+    console.log('Admission Notes Create - Creating admission note:', { title, note_text, is_active, display_order });
     
     const noteData = {
       title: title,
@@ -2020,29 +1372,16 @@ app.post('/api/admin/admission-notes/create/', requireAdmin, async (req, res) =>
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('admission_notes', noteData);
+    const result = await insertIntoDatabase('admission_notes', noteData);
     
-    if (results.errors.length > 0) {
-      console.error('Admission Notes Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Admission Notes Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create admission note in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create admission note' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdNote = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Admission Notes Create - Success:', createdNote);
+
+    console.log('Admission Notes Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      note: createdNote,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      note: result.rows[0]
     });
   } catch (err) {
     console.error('Admission note creation error:', err);
@@ -2109,7 +1448,7 @@ app.post('/api/admin/downloads/create/', requireAdmin, async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Title is required' });
     }
     
-    console.log('Downloads Create - Inserting data into both databases:', { title, description, category, is_active, display_order });
+    console.log('Downloads Create - Creating download:', { title, description, category, is_active, display_order });
     
     const downloadData = {
       title: title,
@@ -2119,29 +1458,16 @@ app.post('/api/admin/downloads/create/', requireAdmin, async (req, res) => {
       display_order: parseInt(display_order) || 0
     };
     
-    const results = await insertIntoBothDatabases('downloads', downloadData);
+    const result = await insertIntoDatabase('downloads', downloadData);
     
-    if (results.errors.length > 0) {
-      console.error('Downloads Create - Database errors:', results.errors);
-      if (results.postgresql || results.mysql) {
-        console.log('Downloads Create - Partial success');
-      } else {
-        return res.status(500).json({ status: 'error', message: 'Failed to create download in both databases', errors: results.errors });
-      }
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to create download' });
     }
-    
-    const successResult = results.postgresql || results.mysql;
-    const createdDownload = successResult.rows[0] || successResult.rows[0];
-    
-    console.log('Downloads Create - Success:', createdDownload);
+
+    console.log('Downloads Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      download: createdDownload,
-      sync_status: {
-        postgresql: !!results.postgresql,
-        mysql: !!results.mysql,
-        errors: results.errors
-      }
+      download: result.rows[0]
     });
   } catch (err) {
     console.error('Download creation error:', err);
@@ -2163,10 +1489,14 @@ app.post('/api/contact/', async (req, res) => {
   const token = uuidv4();
 
   try {
-    await pool.query(
-      `INSERT INTO contacts (name, email, phone, subject, message, verification_token) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [name, email, phone, subject, message, token]
-    );
+    const contactData = { name, email, phone, subject, message, verification_token: token };
+    const result = await insertIntoDatabase('contacts', contactData);
+    
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Failed to submit contact form' });
+    }
+
+    console.log('Contact Form - Successfully submitted:', result.rows[0]);
 
     // Send Verification Email
     const frontendBaseUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:3000'; 
@@ -2185,11 +1515,17 @@ app.post('/api/contact/', async (req, res) => {
 
     try {
       await brevoService.sendContactVerification(email, name, verifyLink);
-      res.json({ status: 'success', message: 'Verification email sent.' });
+      res.json({ 
+        status: 'success', 
+        message: 'Verification email sent.'
+      });
     } catch (emailErr) {
       console.error('Brevo email error:', emailErr);
       // Optional: Delete the record if email fails? For now we keep it.
-      res.status(500).json({ status: 'error', message: 'Failed to send verification email.' });
+      res.status(500).json({ 
+        status: 'error', 
+        message: 'Failed to send verification email.'
+      });
     }
 
   } catch (dbErr) {

@@ -16,13 +16,23 @@
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
   },
+  "devDependencies": {
+    "customize-cra": "^1.0.0",
+    "compression-webpack-plugin": "^10.0.0",
+    "webpack-bundle-analyzer": "^4.9.0",
+    "cross-env": "^7.0.3"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:analyze": "npm run build && npx webpack-bundle-analyzer build/static/js/*.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-backend": "cd backend && node server.js",
-    "db-health": "powershell -NoProfile -Command \"Start-Process 'http://localhost:5000/api/health/db'\""
+    "db-health": "powershell -NoProfile -Command \"Start-Process 'http://localhost:5000/api/health/db'\"",
+    "build:prod": "cross-env NODE_ENV=production npm run build",
+    "serve": "serve -s build -l 3000",
+    "lighthouse": "lighthouse http://localhost:3000 --output html --output-path ./lighthouse-report.html"
   },
   "eslintConfig": {
     "extends": [
@@ -41,5 +51,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "homepage": ".",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
 }

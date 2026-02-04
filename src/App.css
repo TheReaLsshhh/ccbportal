@@ -1,0 +1,93 @@
+/* App-level performance optimizations */
+
+/* Enable hardware acceleration for smooth animations */
+* {
+  box-sizing: border-box;
+}
+
+/* Optimize scrolling performance */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Reduce paint on scroll */
+  will-change: scroll-position;
+  /* Enable font-display for better loading */
+  font-display: swap;
+}
+
+/* CSS containment for better performance */
+main {
+  contain: layout style paint;
+}
+
+/* Optimize images */
+img {
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  /* Prevent layout shifts */
+  aspect-ratio: attr(width) / attr(height);
+}
+
+/* Loading states */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Performance monitoring hooks */
+.performance-observer {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 9999;
+  display: none; /* Set to block to see performance metrics */
+}
+
+/* Critical CSS inlining hint */
+.critical-above-fold {
+  /* This class should be used for above-the-fold content that needs critical CSS */
+  contain: layout style;
+}
+
+/* Non-critical CSS loading hint */
+.non-critical {
+  /* This class should be used for below-the-fold content */
+  contain: layout style paint;
+}
+
+/* Reduce JavaScript execution time */
+.react-lazy {
+  contain: strict;
+}
+
+/* Optimize reflows */
+.layout-optimized {
+  contain: layout;
+}
+
+/* Optimize repaints */
+.paint-optimized {
+  contain: paint;
+}
+
+/* Optimize both layout and paint */
+.style-optimized {
+  contain: layout style paint;
+}

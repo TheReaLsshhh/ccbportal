@@ -24,7 +24,6 @@ const Footer = () => {
           </div>
           <div className="footer-section">
             <h4>Contact Information</h4>
-            <p> Bayawan City, Negros Oriental</p>
             <p> (035) XXX-XXXX</p>
             <p> info@ccb.edu.ph</p>
           </div>
