@@ -7,7 +7,13 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const logger = require('./utils/logger');
+const { validationRules, validate } = require('./middleware/validation');
+const { broadcastDataChange } = require('./utils/realtimeUtils');
 
 // Load env vars from root .env BEFORE importing services
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -15,19 +21,59 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 const brevoService = require('./services/brevoService');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
+const MEDIA_ROOT = path.join(__dirname, '../media');
+const IMAGE_UPLOAD_ROOT = path.join(MEDIA_ROOT, 'images');
 
-// Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'https://ccb-eacademy.onrender.com',
-  ],
-  credentials: true
+fs.mkdirSync(IMAGE_UPLOAD_ROOT, { recursive: true });
+
+// Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://api.brevo.com"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
 }));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Stricter in production
+  message: {
+    status: 'error',
+    message: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/', limiter);
+
+// CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'https://ccb-eacademy.onrender.com'
+    ];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(cookieParser());
 app.use(express.json({ limit: '50mb' }));
+app.use('/media', express.static(MEDIA_ROOT));
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
@@ -187,12 +233,24 @@ async function initDb() {
         duration_years INTEGER DEFAULT 4,
         total_units INTEGER DEFAULT 120,
         with_enhancements INTEGER DEFAULT 0,
+        program_overview TEXT,
+        core_courses TEXT,
+        career_prospects TEXT,
         is_active BOOLEAN DEFAULT TRUE,
         display_order INTEGER DEFAULT 0,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
+
+    // Add missing columns to existing academic_programs table
+    try {
+      await pool.query(`ALTER TABLE academic_programs ADD COLUMN IF NOT EXISTS program_overview TEXT`);
+      await pool.query(`ALTER TABLE academic_programs ADD COLUMN IF NOT EXISTS core_courses TEXT`);
+      await pool.query(`ALTER TABLE academic_programs ADD COLUMN IF NOT EXISTS career_prospects TEXT`);
+    } catch (err) {
+      logger.debug('Database columns may already exist:', err.message);
+    }
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS departments (
@@ -295,12 +353,12 @@ async function initDb() {
     `);
 
     dbReady = true;
-    console.log('Connected to PostgreSQL database.');
+    logger.info('Connected to PostgreSQL database successfully.');
 
   } catch (err) {
-    console.error('Error initializing database:', err);
+    logger.error('Error initializing database:', err);
     if (String(err?.message || '').includes('client password must be a string')) {
-      console.error('Set DATABASE_URL (with password) or set PGPASSWORD in your local .env.');
+      logger.error('Set DATABASE_URL (with password) or set PGPASSWORD in your local .env.');
     }
     dbReady = false;
   }
@@ -343,6 +401,58 @@ async function deleteFromDatabase(table, whereCondition, whereParams) {
   const query = `DELETE FROM ${table} WHERE ${whereCondition} RETURNING *`;
   const result = await pool.query(query, whereParams);
   return result;
+}
+
+function parseBoolean(value, defaultValue = false) {
+  if (value === undefined || value === null || value === '') return defaultValue;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  }
+  return defaultValue;
+}
+
+function withImageField(row) {
+  if (!row) return row;
+  return {
+    ...row,
+    image: row.image_url || null
+  };
+}
+
+async function saveUploadedImage(file, prefix) {
+  if (!file) return null;
+  const originalExt = path.extname(file.originalname || '');
+  const mimeExt = file.mimetype && file.mimetype.includes('/')
+    ? `.${file.mimetype.split('/')[1].split('+')[0]}`
+    : '';
+  const extension = originalExt || mimeExt || '.jpg';
+  const fileName = `${prefix}-${Date.now()}-${uuidv4()}${extension}`;
+  const fullPath = path.join(IMAGE_UPLOAD_ROOT, fileName);
+
+  await fs.promises.writeFile(fullPath, file.buffer);
+
+  return `/media/images/${fileName}`;
+}
+
+async function deleteManagedImage(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== 'string' || !imageUrl.startsWith('/media/')) {
+    return;
+  }
+
+  const relativePath = imageUrl.replace(/^\/media\//, '').replace(/\//g, path.sep);
+  const fullPath = path.join(MEDIA_ROOT, relativePath);
+
+  try {
+    await fs.promises.unlink(fullPath);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      logger.warn('Failed to delete managed image', { imageUrl, error: err.message });
+    }
+  }
 }
 
 // Brevo Email Service is imported and ready to use
@@ -413,7 +523,7 @@ app.post('/api/admin/setup/', async (req, res) => {
     if (String(err?.code) === '23505') {
       return res.status(409).json({ status: 'error', message: 'Username already exists' });
     }
-    console.error('Admin setup error:', err);
+    logger.error('Admin setup error:', err);
     return res.status(500).json({ status: 'error', message: 'Failed to create admin account' });
   }
 });
@@ -459,7 +569,7 @@ app.post('/api/admin/login/', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('Admin login error:', err);
+    logger.error('Admin login error:', err);
     return res.status(500).json({ status: 'error', message: 'Login failed' });
   }
 });
@@ -596,8 +706,8 @@ app.get('/api/debug/downloads/', async (req, res) => {
 // Public news endpoint
 app.get('/api/news/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM news ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', news: result.rows });
+    const result = await pool.query('SELECT * FROM news WHERE is_active = TRUE ORDER BY display_order, created_at DESC');
+    res.json({ status: 'success', news: result.rows.map(withImageField) });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch news' });
   }
@@ -606,8 +716,8 @@ app.get('/api/news/', async (req, res) => {
 // Public events endpoint
 app.get('/api/events/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM events ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', events: result.rows });
+    const result = await pool.query('SELECT * FROM events WHERE is_active = TRUE ORDER BY display_order, created_at DESC');
+    res.json({ status: 'success', events: result.rows.map(withImageField) });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch events' });
   }
@@ -616,8 +726,8 @@ app.get('/api/events/', async (req, res) => {
 // Public announcements endpoint
 app.get('/api/announcements/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM announcements ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', announcements: result.rows });
+    const result = await pool.query('SELECT * FROM announcements WHERE is_active = TRUE ORDER BY display_order, created_at DESC');
+    res.json({ status: 'success', announcements: result.rows.map(withImageField) });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch announcements' });
   }
@@ -626,10 +736,39 @@ app.get('/api/announcements/', async (req, res) => {
 // Public achievements endpoint
 app.get('/api/achievements/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM achievements ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', achievements: result.rows });
+    const result = await pool.query('SELECT * FROM achievements WHERE is_active = TRUE ORDER BY display_order, created_at DESC');
+    res.json({ status: 'success', achievements: result.rows.map(withImageField) });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch achievements' });
+  }
+});
+
+// Public academic programs endpoint
+app.get('/api/academic-programs/', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        id,
+        name as title,
+        description,
+        degree_type,
+        duration_years::text || ' years' as duration_text,
+        total_units::text as units_text,
+        with_enhancements::text as enhancements_text,
+        program_overview,
+        core_courses,
+        career_prospects,
+        is_active,
+        display_order,
+        created_at,
+        updated_at
+      FROM academic_programs 
+      WHERE is_active = true 
+      ORDER BY display_order, created_at DESC
+    `);
+    res.json({ status: 'success', programs: result.rows });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch academic programs' });
   }
 });
 
@@ -639,92 +778,95 @@ app.get('/api/achievements/', async (req, res) => {
 app.get('/api/admin/events/', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM events ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', events: result.rows });
+    res.json({ status: 'success', events: result.rows.map(withImageField) });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch events' });
   }
 });
 
-app.post('/api/admin/events/create/', requireAdmin, upload.single('image'), async (req, res) => {
+app.post('/api/admin/events/create/', requireAdmin, upload.single('image'), validate(validationRules.event), async (req, res) => {
   try {
-    console.log('Events Create - Request body:', req.body);
     const { title, description, details, event_date, start_time, end_time, location, is_active, display_order } = req.body;
-    
-    if (!title || !event_date) {
-      console.log('Events Create - Missing required fields');
-      return res.status(400).json({ status: 'error', message: 'Title and event date are required' });
-    }
-    
-    console.log('Events Create - Creating event:', { title, description, details, event_date, start_time, end_time, location, is_active, display_order });
+    const imageUrl = await saveUploadedImage(req.file, 'event');
     
     const eventData = {
       title: title,
-      description: description,
-      details: details,
+      description: description || null,
+      details: details || null,
       event_date: event_date,
-      start_time: start_time,
-      end_time: end_time,
-      location: location,
-      is_active: is_active === 'true',
-      display_order: parseInt(display_order) || 0
+      start_time: start_time || null,
+      end_time: end_time || null,
+      location: location || null,
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
+      display_order: display_order || 0
     };
-    
+
     const result = await insertIntoDatabase('events', eventData);
     
-    if (result.rows.length === 0) {
+    if (!result || !result.rows || result.rows.length === 0) {
       return res.status(500).json({ error: 'Failed to create event' });
     }
 
-    console.log('Events Create - Successfully created:', result.rows[0]);
+    logger.info('Event created successfully', { eventId: result.rows[0].id, title: title });
+    broadcastDataChange('events', 'create', result.rows[0]);
     return res.status(201).json({
       status: 'success',
-      event: result.rows[0]
+      event: withImageField(result.rows[0])
     });
   } catch (err) {
-    console.error('Event creation error:', err);
+    logger.error('Event creation error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create event: ' + err.message });
   }
 });
 
 // Events UPDATE endpoint
-app.put('/api/admin/events/:id/', requireAdmin, upload.single('image'), async (req, res) => {
+app.put('/api/admin/events/:id/', requireAdmin, upload.single('image'), validate(validationRules.event), async (req, res) => {
   try {
-    console.log('Events Update - Request body:', req.body);
     const { id } = req.params;
-    const { title, description, details, event_date, start_time, end_time, location, is_active, display_order } = req.body;
-    
-    if (!title || !event_date) {
-      console.log('Events Update - Missing required fields');
-      return res.status(400).json({ status: 'error', message: 'Title and event date are required' });
-    }
-    
-    console.log('Events Update - Updating event:', { id, title, description, details, event_date, start_time, end_time, location, is_active, display_order });
-    
-    const updateData = {
-      title: title,
-      description: description,
-      details: details,
-      event_date: event_date,
-      start_time: start_time,
-      end_time: end_time,
-      location: location,
-      is_active: is_active === 'true',
-      display_order: parseInt(display_order) || 0
-    };
-    
-    const result = await updateDatabase('events', updateData, 'id = $1', [parseInt(id)]);
-    
-    if (result.rows.length === 0) {
+    const { title, description, details, event_date, start_time, end_time, location, is_active, display_order, remove_image } = req.body;
+    const existing = await pool.query('SELECT image_url FROM events WHERE id = $1', [parseInt(id)]);
+    if (existing.rows.length === 0) {
       return res.status(404).json({ error: 'Event not found or update failed' });
     }
 
-    console.log('Events Update - Successfully updated:', result.rows[0]);
+    let imageUrl = existing.rows[0].image_url || null;
+    if (parseBoolean(remove_image, false)) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = null;
+    }
+    if (req.file) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = await saveUploadedImage(req.file, 'event');
+    }
+    
+    const updateData = {
+      title: title,
+      description: description || null,
+      details: details || null,
+      event_date: event_date,
+      start_time: start_time || null,
+      end_time: end_time || null,
+      location: location || null,
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
+      display_order: display_order || 0
+    };
+
+    const result = await updateDatabase('events', updateData, 'id = $1', [parseInt(id)]);
+    
+    if (!result || !result.rows || result.rows.length === 0) {
+      return res.status(404).json({ error: 'Event not found or update failed' });
+    }
+
+    logger.info('Event updated successfully', { eventId: id, title: title });
+    broadcastDataChange('events', 'update', result.rows[0]);
     return res.json({
       status: 'success',
-      event: result.rows[0]
+      event: withImageField(result.rows[0])
     });
   } catch (err) {
-    console.error('Event update error:', err);
+    logger.error('Event update error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update event: ' + err.message });
   }
 });
@@ -732,24 +874,24 @@ app.put('/api/admin/events/:id/', requireAdmin, upload.single('image'), async (r
 // Events DELETE endpoint
 app.delete('/api/admin/events/:id/', requireAdmin, async (req, res) => {
   try {
-    console.log('Events Delete - ID:', req.params.id);
     const { id } = req.params;
-    
-    console.log('Events Delete - Deleting event:', { id });
     
     const result = await deleteFromDatabase('events', 'id = $1', [parseInt(id)]);
     
-    if (result.rows.length === 0) {
+    if (!result || !result.rows || result.rows.length === 0) {
       return res.status(404).json({ error: 'Event not found or already deleted' });
     }
 
-    console.log('Events Delete - Successfully deleted:', result.rows[0]);
+    await deleteManagedImage(result.rows[0].image_url);
+
+    logger.info('Event deleted successfully', { eventId: id });
+    broadcastDataChange('events', 'delete', { id: parseInt(id) });
     return res.json({
       status: 'success',
       deleted_event: result.rows[0]
     });
   } catch (err) {
-    console.error('Event deletion error:', err);
+    logger.error('Event deletion error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to delete event: ' + err.message });
   }
 });
@@ -758,86 +900,90 @@ app.delete('/api/admin/events/:id/', requireAdmin, async (req, res) => {
 app.get('/api/admin/news/', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM news ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', news: result.rows });
+    res.json({ status: 'success', news: result.rows.map(withImageField) });
   } catch (err) {
+    logger.error('Failed to fetch news:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch news' });
   }
 });
 
-app.post('/api/admin/news/create/', requireAdmin, upload.single('image'), async (req, res) => {
+app.post('/api/admin/news/create/', requireAdmin, upload.single('image'), validate(validationRules.news), async (req, res) => {
   try {
-    console.log('News Create - Request body:', req.body);
     const { title, body, details, date, is_active, display_order } = req.body;
-    
-    if (!title || !body || !date) {
-      console.log('News Create - Missing required fields');
-      return res.status(400).json({ status: 'error', message: 'Title, body, and date are required' });
-    }
-    
-    console.log('News Create - Creating news article:', { title, body, details, date, is_active, display_order });
+    const imageUrl = await saveUploadedImage(req.file, 'news');
     
     const newsData = {
       title: title,
       body: body,
-      details: details,
+      details: details || null,
       date: date,
-      is_active: is_active === 'true',
-      display_order: parseInt(display_order) || 0
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
+      display_order: display_order || 0
     };
-    
+
     const result = await insertIntoDatabase('news', newsData);
     
-    if (result.rows.length === 0) {
+    if (!result || !result.rows || result.rows.length === 0) {
       return res.status(500).json({ error: 'Failed to create news article' });
     }
 
-    console.log('News Create - Successfully created:', result.rows[0]);
+    logger.info('News created successfully', { newsId: result.rows[0].id, title: title });
+    broadcastDataChange('news', 'create', result.rows[0]);
     return res.status(201).json({
       status: 'success',
-      news: result.rows[0]
+      news: withImageField(result.rows[0])
     });
   } catch (err) {
-    console.error('News creation error:', err);
+    logger.error('News creation error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create news: ' + err.message });
   }
 });
 
 // News UPDATE endpoint
-app.put('/api/admin/news/:id/', requireAdmin, upload.single('image'), async (req, res) => {
+app.put('/api/admin/news/:id/', requireAdmin, upload.single('image'), validate(validationRules.news), async (req, res) => {
   try {
-    console.log('News Update - Request body:', req.body);
     const { id } = req.params;
-    const { title, body, details, date, is_active, display_order } = req.body;
-    
-    if (!title || !body || !date) {
-      console.log('News Update - Missing required fields');
-      return res.status(400).json({ status: 'error', message: 'Title, body, and date are required' });
+    const { title, body, details, date, is_active, display_order, remove_image } = req.body;
+    const existing = await pool.query('SELECT image_url FROM news WHERE id = $1', [parseInt(id)]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'News not found or update failed' });
     }
-    
-    console.log('News Update - Updating news article:', { id, title, body, details, date, is_active, display_order });
+
+    let imageUrl = existing.rows[0].image_url || null;
+    if (parseBoolean(remove_image, false)) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = null;
+    }
+    if (req.file) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = await saveUploadedImage(req.file, 'news');
+    }
     
     const updateData = {
       title: title,
       body: body,
-      details: details,
+      details: details || null,
       date: date,
-      is_active: is_active === 'true',
-      display_order: parseInt(display_order) || 0
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
+      display_order: display_order || 0
     };
-    
+
     const result = await updateDatabase('news', updateData, 'id = $1', [parseInt(id)]);
     
-    if (result.rows.length === 0) {
+    if (!result || !result.rows || result.rows.length === 0) {
       return res.status(404).json({ error: 'News not found or update failed' });
     }
 
-    console.log('News Update - Successfully updated:', result.rows[0]);
+    logger.info('News updated successfully', { newsId: id, title: title });
+    broadcastDataChange('news', 'update', result.rows[0]);
     res.json({ 
       status: 'success', 
-      news: result.rows[0]
+      news: withImageField(result.rows[0])
     });
   } catch (err) {
-    console.error('News update error:', err);
+    logger.error('News update error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update news: ' + err.message });
   }
 });
@@ -845,25 +991,25 @@ app.put('/api/admin/news/:id/', requireAdmin, upload.single('image'), async (req
 // News DELETE endpoint
 app.delete('/api/admin/news/:id/', requireAdmin, async (req, res) => {
   try {
-    console.log('News Delete - ID:', req.params.id);
     const { id } = req.params;
-    
-    console.log('News Delete - Deleting news:', { id });
     
     const result = await deleteFromDatabase('news', 'id = $1', [parseInt(id)]);
     
-    if (result.rows.length === 0) {
+    if (!result || !result.rows || result.rows.length === 0) {
       return res.status(404).json({ error: 'News not found or already deleted' });
     }
 
-    console.log('News Delete - Successfully deleted:', result.rows[0]);
+    await deleteManagedImage(result.rows[0].image_url);
+
+    logger.info('News deleted successfully', { newsId: id });
+    broadcastDataChange('news', 'delete', { id: parseInt(id) });
     res.json({ 
       status: 'success', 
       message: 'News deleted successfully',
       deleted_news: result.rows[0]
     });
   } catch (err) {
-    console.error('News deletion error:', err);
+    logger.error('News deletion error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to delete news: ' + err.message });
   }
 });
@@ -872,7 +1018,7 @@ app.delete('/api/admin/news/:id/', requireAdmin, async (req, res) => {
 app.get('/api/admin/announcements/', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM announcements ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', announcements: result.rows });
+    res.json({ status: 'success', announcements: result.rows.map(withImageField) });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch announcements' });
   }
@@ -890,12 +1036,15 @@ app.post('/api/admin/announcements/create/', requireAdmin, upload.single('image'
     
     console.log('Announcements Create - Creating announcement:', { title, date, body, details, is_active, display_order });
     
+    const imageUrl = await saveUploadedImage(req.file, 'announcement');
+
     const announcementData = {
       title: title,
       date: date,
       body: body,
       details: details,
-      is_active: is_active === 'true',
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -908,7 +1057,7 @@ app.post('/api/admin/announcements/create/', requireAdmin, upload.single('image'
     console.log('Announcements Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      announcement: result.rows[0]
+      announcement: withImageField(result.rows[0])
     });
   } catch (err) {
     console.error('Announcement creation error:', err);
@@ -921,7 +1070,7 @@ app.put('/api/admin/announcements/:id/', requireAdmin, upload.single('image'), a
   try {
     console.log('Announcements Update - Request body:', req.body);
     const { id } = req.params;
-    const { title, date, body, details, is_active, display_order } = req.body;
+    const { title, date, body, details, is_active, display_order, remove_image } = req.body;
     
     if (!title || !date || !body) {
       console.log('Announcements Update - Missing required fields');
@@ -930,12 +1079,28 @@ app.put('/api/admin/announcements/:id/', requireAdmin, upload.single('image'), a
     
     console.log('Announcements Update - Updating announcement:', { id, title, date, body, details, is_active, display_order });
     
+    const existing = await pool.query('SELECT image_url FROM announcements WHERE id = $1', [parseInt(id)]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'Announcement not found or update failed' });
+    }
+
+    let imageUrl = existing.rows[0].image_url || null;
+    if (parseBoolean(remove_image, false)) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = null;
+    }
+    if (req.file) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = await saveUploadedImage(req.file, 'announcement');
+    }
+
     const updateData = {
       title: title,
       date: date,
       body: body,
       details: details,
-      is_active: is_active === 'true',
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -948,7 +1113,7 @@ app.put('/api/admin/announcements/:id/', requireAdmin, upload.single('image'), a
     console.log('Announcements Update - Successfully updated:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      announcement: result.rows[0]
+      announcement: withImageField(result.rows[0])
     });
   } catch (err) {
     console.error('Announcement update error:', err);
@@ -970,6 +1135,8 @@ app.delete('/api/admin/announcements/:id/', requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Announcement not found or already deleted' });
     }
 
+    await deleteManagedImage(result.rows[0].image_url);
+
     console.log('Announcements Delete - Successfully deleted:', result.rows[0]);
     res.json({ 
       status: 'success', 
@@ -986,7 +1153,7 @@ app.delete('/api/admin/announcements/:id/', requireAdmin, async (req, res) => {
 app.get('/api/admin/achievements/', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM achievements ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', achievements: result.rows });
+    res.json({ status: 'success', achievements: result.rows.map(withImageField) });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch achievements' });
   }
@@ -1004,13 +1171,16 @@ app.post('/api/admin/achievements/create/', requireAdmin, upload.single('image')
     
     console.log('Achievements Create - Creating achievement:', { title, description, details, achievement_date, category, is_active, display_order });
     
+    const imageUrl = await saveUploadedImage(req.file, 'achievement');
+
     const achievementData = {
       title: title,
       description: description,
       details: details,
       achievement_date: achievement_date,
       category: category,
-      is_active: is_active === 'true',
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1023,7 +1193,7 @@ app.post('/api/admin/achievements/create/', requireAdmin, upload.single('image')
     console.log('Achievements Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      achievement: result.rows[0]
+      achievement: withImageField(result.rows[0])
     });
   } catch (err) {
     console.error('Achievement creation error:', err);
@@ -1031,10 +1201,101 @@ app.post('/api/admin/achievements/create/', requireAdmin, upload.single('image')
   }
 });
 
+app.put('/api/admin/achievements/:id/', requireAdmin, upload.single('image'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, details, achievement_date, category, is_active, display_order, remove_image } = req.body;
+
+    if (!title || !achievement_date) {
+      return res.status(400).json({ status: 'error', message: 'Title and achievement date are required' });
+    }
+
+    const existing = await pool.query('SELECT image_url FROM achievements WHERE id = $1', [parseInt(id)]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'Achievement not found or update failed' });
+    }
+
+    let imageUrl = existing.rows[0].image_url || null;
+    if (parseBoolean(remove_image, false)) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = null;
+    }
+    if (req.file) {
+      await deleteManagedImage(imageUrl);
+      imageUrl = await saveUploadedImage(req.file, 'achievement');
+    }
+
+    const updateData = {
+      title,
+      description,
+      details,
+      achievement_date,
+      category,
+      image_url: imageUrl,
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('achievements', updateData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Achievement not found or update failed' });
+    }
+
+    res.json({
+      status: 'success',
+      achievement: withImageField(result.rows[0])
+    });
+  } catch (err) {
+    console.error('Achievement update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update achievement: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/achievements/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('achievements', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Achievement not found or already deleted' });
+    }
+
+    await deleteManagedImage(result.rows[0].image_url);
+
+    res.json({
+      status: 'success',
+      deleted_achievement: withImageField(result.rows[0])
+    });
+  } catch (err) {
+    console.error('Achievement deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete achievement: ' + err.message });
+  }
+});
+
 // Academic Programs endpoints
 app.get('/api/admin/academic-programs/', requireAdmin, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM academic_programs ORDER BY display_order, created_at DESC');
+    const result = await pool.query(`
+      SELECT 
+        id,
+        name as title,
+        name as short_title,
+        description,
+        degree_type,
+        duration_years,
+        total_units,
+        with_enhancements,
+        program_overview,
+        core_courses,
+        career_prospects,
+        is_active,
+        display_order,
+        created_at,
+        updated_at
+      FROM academic_programs 
+      ORDER BY display_order, created_at DESC
+    `);
     res.json({ status: 'success', programs: result.rows });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch academic programs' });
@@ -1044,14 +1305,14 @@ app.get('/api/admin/academic-programs/', requireAdmin, async (req, res) => {
 app.post('/api/admin/academic-programs/create/', requireAdmin, async (req, res) => {
   try {
     console.log('Academic Programs Create - Request body:', req.body);
-    const { title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order } = req.body;
+    const { title, short_title, program_type, description, duration_years, total_units, with_enhancements, program_overview, core_courses, career_prospects, is_active, display_order } = req.body;
     
     if (!title) {
       console.log('Academic Programs Create - Missing title');
       return res.status(400).json({ status: 'error', message: 'Program title is required' });
     }
     
-    console.log('Academic Programs Create - Creating academic program:', { title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order });
+    console.log('Academic Programs Create - Creating academic program:', { title, short_title, program_type, description, duration_years, total_units, with_enhancements, program_overview, core_courses, career_prospects, is_active, display_order });
     
     const programData = {
       name: title,
@@ -1060,7 +1321,10 @@ app.post('/api/admin/academic-programs/create/', requireAdmin, async (req, res) 
       duration_years: parseInt(duration_years) || 4,
       total_units: parseInt(total_units) || 120,
       with_enhancements: parseInt(with_enhancements) || 0,
-      is_active: is_active === 'true',
+      program_overview: program_overview || '',
+      core_courses: core_courses || '',
+      career_prospects: career_prospects || '',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1071,9 +1335,14 @@ app.post('/api/admin/academic-programs/create/', requireAdmin, async (req, res) 
     }
 
     console.log('Academic Programs Create - Successfully created:', result.rows[0]);
+    const responseProgram = {
+      ...result.rows[0],
+      title: result.rows[0].name,
+      short_title: result.rows[0].name
+    };
     res.json({ 
       status: 'success', 
-      program: result.rows[0]
+      program: responseProgram
     });
   } catch (err) {
     console.error('Academic program creation error:', err);
@@ -1085,14 +1354,14 @@ app.put('/api/admin/academic-programs/:id/', requireAdmin, async (req, res) => {
   try {
     console.log('Academic Programs Update - Request body:', req.body);
     const { id } = req.params;
-    const { title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order } = req.body;
+    const { title, short_title, program_type, description, duration_years, total_units, with_enhancements, program_overview, core_courses, career_prospects, is_active, display_order } = req.body;
     
     if (!title) {
       console.log('Academic Programs Update - Missing title');
       return res.status(400).json({ status: 'error', message: 'Program title is required' });
     }
     
-    console.log('Academic Programs Update - Updating academic program:', { id, title, short_title, program_type, description, duration_years, total_units, with_enhancements, is_active, display_order });
+    console.log('Academic Programs Update - Updating academic program:', { id, title, short_title, program_type, description, duration_years, total_units, with_enhancements, program_overview, core_courses, career_prospects, is_active, display_order });
     
     const updateData = {
       name: title,
@@ -1101,7 +1370,10 @@ app.put('/api/admin/academic-programs/:id/', requireAdmin, async (req, res) => {
       duration_years: parseInt(duration_years) || 4,
       total_units: parseInt(total_units) || 120,
       with_enhancements: parseInt(with_enhancements) || 0,
-      is_active: is_active === 'true',
+      program_overview: program_overview || '',
+      core_courses: core_courses || '',
+      career_prospects: career_prospects || '',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1112,9 +1384,14 @@ app.put('/api/admin/academic-programs/:id/', requireAdmin, async (req, res) => {
     }
 
     console.log('Academic Programs Update - Successfully updated:', result.rows[0]);
+    const responseProgram = {
+      ...result.rows[0],
+      title: result.rows[0].name,
+      short_title: result.rows[0].name
+    };
     res.json({ 
       status: 'success', 
-      program: result.rows[0]
+      program: responseProgram
     });
   } catch (err) {
     console.error('Academic program update error:', err);
@@ -1178,7 +1455,7 @@ app.post('/api/admin/departments/create/', requireAdmin, async (req, res) => {
       email: email,
       head_name: head_name,
       head_title: head_title,
-      is_active: is_active === 'true',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1228,7 +1505,7 @@ app.post('/api/admin/personnel/create/', requireAdmin, async (req, res) => {
       email: email,
       phone: phone,
       bio: bio,
-      is_active: is_active === 'true',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1274,7 +1551,7 @@ app.post('/api/admin/admission-requirements/create/', requireAdmin, async (req, 
     const requirementData = {
       category: category || 'new-scholar',
       requirement_text: requirement_text,
-      is_active: is_active === 'true',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1322,7 +1599,7 @@ app.post('/api/admin/enrollment-steps/create/', requireAdmin, async (req, res) =
       step_number: parseInt(step_number) || 1,
       title: title,
       description: description,
-      is_active: is_active === 'true',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1368,7 +1645,7 @@ app.post('/api/admin/admission-notes/create/', requireAdmin, async (req, res) =>
     const noteData = {
       title: title,
       note_text: note_text,
-      is_active: is_active === 'true',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1411,7 +1688,7 @@ app.post('/api/admin/institutional-info/update/', requireAdmin, async (req, res)
       const result = await pool.query(
         `UPDATE institutional_info SET vision = $1, mission = $2, goals = $3, core_values = $4, is_active = $5, updated_at = NOW() 
          WHERE id = $6 RETURNING *`,
-        [vision, mission, goals, core_values, is_active, existing.rows[0].id]
+        [vision, mission, goals, core_values, parseBoolean(is_active, true), existing.rows[0].id]
       );
       res.json({ status: 'success', institutional_info: result.rows[0] });
     } else {
@@ -1419,7 +1696,7 @@ app.post('/api/admin/institutional-info/update/', requireAdmin, async (req, res)
       const result = await pool.query(
         `INSERT INTO institutional_info (vision, mission, goals, core_values, is_active) 
          VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-        [vision, mission, goals, core_values, is_active]
+        [vision, mission, goals, core_values, parseBoolean(is_active, true)]
       );
       res.json({ status: 'success', institutional_info: result.rows[0] });
     }
@@ -1454,7 +1731,7 @@ app.post('/api/admin/downloads/create/', requireAdmin, async (req, res) => {
       title: title,
       description: description,
       category: category || 'other',
-      is_active: is_active === 'true',
+      is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
     
@@ -1590,23 +1867,60 @@ app.get('/api/contact/verify/', async (req, res) => {
           </body>
         </html>
       `);
-    } catch (adminErr) {
-      console.error('Admin notification error:', adminErr);
+    } catch (err) {
+      logger.error('Admin notification error:', err);
       res.send('Verified, but failed to notify admin. We will check the database.');
     }
 
   } catch (err) {
-    console.error('Verification error:', err);
+    logger.error('Verification error:', err);
     res.status(500).send('An error occurred during verification.');
   }
 });
 
-// 3. Health Check
+// Comprehensive Health Check Endpoint
+app.get('/health', async (req, res) => {
+  const healthCheck = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    services: {
+      database: 'unknown',
+      memory: process.memoryUsage(),
+      cpu: process.cpuUsage()
+    }
+  };
+
+  try {
+    if (pool && dbReady) {
+      await pool.query('SELECT 1');
+      healthCheck.services.database = 'healthy';
+    } else {
+      healthCheck.services.database = 'unhealthy';
+      healthCheck.status = 'degraded';
+    }
+  } catch (err) {
+    healthCheck.services.database = 'unhealthy';
+    healthCheck.status = 'unhealthy';
+    healthCheck.error = err.message;
+  }
+
+  const statusCode = healthCheck.status === 'healthy' ? 200 : 
+                    healthCheck.status === 'degraded' ? 200 : 503;
+  
+  res.status(statusCode).json(healthCheck);
+});
+
+// Legacy Health Check
 app.get('/', (req, res) => {
   res.json({ status: 'ok', db: dbReady ? 'ready' : 'not_ready' });
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`Health check available at: http://localhost:${PORT}/health`);
 });

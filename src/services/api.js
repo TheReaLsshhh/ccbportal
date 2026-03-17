@@ -121,7 +121,7 @@ class ApiService {
     }
 
     async deleteAnnouncement(announcementId) {
-        return this.makeRequest(`/admin/announcements/${announcementId}/delete/`, {
+        return this.makeRequest(`/admin/announcements/${announcementId}/`, {
             method: 'DELETE',
         });
     }
@@ -151,7 +151,7 @@ class ApiService {
     }
 
     async deleteAdmissionRequirement(requirementId) {
-        return this.makeRequest(`/admin/admission-requirements/${requirementId}/delete/`, {
+        return this.makeRequest(`/admin/admission-requirements/${requirementId}/`, {
             method: 'DELETE',
         });
     }
@@ -176,7 +176,7 @@ class ApiService {
     }
 
     async deleteEnrollmentStep(stepId) {
-        return this.makeRequest(`/admin/enrollment-steps/${stepId}/delete/`, {
+        return this.makeRequest(`/admin/enrollment-steps/${stepId}/`, {
             method: 'DELETE',
         });
     }
@@ -201,7 +201,7 @@ class ApiService {
     }
 
     async deleteAdmissionNote(noteId) {
-        return this.makeRequest(`/admin/admission-notes/${noteId}/delete/`, {
+        return this.makeRequest(`/admin/admission-notes/${noteId}/`, {
             method: 'DELETE',
         });
     }
@@ -295,7 +295,7 @@ class ApiService {
     }
 
     async deleteDownload(downloadId) {
-        return this.makeRequest(`/admin/downloads/${downloadId}/delete/`, {
+        return this.makeRequest(`/admin/downloads/${downloadId}/`, {
             method: 'DELETE',
         });
     }
@@ -386,38 +386,12 @@ class ApiService {
     }
 
     async updateEvent(eventId, payload) {
-        // For updates with an image (FormData), use POST so the backend reliably
-        // parses multipart/form-data (similar pattern to updateNews).
+        // PUT + FormData works with the Express multer route used by the backend.
         if (payload instanceof FormData) {
-            const url = `${this.baseURL}/admin/events/${eventId}/`;
-            const config = {
-                method: 'POST',
+            return this.makeRequest(`/admin/events/${eventId}/`, {
+                method: 'PUT',
                 body: payload,
-                credentials: 'include',
-                // Let the browser set Content-Type with the multipart boundary
-            };
-
-            try {
-                const response = await fetch(url, config);
-                let data = null;
-                const contentType = response.headers.get('content-type') || '';
-                if (contentType.includes('application/json')) {
-                    try { data = await response.json(); } catch (_) { /* ignore */ }
-                }
-
-                if (!response.ok) {
-                    const message = (data && (data.message || data.detail || data.error)) || `HTTP error! status: ${response.status}`;
-                    const err = new Error(message);
-                    err.status = response.status;
-                    err.data = data;
-                    throw err;
-                }
-
-                return data || await response.json();
-            } catch (error) {
-                console.error('API request failed:', error);
-                throw error;
-            }
+            });
         }
 
         // For simple JSON updates (no file), keep using PUT + JSON
@@ -428,7 +402,7 @@ class ApiService {
     }
 
     async deleteEvent(eventId) {
-        return this.makeRequest(`/admin/events/${eventId}/delete/`, {
+        return this.makeRequest(`/admin/events/${eventId}/`, {
             method: 'DELETE',
         });
     }
@@ -449,7 +423,7 @@ class ApiService {
     }
 
     async deleteAchievement(achievementId) {
-        return this.makeRequest(`/admin/achievements/${achievementId}/delete/`, {
+        return this.makeRequest(`/admin/achievements/${achievementId}/`, {
             method: 'DELETE',
         });
     }
@@ -486,7 +460,7 @@ class ApiService {
     }
 
     async deleteDepartment(departmentId) {
-        return this.makeRequest(`/admin/departments/${departmentId}/delete/`, {
+        return this.makeRequest(`/admin/departments/${departmentId}/`, {
             method: 'DELETE',
         });
     }
@@ -511,7 +485,7 @@ class ApiService {
     }
 
     async deletePersonnel(personnelId) {
-        return this.makeRequest(`/admin/personnel/${personnelId}/delete/`, {
+        return this.makeRequest(`/admin/personnel/${personnelId}/`, {
             method: 'DELETE',
         });
     }
@@ -551,51 +525,14 @@ class ApiService {
     }
 
     async updateNews(newsId, formData) {
-        // Use FormData for file uploads
-        // Note: Some backends don't parse multipart/form-data for PUT requests automatically.
-        // So we use POST with a method override header.
-        const url = `${this.baseURL}/admin/news/${newsId}/`;
-        
-        // Add _method field to FormData to indicate it's an update
-        if (formData instanceof FormData) {
-            formData.append('_method', 'PUT');
-        }
-        
-        const config = {
-            method: 'POST', // Use POST for multipart data
+        return this.makeRequest(`/admin/news/${newsId}/`, {
+            method: 'PUT',
             body: formData,
-            credentials: 'include',
-            headers: {
-                'X-HTTP-Method-Override': 'PUT' // Send method override header
-            }
-            // Don't set Content-Type header - browser will set it with boundary for multipart/form-data
-        };
-
-        try {
-            const response = await fetch(url, config);
-            let data = null;
-            const contentType = response.headers.get('content-type') || '';
-            if (contentType.includes('application/json')) {
-                try { data = await response.json(); } catch (_) { /* ignore */ }
-            }
-
-            if (!response.ok) {
-                const message = (data && (data.message || data.detail || data.error)) || `HTTP error! status: ${response.status}`;
-                const err = new Error(message);
-                err.status = response.status;
-                err.data = data;
-                throw err;
-            }
-
-            return data || await response.json();
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
+        });
     }
 
     async deleteNews(newsId) {
-        return this.makeRequest(`/admin/news/${newsId}/delete/`, {
+        return this.makeRequest(`/admin/news/${newsId}/`, {
             method: 'DELETE',
         });
     }

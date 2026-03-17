@@ -281,7 +281,13 @@ const AdminPage = () => {
     setEditingItem(null);
     // Initialize formData with default values based on active tab
     const defaultFormData = {};
-    if (activeTab === 'admission-requirements') {
+    if (activeTab === 'academic-programs') {
+      defaultFormData.is_active = true;
+      defaultFormData.display_order = 0;
+      defaultFormData.duration_years = 4;
+      defaultFormData.total_units = 120;
+      defaultFormData.with_enhancements = 0;
+    } else if (activeTab === 'admission-requirements') {
       defaultFormData.category = 'new-scholar';
       defaultFormData.is_active = true;
       defaultFormData.display_order = 0;

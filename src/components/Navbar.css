@@ -310,8 +310,11 @@
   /* Hide icons to match the design */
 }
 
-.nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+/* Unified hover style for all main nav items (links and Services button) */
+.nav-link:hover,
+.services-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
 }
 
 /* Active navigation styling - white/light background for current page */
@@ -380,10 +383,6 @@
 
 .services-nav-link:focus {
   outline: none;
-}
-
-.services-nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .services-nav-link.active-nav {
@@ -1086,7 +1085,8 @@
     transition: all 0.3s ease;
   }
 
-  .nav-link:hover {
+  .nav-link:hover,
+  .services-nav-link:hover {
     background-color: rgba(255, 255, 255, 0.2);
     transform: translateX(5px);
   }
