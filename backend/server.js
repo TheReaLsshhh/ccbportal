@@ -766,7 +766,15 @@ app.get('/api/academic-programs/', async (req, res) => {
       WHERE is_active = true 
       ORDER BY display_order, created_at DESC
     `);
-    res.json({ status: 'success', programs: result.rows });
+    const programs = result.rows.map((row) => ({
+      ...row,
+      core_courses: typeof row.core_courses === 'string'
+        ? row.core_courses.split('\n').map((course) => course.trim()).filter(Boolean)
+        : Array.isArray(row.core_courses)
+          ? row.core_courses
+          : []
+    }));
+    res.json({ status: 'success', programs });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch academic programs' });
   }

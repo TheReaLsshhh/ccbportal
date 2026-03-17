@@ -6,6 +6,18 @@ import SEO from './components/SEO';
 import apiService from './services/api';
 import './academicprogram.css';
 
+const getCoreCoursesList = (coreCourses) => {
+  if (Array.isArray(coreCourses)) {
+    return coreCourses.filter((course) => typeof course === 'string' && course.trim());
+  }
+
+  if (typeof coreCourses === 'string') {
+    return coreCourses.split('\n').map((course) => course.trim()).filter(Boolean);
+  }
+
+  return [];
+};
+
 const AcademicPrograms = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -251,7 +263,9 @@ const AcademicPrograms = () => {
                 </div>
               ) : (
                 <div className={`descriptions-content ${isDescriptionsVisible ? 'fade-in-visible' : ''}`}>
-                  {programs.map((program) => (
+                  {programs.map((program) => {
+                    const coreCourses = getCoreCoursesList(program.core_courses);
+                    return (
                     <div key={`desc-${program.id}`} className="description-card">
                       <h3>{program.title}</h3>
                       <div className="description-details">
@@ -262,8 +276,8 @@ const AcademicPrograms = () => {
                         <div className="core-courses">
                           <h4>Core Courses</h4>
                           <ul>
-                            {program.core_courses && program.core_courses.length > 0 ? (
-                              program.core_courses.map((course, index) => (
+                            {coreCourses.length > 0 ? (
+                              coreCourses.map((course, index) => (
                                 <li key={index}>{course}</li>
                               ))
                             ) : (
@@ -285,7 +299,8 @@ const AcademicPrograms = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
