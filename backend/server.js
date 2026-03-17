@@ -982,6 +982,82 @@ app.get('/api/academic-programs/', async (req, res) => {
   }
 });
 
+app.get('/api/admissions-info/', async (req, res) => {
+  try {
+    const [requirementsResult, stepsResult, notesResult] = await Promise.all([
+      pool.query(`
+        SELECT *
+        FROM admission_requirements
+        WHERE is_active = TRUE
+        ORDER BY category, display_order, created_at DESC
+      `),
+      pool.query(`
+        SELECT *
+        FROM enrollment_steps
+        WHERE is_active = TRUE
+        ORDER BY category, display_order, step_number, created_at DESC
+      `),
+      pool.query(`
+        SELECT *
+        FROM admission_notes
+        WHERE is_active = TRUE
+        ORDER BY display_order, created_at DESC
+      `)
+    ]);
+
+    const requirements = requirementsResult.rows.reduce((acc, item) => {
+      const category = item.category || 'new-scholar';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push({
+        id: item.id,
+        text: item.requirement_text,
+        category,
+        display_order: item.display_order
+      });
+      return acc;
+    }, {});
+
+    const processStepsByCategory = stepsResult.rows.reduce((acc, item) => {
+      const category = item.category || 'new-scholar';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push({
+        id: item.id,
+        category,
+        step_number: item.step_number,
+        title: item.title,
+        description: item.description,
+        display_order: item.display_order
+      });
+      return acc;
+    }, {});
+
+    const notes = notesResult.rows.map((item) => ({
+      id: item.id,
+      title: item.title,
+      text: item.note_text,
+      display_order: item.display_order
+    }));
+
+    res.json({
+      status: 'success',
+      requirements,
+      process_steps: stepsResult.rows.map((item) => ({
+        id: item.id,
+        category: item.category || 'new-scholar',
+        step_number: item.step_number,
+        title: item.title,
+        description: item.description,
+        display_order: item.display_order
+      })),
+      process_steps_by_category: processStepsByCategory,
+      notes
+    });
+  } catch (err) {
+    logger.error('Failed to fetch admissions info:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch admissions info' });
+  }
+});
+
 app.get('/api/departments/', async (req, res) => {
   try {
     const [departmentsResult, personnelResult] = await Promise.all([
