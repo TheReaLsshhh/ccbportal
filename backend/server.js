@@ -471,7 +471,7 @@ async function saveUploadedImage(file, prefix) {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: 'ccbportal',
+          asset_folder: 'ccbportal',
           public_id: publicId,
           resource_type: 'image'
         },
