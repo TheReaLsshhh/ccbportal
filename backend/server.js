@@ -858,6 +858,59 @@ app.get('/api/academic-programs/', async (req, res) => {
   }
 });
 
+app.get('/api/departments/', async (req, res) => {
+  try {
+    const [departmentsResult, personnelResult] = await Promise.all([
+      pool.query(`
+        SELECT *
+        FROM departments
+        WHERE is_active = TRUE
+        ORDER BY display_order, created_at DESC
+      `),
+      pool.query(`
+        SELECT *
+        FROM personnel
+        WHERE is_active = TRUE
+        ORDER BY display_order, created_at DESC
+      `)
+    ]);
+
+    const personnelByDepartment = personnelResult.rows.reduce((acc, person) => {
+      const departmentId = person.department_id;
+      if (!departmentId) return acc;
+      if (!acc[departmentId]) acc[departmentId] = [];
+      acc[departmentId].push(person);
+      return acc;
+    }, {});
+
+    const departments = departmentsResult.rows.map((department) => ({
+      ...department,
+      personnel: personnelByDepartment[department.id] || []
+    }));
+
+    res.json({ status: 'success', departments });
+  } catch (err) {
+    logger.error('Failed to fetch public departments:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch departments' });
+  }
+});
+
+app.get('/api/personnel/', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM personnel
+      WHERE is_active = TRUE
+      ORDER BY display_order, created_at DESC
+    `);
+
+    res.json({ status: 'success', personnel: result.rows });
+  } catch (err) {
+    logger.error('Failed to fetch public personnel:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch personnel' });
+  }
+});
+
 // 2. Admin CRUD Endpoints
 
 // Events endpoints
