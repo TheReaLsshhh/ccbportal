@@ -555,7 +555,7 @@ app.post('/api/admin/login/', async (req, res) => {
 
     res.cookie(ADMIN_TOKEN_COOKIE, token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
@@ -588,7 +588,7 @@ app.get('/api/admin/auth-check/', requireAdmin, async (req, res) => {
 });
 
 app.post('/api/admin/logout/', (req, res) => {
-  res.clearCookie(ADMIN_TOKEN_COOKIE, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+  res.clearCookie(ADMIN_TOKEN_COOKIE, { httpOnly: true, sameSite: 'none', secure: process.env.NODE_ENV === 'production' });
   return res.json({ status: 'success', message: 'Logged out' });
 });
 
