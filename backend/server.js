@@ -26,11 +26,13 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const MEDIA_ROOT = path.join(__dirname, '../media');
 const IMAGE_UPLOAD_ROOT = path.join(MEDIA_ROOT, 'images');
+const FILE_UPLOAD_ROOT = path.join(MEDIA_ROOT, 'files');
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 
 fs.mkdirSync(IMAGE_UPLOAD_ROOT, { recursive: true });
+fs.mkdirSync(FILE_UPLOAD_ROOT, { recursive: true });
 
 if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
   cloudinary.config({
@@ -98,6 +100,34 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Only image files are allowed'));
+    }
+  }
+});
+
+const documentUpload = multer({
+  storage: storage,
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = new Set([
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/x-rar-compressed',
+      'application/octet-stream'
+    ]);
+
+    const fileName = (file.originalname || '').toLowerCase();
+    const allowedExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip', '.rar'];
+    const hasAllowedExtension = allowedExtensions.some((ext) => fileName.endsWith(ext));
+
+    if (allowedMimeTypes.has(file.mimetype) || hasAllowedExtension) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only supported document files are allowed'));
     }
   }
 });
@@ -502,6 +532,69 @@ async function saveUploadedImage(file, prefix) {
   return `/media/images/${fileName}`;
 }
 
+function getSafeStoredExtension(file, fallback = '.bin') {
+  const originalExt = path.extname(file.originalname || '');
+  if (originalExt) return originalExt;
+
+  const mimeToExt = {
+    'application/pdf': '.pdf',
+    'application/msword': '.doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+    'application/vnd.ms-excel': '.xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+    'application/zip': '.zip',
+    'application/x-zip-compressed': '.zip',
+    'application/x-rar-compressed': '.rar'
+  };
+
+  return mimeToExt[file.mimetype] || fallback;
+}
+
+function getFileTypeLabel(fileUrl) {
+  if (!fileUrl || typeof fileUrl !== 'string') return null;
+  const pathname = fileUrl.split('?')[0];
+  const ext = path.extname(pathname).replace('.', '').toUpperCase();
+  return ext || null;
+}
+
+async function saveUploadedDocument(file, prefix) {
+  if (!file) return null;
+
+  if (isCloudinaryConfigured()) {
+    const originalName = file.originalname || `${prefix}-${Date.now()}`;
+    const publicIdBase = path.parse(originalName).name.replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const publicId = `${prefix}-${Date.now()}-${publicIdBase || uuidv4()}`;
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          asset_folder: 'ccbportal',
+          public_id: publicId,
+          resource_type: 'raw'
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          resolve(result?.secure_url || null);
+        }
+      );
+
+      uploadStream.end(file.buffer);
+    });
+  }
+
+  const extension = getSafeStoredExtension(file);
+  const fileName = `${prefix}-${Date.now()}-${uuidv4()}${extension}`;
+  const fullPath = path.join(FILE_UPLOAD_ROOT, fileName);
+
+  await fs.promises.writeFile(fullPath, file.buffer);
+
+  return `/media/files/${fileName}`;
+}
+
 async function deleteManagedImage(imageUrl) {
   if (!imageUrl || typeof imageUrl !== 'string') {
     return;
@@ -529,6 +622,37 @@ async function deleteManagedImage(imageUrl) {
   } catch (err) {
     if (err.code !== 'ENOENT') {
       logger.warn('Failed to delete managed image', { imageUrl, error: err.message });
+    }
+  }
+}
+
+async function deleteManagedFile(fileUrl) {
+  if (!fileUrl || typeof fileUrl !== 'string') {
+    return;
+  }
+
+  const publicId = getCloudinaryPublicId(fileUrl);
+  if (publicId && isCloudinaryConfigured()) {
+    try {
+      await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+    } catch (err) {
+      logger.warn('Failed to delete Cloudinary file', { fileUrl, error: err.message });
+    }
+    return;
+  }
+
+  if (!fileUrl.startsWith('/media/')) {
+    return;
+  }
+
+  const relativePath = fileUrl.replace(/^\/media\//, '').replace(/\//g, path.sep);
+  const fullPath = path.join(MEDIA_ROOT, relativePath);
+
+  try {
+    await fs.promises.unlink(fullPath);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      logger.warn('Failed to delete managed file', { fileUrl, error: err.message });
     }
   }
 }
@@ -908,6 +1032,32 @@ app.get('/api/personnel/', async (req, res) => {
   } catch (err) {
     logger.error('Failed to fetch public personnel:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch personnel' });
+  }
+});
+
+app.get('/api/downloads/', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM downloads
+      WHERE is_active = TRUE
+      ORDER BY display_order, created_at DESC
+    `);
+
+    const groupedDownloads = result.rows.reduce((acc, item) => {
+      const category = item.category || 'other';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push({
+        ...item,
+        file_type: getFileTypeLabel(item.file_url)
+      });
+      return acc;
+    }, {});
+
+    res.json({ status: 'success', downloads: groupedDownloads });
+  } catch (err) {
+    logger.error('Failed to fetch public downloads:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch downloads' });
   }
 });
 
@@ -1823,6 +1973,57 @@ app.post('/api/admin/admission-requirements/create/', requireAdmin, async (req, 
   }
 });
 
+app.put('/api/admin/admission-requirements/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, requirement_text, is_active, display_order } = req.body;
+
+    if (!requirement_text) {
+      return res.status(400).json({ status: 'error', message: 'Requirement text is required' });
+    }
+
+    const requirementData = {
+      category: category || 'new-scholar',
+      requirement_text: requirement_text,
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('admission_requirements', requirementData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Admission requirement not found or update failed' });
+    }
+
+    res.json({
+      status: 'success',
+      requirement: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Admission requirement update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update admission requirement: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/admission-requirements/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('admission_requirements', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Admission requirement not found or already deleted' });
+    }
+
+    res.json({
+      status: 'success',
+      deleted_requirement: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Admission requirement deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete admission requirement: ' + err.message });
+  }
+});
+
 // Enrollment Steps endpoints
 app.get('/api/admin/enrollment-steps/', requireAdmin, async (req, res) => {
   try {
@@ -1868,6 +2069,59 @@ app.post('/api/admin/enrollment-steps/create/', requireAdmin, async (req, res) =
   } catch (err) {
     console.error('Enrollment step creation error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create enrollment step: ' + err.message });
+  }
+});
+
+app.put('/api/admin/enrollment-steps/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, step_number, title, description, is_active, display_order } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ status: 'error', message: 'Title is required' });
+    }
+
+    const stepData = {
+      category: category || 'new-scholar',
+      step_number: parseInt(step_number) || 1,
+      title: title,
+      description: description,
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('enrollment_steps', stepData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Enrollment step not found or update failed' });
+    }
+
+    res.json({
+      status: 'success',
+      step: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Enrollment step update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update enrollment step: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/enrollment-steps/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('enrollment_steps', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Enrollment step not found or already deleted' });
+    }
+
+    res.json({
+      status: 'success',
+      deleted_step: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Enrollment step deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete enrollment step: ' + err.message });
   }
 });
 
@@ -1917,6 +2171,57 @@ app.post('/api/admin/admission-notes/create/', requireAdmin, async (req, res) =>
   }
 });
 
+app.put('/api/admin/admission-notes/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, note_text, is_active, display_order } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ status: 'error', message: 'Title is required' });
+    }
+
+    const noteData = {
+      title: title,
+      note_text: note_text,
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('admission_notes', noteData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Admission note not found or update failed' });
+    }
+
+    res.json({
+      status: 'success',
+      note: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Admission note update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update admission note: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/admission-notes/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('admission_notes', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Admission note not found or already deleted' });
+    }
+
+    res.json({
+      status: 'success',
+      deleted_note: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Admission note deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete admission note: ' + err.message });
+  }
+});
+
 // Institutional Info endpoints
 app.get('/api/admin/institutional-info/', requireAdmin, async (req, res) => {
   try {
@@ -1960,13 +2265,19 @@ app.post('/api/admin/institutional-info/update/', requireAdmin, async (req, res)
 app.get('/api/admin/downloads/', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM downloads ORDER BY display_order, created_at DESC');
-    res.json({ status: 'success', downloads: result.rows });
+    res.json({
+      status: 'success',
+      downloads: result.rows.map((download) => ({
+        ...download,
+        file_type: getFileTypeLabel(download.file_url)
+      }))
+    });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to fetch downloads' });
   }
 });
 
-app.post('/api/admin/downloads/create/', requireAdmin, async (req, res) => {
+app.post('/api/admin/downloads/create/', requireAdmin, documentUpload.single('file'), async (req, res) => {
   try {
     console.log('Downloads Create - Request body:', req.body);
     const { title, description, category, is_active, display_order } = req.body;
@@ -1975,13 +2286,20 @@ app.post('/api/admin/downloads/create/', requireAdmin, async (req, res) => {
       console.log('Downloads Create - Missing required fields');
       return res.status(400).json({ status: 'error', message: 'Title is required' });
     }
+
+    if (!req.file) {
+      return res.status(400).json({ status: 'error', message: 'File is required' });
+    }
     
     console.log('Downloads Create - Creating download:', { title, description, category, is_active, display_order });
+
+    const fileUrl = await saveUploadedDocument(req.file, 'download');
     
     const downloadData = {
       title: title,
       description: description,
       category: category || 'other',
+      file_url: fileUrl,
       is_active: parseBoolean(is_active, true),
       display_order: parseInt(display_order) || 0
     };
@@ -1995,11 +2313,88 @@ app.post('/api/admin/downloads/create/', requireAdmin, async (req, res) => {
     console.log('Downloads Create - Successfully created:', result.rows[0]);
     res.json({ 
       status: 'success', 
-      download: result.rows[0]
+      download: {
+        ...result.rows[0],
+        file_type: getFileTypeLabel(result.rows[0].file_url)
+      }
     });
   } catch (err) {
     console.error('Download creation error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create download: ' + err.message });
+  }
+});
+
+app.put('/api/admin/downloads/:id/', requireAdmin, documentUpload.single('file'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, category, is_active, display_order, remove_file } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ status: 'error', message: 'Title is required' });
+    }
+
+    const existing = await pool.query('SELECT file_url FROM downloads WHERE id = $1', [parseInt(id)]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Download not found or update failed' });
+    }
+
+    let fileUrl = existing.rows[0].file_url || null;
+    if (parseBoolean(remove_file, false)) {
+      await deleteManagedFile(fileUrl);
+      fileUrl = null;
+    }
+
+    if (req.file) {
+      await deleteManagedFile(fileUrl);
+      fileUrl = await saveUploadedDocument(req.file, 'download');
+    }
+
+    const downloadData = {
+      title: title,
+      description: description,
+      category: category || 'other',
+      file_url: fileUrl,
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('downloads', downloadData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Download not found or update failed' });
+    }
+
+    res.json({
+      status: 'success',
+      download: {
+        ...result.rows[0],
+        file_type: getFileTypeLabel(result.rows[0].file_url)
+      }
+    });
+  } catch (err) {
+    console.error('Download update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update download: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/downloads/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('downloads', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Download not found or already deleted' });
+    }
+
+    await deleteManagedFile(result.rows[0].file_url);
+
+    res.json({
+      status: 'success',
+      deleted_download: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Download deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete download: ' + err.message });
   }
 });
 
