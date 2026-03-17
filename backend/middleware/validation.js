@@ -14,7 +14,7 @@ const validationRules = {
   // News
   news: [
     body('title').trim().isLength({ min: 2, max: 200 }).withMessage('Title must be 2-200 characters'),
-    body('body').trim().isLength({ min: 10 }).withMessage('Body must be at least 10 characters'),
+    body('body').trim().isLength({ min: 1 }).withMessage('Body is required'),
     body('date').isISO8601().withMessage('Date must be valid ISO8601 format'),
     body('details').optional().trim(),
     body('is_active').optional().isBoolean(),
