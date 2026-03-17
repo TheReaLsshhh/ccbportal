@@ -1615,6 +1615,63 @@ app.post('/api/admin/departments/create/', requireAdmin, async (req, res) => {
   }
 });
 
+app.put('/api/admin/departments/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, department_type, description, office_location, phone, email, head_name, head_title, is_active, display_order } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ status: 'error', message: 'Department name is required' });
+    }
+
+    const departmentData = {
+      name: name,
+      department_type: department_type || 'academic',
+      description: description,
+      office_location: office_location,
+      phone: phone,
+      email: email,
+      head_name: head_name,
+      head_title: head_title,
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('departments', departmentData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Department not found or update failed' });
+    }
+
+    res.json({
+      status: 'success',
+      department: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Department update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update department: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/departments/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('departments', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Department not found or already deleted' });
+    }
+
+    res.json({
+      status: 'success',
+      deleted_department: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Department deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete department: ' + err.message });
+  }
+});
+
 // Personnel endpoints
 app.get('/api/admin/personnel/', requireAdmin, async (req, res) => {
   try {
@@ -1662,6 +1719,61 @@ app.post('/api/admin/personnel/create/', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Personnel creation error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create personnel: ' + err.message });
+  }
+});
+
+app.put('/api/admin/personnel/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { full_name, title, department_id, email, phone, bio, is_active, display_order } = req.body;
+
+    if (!full_name) {
+      return res.status(400).json({ status: 'error', message: 'Full name is required' });
+    }
+
+    const personnelData = {
+      full_name: full_name,
+      title: title,
+      department_id: department_id ? parseInt(department_id) : null,
+      email: email,
+      phone: phone,
+      bio: bio,
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('personnel', personnelData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Personnel not found or update failed' });
+    }
+
+    res.json({
+      status: 'success',
+      personnel: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Personnel update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update personnel: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/personnel/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('personnel', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Personnel not found or already deleted' });
+    }
+
+    res.json({
+      status: 'success',
+      deleted_personnel: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Personnel deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete personnel: ' + err.message });
   }
 });
 
