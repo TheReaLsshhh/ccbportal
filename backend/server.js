@@ -11,6 +11,7 @@ const fs = require('fs');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const { v2: cloudinary } = require('cloudinary');
 const logger = require('./utils/logger');
 const { validationRules, validate } = require('./middleware/validation');
 const { broadcastDataChange } = require('./utils/realtimeUtils');
@@ -25,8 +26,20 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const MEDIA_ROOT = path.join(__dirname, '../media');
 const IMAGE_UPLOAD_ROOT = path.join(MEDIA_ROOT, 'images');
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 
 fs.mkdirSync(IMAGE_UPLOAD_ROOT, { recursive: true });
+
+if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: CLOUDINARY_CLOUD_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: CLOUDINARY_API_SECRET,
+    secure: true
+  });
+}
 
 // Security Middleware
 app.use(helmet({
@@ -423,8 +436,59 @@ function withImageField(row) {
   };
 }
 
+function isCloudinaryConfigured() {
+  return Boolean(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
+}
+
+function getCloudinaryPublicId(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== 'string') return null;
+
+  try {
+    const url = new URL(imageUrl);
+    if (!url.hostname.includes('res.cloudinary.com')) return null;
+
+    const uploadMarker = '/upload/';
+    const uploadIndex = url.pathname.indexOf(uploadMarker);
+    if (uploadIndex === -1) return null;
+
+    let assetPath = url.pathname.slice(uploadIndex + uploadMarker.length);
+    assetPath = assetPath.replace(/^v\d+\//, '');
+    assetPath = assetPath.replace(/\.[^.\/]+$/, '');
+    return assetPath || null;
+  } catch (_) {
+    return null;
+  }
+}
+
 async function saveUploadedImage(file, prefix) {
   if (!file) return null;
+
+  if (isCloudinaryConfigured()) {
+    const originalName = file.originalname || `${prefix}-${Date.now()}`;
+    const publicIdBase = path.parse(originalName).name.replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const publicId = `${prefix}-${Date.now()}-${publicIdBase || uuidv4()}`;
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'ccbportal',
+          public_id: publicId,
+          resource_type: 'image'
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          resolve(result?.secure_url || null);
+        }
+      );
+
+      uploadStream.end(file.buffer);
+    });
+  }
+
   const originalExt = path.extname(file.originalname || '');
   const mimeExt = file.mimetype && file.mimetype.includes('/')
     ? `.${file.mimetype.split('/')[1].split('+')[0]}`
@@ -439,7 +503,21 @@ async function saveUploadedImage(file, prefix) {
 }
 
 async function deleteManagedImage(imageUrl) {
-  if (!imageUrl || typeof imageUrl !== 'string' || !imageUrl.startsWith('/media/')) {
+  if (!imageUrl || typeof imageUrl !== 'string') {
+    return;
+  }
+
+  const publicId = getCloudinaryPublicId(imageUrl);
+  if (publicId && isCloudinaryConfigured()) {
+    try {
+      await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
+    } catch (err) {
+      logger.warn('Failed to delete Cloudinary image', { imageUrl, error: err.message });
+    }
+    return;
+  }
+
+  if (!imageUrl.startsWith('/media/')) {
     return;
   }
 
