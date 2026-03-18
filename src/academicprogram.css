@@ -718,10 +718,7 @@ html, body {
   border-left-color: #ff8c00;
 }
 
-.description-card:hover h3,
-.description-card:hover .program-overview h4,
-.description-card:hover .core-courses h4,
-.description-card:hover .career-prospects h4 {
+.description-card:hover h3 {
   color: #ff8c00;
 }
 
@@ -764,6 +761,12 @@ html, body {
   line-height: 1.65;
   margin: 0;
   font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.description-card .program-overview h4:hover,
+.description-card .program-overview p:hover {
+  color: #ff8c00;
 }
 
 .description-card .core-courses ul,
@@ -780,6 +783,17 @@ html, body {
   line-height: 1.6;
   margin-bottom: 0.35rem;
   padding-left: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.description-card .core-courses h4:hover,
+.description-card .core-courses li:hover {
+  color: #ff8c00;
+}
+
+.description-card .career-prospects h4:hover,
+.description-card .career-prospects li:hover {
+  color: #ff8c00;
 }
 
 .description-card .core-courses li:last-child,
