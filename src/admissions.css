@@ -548,6 +548,18 @@ html, body {
   margin: 0 auto;
 }
 
+.requirements-content li {
+  transition: color 0.3s ease;
+}
+
+.requirements-content li:hover {
+  color: #ff8c00;
+}
+
+.requirements-content li:hover .requirement-checkmark {
+  color: #ff8c00;
+}
+
 /* Tab Content Animation */
 .tab-content {
   opacity: 0;
@@ -593,6 +605,15 @@ html, body {
   margin-bottom: 1.5rem;
   border-bottom: 2px solid #f0f0f0;
   padding-bottom: 1rem;
+}
+
+/* Override: h3 turns orange when hovering inside requirements-content */
+.requirements-content .detail-card h3 {
+  transition: color 0.3s ease;
+}
+
+.requirements-content:hover .detail-card h3 {
+  color: #ff8c00;
 }
 
 .enrollment-requirements ul {
@@ -737,6 +758,20 @@ html, body {
   margin: 0 0 5px 0;
   font-weight: bold;
   text-transform: none;
+  transition: color 0.3s ease;
+}
+
+.timeline-item:hover .timeline-content h4 {
+  color: #ff8c00;
+}
+
+.process-timeline .timeline-number {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.timeline-item:hover .timeline-number {
+  background: #ff8c00;
+  color: #fff;
 }
 
 .timeline-content p {
