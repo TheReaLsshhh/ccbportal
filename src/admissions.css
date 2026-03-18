@@ -334,9 +334,10 @@ html, body {
 
 /* Admissions Navigation Tabs */
 .admissions-navigation {
-  background: #f8f9fa;
-  padding: 20px 0;
-  border-bottom: 1px solid #e9ecef;
+  background: #fff;
+  padding: 20px 0 24px;
+  border-bottom: 1px solid rgba(45, 90, 45, 0.08);
+  box-shadow: 0 10px 30px rgba(19, 34, 19, 0.06);
   position: static;
   opacity: 0;
   transform: translateY(20px);
@@ -362,13 +363,15 @@ html, body {
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .admissions-navigation .nav-tab {
   background: white;
-  border: 2px solid #e9ecef;
+  border: 1px solid #dbe4db;
   color: #6c757d;
-  padding: 12px 24px;
+  padding: 12px 22px;
   border-radius: 25px;
   font-weight: 600;
   cursor: pointer;
@@ -380,14 +383,15 @@ html, body {
 .admissions-navigation .nav-tab:hover {
   border-color: #2d5a2d;
   color: #2d5a2d;
-  box-shadow: 0 4px 12px rgba(45, 90, 45, 0.15);
+  box-shadow: 0 8px 20px rgba(45, 90, 45, 0.12);
+  transform: translateY(-2px);
 }
 
 .admissions-navigation .nav-tab.active {
-  background: #2d5a2d;
+  background: linear-gradient(135deg, #2d5a2d, #356735);
   border-color: #2d5a2d;
   color: white;
-  box-shadow: 0 4px 12px rgba(45, 90, 45, 0.3);
+  box-shadow: 0 10px 24px rgba(45, 90, 45, 0.22);
 }
 
 /* Hero Section */
@@ -474,18 +478,18 @@ html, body {
 
 /* Main Section */
 .section-admissions {
-  padding: -40px 0 !important;
+  padding: 0 !important;
 }
 
 .admissions-section {
   padding-top: 1px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: #fff;
   min-height: 100vh;
 }
 
 .admissions-page .admissions-section {
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 35px 0;
+  background-color: rgba(255, 255, 255, 0.98);
+  padding: 58px 0 72px;
 }
 
 .admissions-section.navbar-collapsed {
@@ -496,10 +500,14 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 60px;
-  margin: 19px 0;
+  margin: 0;
   overflow: visible;
   width: 100%;
   max-width: 100%;
+}
+
+.admissions-block {
+  width: 100%;
 }
 
 /* Section Headers */
@@ -530,6 +538,14 @@ html, body {
   text-align: center;
   margin-bottom: 3rem;
   line-height: 1.6;
+}
+
+.requirements-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 /* Tab Content Animation */
@@ -577,6 +593,46 @@ html, body {
   margin-bottom: 1.5rem;
   border-bottom: 2px solid #f0f0f0;
   padding-bottom: 1rem;
+}
+
+.enrollment-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.enrollment-requirements li {
+  position: relative;
+  padding-left: 32px;
+  color: #495057;
+  line-height: 1.7;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f3f5f3;
+}
+
+.enrollment-requirements li:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.requirement-checkmark {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  color: #2d5a2d;
+  font-weight: 700;
+}
+
+.empty-state-message {
+  color: #666;
+  font-style: italic;
+  margin: 0;
+}
+
+.empty-state-card p {
+  margin-bottom: 0;
 }
 
 .card-section {
@@ -690,6 +746,54 @@ html, body {
   line-height: 1.5;
 }
 
+.requirements-note {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  background: linear-gradient(135deg, rgba(45, 90, 45, 0.08), rgba(255, 140, 0, 0.08));
+  border: 1px solid rgba(45, 90, 45, 0.12);
+  border-radius: 16px;
+  padding: 24px 26px;
+  box-shadow: 0 8px 20px rgba(19, 34, 19, 0.06);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.requirements-note.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.note-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 10px 20px rgba(45, 90, 45, 0.2);
+}
+
+.note-content h5 {
+  margin: 0 0 10px;
+  color: #2d5a2d;
+  font-size: 1.05rem;
+}
+
+.note-content ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #495057;
+}
+
+.note-content li + li {
+  margin-top: 8px;
+}
+
 /* CTA Section */
 .section-cta {
   display: flex;
@@ -781,6 +885,10 @@ html, body {
     padding-top: 30px;
   }
 
+  .admissions-page .admissions-section {
+    padding: 46px 0 56px;
+  }
+
   .admissions-navigation {
     padding: 15px 0;
   }
@@ -791,6 +899,10 @@ html, body {
   }
 
   .detail-card {
+    padding: 20px;
+  }
+
+  .requirements-note {
     padding: 20px;
   }
 }
@@ -820,6 +932,24 @@ html, body {
   .admissions-navigation .nav-tab {
     padding: 8px 12px;
     font-size: 12px;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .detail-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .requirements-note {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   /* Match mobile menu button positioning from Navbar.css for max-width: 480px */

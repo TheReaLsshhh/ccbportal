@@ -682,6 +682,16 @@ function getJwtSecret() {
   return process.env.JWT_SECRET || 'dev-jwt-secret';
 }
 
+function getAdminCookieOptions() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  };
+}
+
 async function requireAdmin(req, res, next) {
   try {
     if (!dbReady || !pool) return res.status(503).json({ authenticated: false, message: 'Database not ready' });
@@ -755,12 +765,7 @@ app.post('/api/admin/login/', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.cookie(ADMIN_TOKEN_COOKIE, token, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    res.cookie(ADMIN_TOKEN_COOKIE, token, getAdminCookieOptions());
 
     return res.json({ 
       status: 'success', 
@@ -790,7 +795,8 @@ app.get('/api/admin/auth-check/', requireAdmin, async (req, res) => {
 });
 
 app.post('/api/admin/logout/', (req, res) => {
-  res.clearCookie(ADMIN_TOKEN_COOKIE, { httpOnly: true, sameSite: 'none', secure: process.env.NODE_ENV === 'production' });
+  const { maxAge, ...clearCookieOptions } = getAdminCookieOptions();
+  res.clearCookie(ADMIN_TOKEN_COOKIE, clearCookieOptions);
   return res.json({ status: 'success', message: 'Logged out' });
 });
 

@@ -7,6 +7,13 @@ import SEO from './components/SEO';
 import apiService from './services/api';
 import './admissions.css';
 
+const categoryLabels = {
+  'new-scholar': 'Requirements for Enrollment of New Students (Scholarship)',
+  'new-non-scholar': 'Requirements for Enrollment of New Students (Non-Scholarship)',
+  'continuing-scholar': 'Requirements for Enrollment of Continuing Students (Scholarship)',
+  'continuing-non-scholar': 'Requirements for Enrollment of Continuing Students (Non-Scholarship)'
+};
+
 const Admissions = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -20,13 +27,6 @@ const Admissions = () => {
     processSteps: {},
     notes: []
   });
-  
-  // Debug: Log state changes
-  useEffect(() => {
-    console.log('Admissions data state updated:', admissionsData);
-    console.log('Selected category:', selectedCategory);
-    console.log('Process steps for category:', admissionsData.processSteps?.[selectedCategory]);
-  }, [admissionsData, selectedCategory]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -199,15 +199,12 @@ const Admissions = () => {
         setError(null);
         const data = await apiService.getAdmissionsInfo();
         
-        console.log('Admissions data received:', data); // Debug log
-        
         // Use process_steps_by_category if available, otherwise group from flat list
         let processStepsByCategory = {};
         
         // First, try to use the grouped data from backend
         if (data.process_steps_by_category && typeof data.process_steps_by_category === 'object') {
           processStepsByCategory = data.process_steps_by_category;
-          console.log('Using process_steps_by_category from API:', processStepsByCategory); // Debug log
         }
         
         // Also check if we have a flat list and need to group it (or if grouped data is empty)
@@ -216,7 +213,6 @@ const Admissions = () => {
           const hasGroupedSteps = Object.values(processStepsByCategory).some(steps => Array.isArray(steps) && steps.length > 0);
           
           if (!hasGroupedSteps) {
-            console.log('Grouped data empty, grouping from flat list:', data.process_steps); // Debug log
             data.process_steps.forEach(step => {
               const category = step.category || 'new-scholar';
               if (!processStepsByCategory[category]) {
@@ -226,9 +222,6 @@ const Admissions = () => {
             });
           }
         }
-        
-        console.log('Final processStepsByCategory:', processStepsByCategory); // Debug log
-        console.log('Steps for new-scholar:', processStepsByCategory['new-scholar']); // Debug log
         
         setAdmissionsData({
           requirements: data.requirements || {},
@@ -316,12 +309,12 @@ const Admissions = () => {
           
           <div className="admissions-content">
             {/* Requirements Section */}
-            <div className="requirements-section">
-              <h2>Admission Requirements</h2>
+            <div className="requirements-section admissions-block">
+              <h2 className="section-title">Admission Requirements</h2>
               <p className="section-subtitle">Complete requirements and qualifications for enrollment at City College of Bayawan</p>
               
               <div className="requirements-content">
-                <div className="general-requirements">
+                <div className="general-requirements detail-card">
                   {loading ? (
                     <div style={{ textAlign: 'center', padding: '2rem' }}>
                       <p>Loading requirements...</p>
@@ -335,12 +328,7 @@ const Admissions = () => {
                       {/* Dynamic Requirements by Category */}
                       {selectedCategory && admissionsData.requirements[selectedCategory] && admissionsData.requirements[selectedCategory].length > 0 && (
                         <div className="enrollment-requirements">
-                          <h4>
-                            {selectedCategory === 'new-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF NEW STUDENTS (Scholarship)'}
-                            {selectedCategory === 'new-non-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF NEW STUDENTS (Non-Scholarship)'}
-                            {selectedCategory === 'continuing-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF CONTINUING STUDENTS (Scholarship)'}
-                            {selectedCategory === 'continuing-non-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF CONTINUING STUDENTS (Non-Scholarship)'}
-                          </h4>
+                          <h3>{categoryLabels[selectedCategory]}</h3>
                           <ul>
                             {admissionsData.requirements[selectedCategory].map((req, index) => {
                               // If requirement_text contains newlines, split and display as list items
@@ -376,13 +364,8 @@ const Admissions = () => {
                       {/* Show message if no requirements for selected category */}
                       {selectedCategory && (!admissionsData.requirements[selectedCategory] || admissionsData.requirements[selectedCategory].length === 0) && (
                         <div className="enrollment-requirements">
-                          <h4>
-                            {selectedCategory === 'new-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF NEW STUDENTS (Scholarship)'}
-                            {selectedCategory === 'new-non-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF NEW STUDENTS (Non-Scholarship)'}
-                            {selectedCategory === 'continuing-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF CONTINUING STUDENTS (Scholarship)'}
-                            {selectedCategory === 'continuing-non-scholar' && 'REQUIREMENTS FOR ENROLLMENT OF CONTINUING STUDENTS (Non-Scholarship)'}
-                          </h4>
-                          <p style={{ color: '#666', fontStyle: 'italic' }}>No requirements available for this category at this time.</p>
+                          <h3>{categoryLabels[selectedCategory]}</h3>
+                          <p className="empty-state-message">No requirements available for this category at this time.</p>
                         </div>
                       )}
                     </>
@@ -411,35 +394,27 @@ const Admissions = () => {
             </div>
 
             {/* Application Process Section */}
-            <div className="process-section">
-              <h2>Enrollment Process</h2>
+            <div className="process-section admissions-block">
+              <h2 className="section-title">Enrollment Process</h2>
               <p className="section-subtitle">Follow these steps to apply for your chosen program</p>
               
               {loading ? (
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <div className="detail-card" style={{ textAlign: 'center', padding: '2rem' }}>
                   <p>Loading enrollment process...</p>
                 </div>
               ) : error ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: '#dc3545' }}>
+                <div className="detail-card" style={{ textAlign: 'center', padding: '2rem', color: '#dc3545' }}>
                   <p>{error}</p>
                 </div>
               ) : (() => {
                 // Get steps for selected category
                 const currentSteps = admissionsData.processSteps?.[selectedCategory];
-                
-                // Debug logging
-                console.log('Rendering Enrollment Process:', {
-                  selectedCategory,
-                  allProcessSteps: admissionsData.processSteps,
-                  currentSteps,
-                  stepsCount: currentSteps?.length || 0
-                });
-                
+
                 // Check if we have steps for the selected category
                 if (currentSteps && Array.isArray(currentSteps) && currentSteps.length > 0) {
                   // Always show the timeline - animation is optional
                   return (
-                    <div className="process-timeline fade-in-visible">
+                    <div className={`process-timeline detail-card ${isProcessTimelineVisible ? 'fade-in-visible' : ''}`}>
                       {currentSteps.map((step, index) => (
                         <div key={step.id || `step-${index}`} className="timeline-item">
                           <div className="timeline-number">{step.step_number || index + 1}</div>
@@ -462,7 +437,7 @@ const Admissions = () => {
                 } else {
                   // Show helpful message
                   return (
-                    <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                    <div className="detail-card empty-state-card" style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
                       <p>No enrollment process steps available for this category at this time.</p>
                       <p style={{ fontSize: '0.9rem', marginTop: '10px', color: '#999' }}>
                         Please check back later or contact the admissions office for more information.
@@ -494,4 +469,3 @@ const Admissions = () => {
 };
 
 export default Admissions;
-

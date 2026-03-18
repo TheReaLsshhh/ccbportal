@@ -226,9 +226,39 @@ const AdminPage = () => {
   };
 
   const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    showAlert('success', 'Welcome back!', `Welcome back, ${userData.username}!`);
+    const verifySessionAfterLogin = async () => {
+      setCheckingAuth(true);
+      const maxAttempts = 5;
+
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        try {
+          const response = await apiService.checkAuth();
+          if (response.status === 'success' && response.authenticated) {
+            setUser(response.user || userData);
+            setIsAuthenticated(true);
+            sessionStorage.setItem('admin_user', JSON.stringify(response.user || userData));
+            showAlert('success', 'Welcome back!', `Welcome back, ${(response.user || userData).username}!`);
+            setCheckingAuth(false);
+            return;
+          }
+        } catch (_) {
+          // Give the browser a moment to persist the auth cookie before retrying.
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+
+      setCheckingAuth(false);
+      setIsAuthenticated(false);
+      setUser(null);
+      sessionStorage.removeItem('admin_user');
+      sessionStorage.removeItem('session_expiry');
+      sessionStorage.removeItem('session_warning_time');
+      sessionStorage.removeItem('login_time');
+      setError('Login succeeded, but the admin session could not be verified. Please try again.');
+    };
+
+    verifySessionAfterLogin();
   };
 
   // CRUD Alert functions
