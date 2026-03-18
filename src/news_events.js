@@ -1099,7 +1099,7 @@ const NewsEvents = () => {
                     <>
                       <div className={`events-grid ${isEventsVisible ? 'fade-in-visible' : ''}`}>
                         {pagedEvents.map(event => (
-                          <div key={event.id} className="event-item">
+                          <div key={event.id} className={`event-item ${event.image ? 'has-image' : ''}`}>
                             {event.image ? (
                               <div className="event-image-wrapper">
                                 <img src={normalizeImageUrl(event.image)} srcSet={buildSrcSet(event.image)} sizes="(max-width: 768px) 100vw, 50vw" alt={event.title} loading="lazy" />
@@ -1151,7 +1151,7 @@ const NewsEvents = () => {
                     <>
                       <div className={`news-grid ${isNewsVisible ? 'fade-in-visible' : ''}`}>
                         {pagedNews.map(item => (
-                          <div key={item.id} className="news-item">
+                          <div key={item.id} className={`news-item ${item.image ? 'has-image' : ''}`}>
                             {item.image ? (
                               <div className="news-image-wrapper">
                                 <img src={normalizeImageUrl(item.image)} srcSet={buildSrcSet(item.image)} sizes="(max-width: 768px) 100vw, 33vw" alt={item.title} loading="lazy" />
@@ -1190,7 +1190,7 @@ const NewsEvents = () => {
                     <>
                       <div className={`announcements-grid ${isAnnouncementsVisible ? 'fade-in-visible' : ''}`}>
                         {pagedAnnouncements.map(item => (
-                          <div key={item.id} className="announcement-item">
+                          <div key={item.id} className={`announcement-item ${item.image ? 'has-image' : ''}`}>
                             {item.image ? (
                               <div className="announcement-image-wrapper">
                                 <img src={normalizeImageUrl(item.image)} srcSet={buildSrcSet(item.image)} sizes="(max-width: 768px) 100vw, 33vw" alt={item.title} loading="lazy" />
