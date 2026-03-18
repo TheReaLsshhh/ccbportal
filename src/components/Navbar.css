@@ -1139,7 +1139,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: -10px;
+    margin-bottom: 0;
   }
   
   .services-nav-link,
@@ -1162,9 +1162,9 @@
   .admissions-dropdown {
     position: static !important;
     width: 100%;
-    margin-top: 4px;
+    margin-top: 8px;
     margin-left: 0;
-    margin-bottom: 4px;
+    margin-bottom: 0;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1173,12 +1173,14 @@
     max-height: 0;
     opacity: 0;
     visibility: hidden;
-    transition: max-height 0.4s ease, opacity 0.3s ease, visibility 0.3s ease, margin 0.3s ease;
+    pointer-events: none;
+    transform: translateY(-8px) scaleY(0.96);
+    transform-origin: top center;
+    transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0.25s ease, transform 0.35s ease;
     display: block;
     z-index: auto;
     top: auto;
     left: auto;
-    transform: none;
   }
 
   .services-dropdown.dropdown-open,
@@ -1186,10 +1188,9 @@
     max-height: 600px;
     opacity: 1;
     visibility: visible;
-    transform: none !important;
-    overflow: visible !important;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    pointer-events: auto;
+    transform: translateY(0) scaleY(1) !important;
+    overflow: hidden;
   }
 
   .dropdown-item {
@@ -1197,7 +1198,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding: 14px 20px 14px 24px;
     text-align: left;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
     display: block;
     cursor: pointer;
     background-color: transparent;
@@ -1214,6 +1215,14 @@
     background-color: rgba(255, 255, 255, 0.12);
     color: #fff;
     padding-left: 28px;
+  }
+
+  .navbar .services-dropdown .dropdown-item,
+  .navbar .admissions-dropdown .dropdown-item {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease !important;
   }
 
   .nav-search {

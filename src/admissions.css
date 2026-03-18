@@ -840,7 +840,7 @@ html, body {
 .btn-secondary:hover {
   background-color: #5a6268;
   border-color: #545b62;
-}
+}           
 
 /* Footer Styles */
 .footer-section-admissions .footer {
@@ -860,7 +860,7 @@ html, body {
 /* Custom wave colors for Admissions page footer */
 .admissions-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .admissions-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
-.admissions-page .footer-wave .shape-fill-3 { fill: rgb(244, 244, 244); }
+.admissions-page .footer-wave .shape-fill-3 { fill: #fff; }
 
 /* Responsive Design */
 @media (max-width: 768px) {
