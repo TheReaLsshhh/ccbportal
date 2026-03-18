@@ -737,7 +737,7 @@ html, body {
 @media (max-width: 768px) {
   .downloads-hero {
     padding: 100px 0 60px;
-    height: 445px !important;
+    height: 350px !important;
   }
 
   .downloads-hero .hero-title {
@@ -775,8 +775,8 @@ html, body {
 
 @media (max-width: 480px) {
   .downloads-hero {
-    padding: 90px 0 50px;
-    height: 400px !important;
+    padding: 80px 0 50px;
+    height: 300px !important;
   }
   
   .downloads-hero .hero-title {
