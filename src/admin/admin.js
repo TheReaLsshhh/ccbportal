@@ -381,6 +381,12 @@ const AdminPage = () => {
     setEditingItem(item);
     // For admission requirements, ensure we have the requirement_text field
     const editData = { ...item };
+    if (activeTab === 'academic-programs') {
+      // Backend returns degree_type; form expects program_type
+      editData.program_type = item.degree_type || item.program_type || 'BS';
+      editData.title = item.title || item.name || '';
+      editData.short_title = item.short_title || item.title || item.name || '';
+    }
     if (activeTab === 'admission-requirements' && !editData.requirement_text) {
       editData.requirement_text = item.requirement_text || '';
     }

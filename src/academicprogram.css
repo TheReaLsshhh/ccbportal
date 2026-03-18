@@ -559,8 +559,8 @@ html, body {
 /* Programs Grid (Matches Requirements Grid) */
 .programs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
   width: 100%;
   max-width: 100%;
 }
@@ -569,26 +569,34 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
   background: #fff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 24px 20px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
   transition: all 0.3s ease;
   text-align: center;
 }
 
 .program-card:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: #2d5a2d;
-  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border-color: rgba(45, 90, 45, 0.55);
+}
+
+.program-card:hover h3 {
+  color: #ff8c00;
+}
+
+.program-card:hover .program-icon {
+  background: #ff8c00;
+  color: #fff;
 }
 
 .program-icon {
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
+  width: 56px;
+  height: 56px;
   background: linear-gradient(135deg, #2d5a2d, #3a6b3a);
   border-radius: 50%;
   display: flex;
@@ -596,30 +604,72 @@ html, body {
   justify-content: center;
   color: #fff;
   transition: all 0.3s ease;
-  margin-bottom: 10px;
 }
 
-.program-card:hover .program-icon {
-  background: linear-gradient(135deg, #ff8c00, #ff9f1a);
-  transform: scale(1.1);
+.program-icon svg {
+  width: 28px;
+  height: 28px;
 }
 
 .program-card h3 {
-  color: #2d5a2d;
-  font-size: 1.4rem;
-  font-weight: bold;
+  color: #1a472a;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.program-code {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  margin: -4px 0 0 0;
 }
 
 .program-details {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .program-description {
-  color: #666;
-  line-height: 1.6;
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
+  color: #555;
+  line-height: 1.55;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.program-stats-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 1rem 1.5rem;
+}
+
+.program-duration,
+.program-units,
+.program-enhancements {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.program-duration .duration-label,
+.program-units .units-label,
+.program-enhancements .enhancements-label {
+  color: #2d5a2d;
+  font-weight: 600;
+}
+
+.program-duration .duration-value,
+.program-units .units-value,
+.program-enhancements .enhancements-value {
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .program-meta {
@@ -643,6 +693,98 @@ html, body {
 .meta-value {
   color: #ff8c00;
   font-weight: bold;
+}
+
+/* Descriptions Section - Program Details & Course Outlines */
+.descriptions-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.description-card {
+  background: #fff;
+  padding: 28px 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(45, 90, 45, 0.08);
+  border-left: 4px solid #2d5a2d;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.description-card:hover {
+  box-shadow: 0 8px 24px rgba(45, 90, 45, 0.1);
+  border-left-color: #ff8c00;
+}
+
+.description-card:hover h3,
+.description-card:hover .program-overview h4,
+.description-card:hover .core-courses h4,
+.description-card:hover .career-prospects h4 {
+  color: #ff8c00;
+}
+
+.description-card h3 {
+  color: #1a472a;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(45, 90, 45, 0.15);
+  transition: color 0.3s ease;
+}
+
+.description-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.description-card .program-overview,
+.description-card .core-courses,
+.description-card .career-prospects {
+  text-align: left;
+}
+
+.description-card .program-overview h4,
+.description-card .core-courses h4,
+.description-card .career-prospects h4 {
+  color: #2d5a2d;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 0.3s ease;
+}
+
+.description-card .program-overview p {
+  color: #495057;
+  line-height: 1.65;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.description-card .core-courses ul,
+.description-card .career-prospects ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0;
+  text-align: left;
+}
+
+.description-card .core-courses li,
+.description-card .career-prospects li {
+  color: #495057;
+  line-height: 1.6;
+  margin-bottom: 0.35rem;
+  padding-left: 0.25rem;
+}
+
+.description-card .core-courses li:last-child,
+.description-card .career-prospects li:last-child {
+  margin-bottom: 0;
 }
 
 /* Detail Lists (Curriculum & Careers) */
@@ -879,7 +1021,12 @@ html, body {
   }
 
   .program-card {
-    padding: 25px 20px;
+    padding: 20px 18px;
+    gap: 12px;
+  }
+
+  .description-card {
+    padding: 1.5rem 1.25rem;
   }
 
   .detail-card {

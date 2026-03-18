@@ -221,24 +221,26 @@ const AcademicPrograms = () => {
                   {programs.map((program) => (
                     <div key={program.id} className="program-card">
                       <div className="program-icon">
-                        <svg viewBox="0 0 24 24" width="64" height="64" fill="currentColor">
-                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
                         </svg>
                       </div>
                       <h3>{program.title}</h3>
                       <div className="program-details">
                         <p className="program-description">{program.description}</p>
-                        <div className="program-duration">
-                          <span className="duration-label">Duration:</span>
-                          <span className="duration-value">{program.duration_text}</span>
-                        </div>
-                        <div className="program-units">
-                          <span className="units-label">Total Units:</span>
-                          <span className="units-value">{program.units_text}</span>
-                        </div>
-                        <div className="program-enhancements">
-                          <span className="enhancements-label">Enhancements:</span>
-                          <span className="enhancements-value">{program.enhancements_text}</span>
+                        <div className="program-stats-row">
+                          <div className="program-duration">
+                            <span className="duration-label">Duration:</span>
+                            <span className="duration-value">{program.duration_text}</span>
+                          </div>
+                          <div className="program-units">
+                            <span className="units-label">Total Units:</span>
+                            <span className="units-value">{program.units_text}</span>
+                          </div>
+                          <div className="program-enhancements">
+                            <span className="enhancements-label">Enhancements:</span>
+                            <span className="enhancements-value">{program.enhancements_text}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
