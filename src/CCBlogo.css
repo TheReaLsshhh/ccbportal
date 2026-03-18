@@ -24,6 +24,204 @@
   }
 }
 
+@keyframes homepageMobileDropdownItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .ccb-logo-page .mobile-menu-overlay,
+  .ccb-logo-page-navbar .mobile-menu-overlay {
+    z-index: 1002 !important;
+    position: fixed !important;
+    top: 66px !important;
+    height: calc(100vh - 10px) !important;
+  }
+
+  .ccb-logo-page .nav-links.mobile-open,
+  .ccb-logo-page-navbar .nav-links.mobile-open {
+    z-index: 1003 !important;
+    position: fixed !important;
+    top: 66px !important;
+    height: calc(100vh - 10px) !important;
+    background-color: rgba(45, 90, 45, 0.98) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .ccb-logo-page .mobile-menu-btn,
+  .ccb-logo-page-navbar .mobile-menu-btn {
+    background-color: #ffffff00 !important;
+    z-index: 1004 !important;
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .ccb-logo-page .mobile-menu-btn.active span:nth-child(1),
+  .ccb-logo-page-navbar .mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px) !important;
+  }
+
+  .ccb-logo-page .mobile-menu-btn.active span:nth-child(2),
+  .ccb-logo-page-navbar .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0 !important;
+    transform: scaleX(0) !important;
+  }
+
+  .ccb-logo-page .mobile-menu-btn.active span:nth-child(3),
+  .ccb-logo-page-navbar .mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px) !important;
+  }
+
+  .ccb-logo-page .services-dropdown-container,
+  .ccb-logo-page-navbar .services-dropdown-container {
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+
+  .ccb-logo-page .services-dropdown-container .dropdown-arrow,
+  .ccb-logo-page-navbar .services-dropdown-container .dropdown-arrow {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: inline-block !important;
+    transform-origin: center !important;
+  }
+
+  .ccb-logo-page .services-dropdown-container .dropdown-arrow.open,
+  .ccb-logo-page-navbar .services-dropdown-container .dropdown-arrow.open {
+    transform: rotate(180deg) !important;
+  }
+
+  .ccb-logo-page .services-dropdown,
+  .ccb-logo-page-navbar .services-dropdown {
+    position: relative !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-12px) scale(0.96) !important;
+    filter: blur(2px);
+    transition: max-height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      visibility 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    z-index: auto !important;
+    top: auto !important;
+    left: auto !important;
+    transform-origin: top center !important;
+  }
+
+  .ccb-logo-page .services-dropdown.dropdown-open,
+  .ccb-logo-page-navbar .services-dropdown.dropdown-open {
+    max-height: 1000px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    filter: blur(0);
+    overflow: visible !important;
+  }
+
+  .ccb-logo-page .services-dropdown .dropdown-item,
+  .ccb-logo-page-navbar .services-dropdown .dropdown-item {
+    color: #fff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 12px 20px 12px 28px !important;
+    text-align: left !important;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: block !important;
+    opacity: 0;
+    transform: translateY(-6px) translateX(-15px);
+  }
+
+  .ccb-logo-page .services-dropdown.dropdown-open .dropdown-item,
+  .ccb-logo-page-navbar .services-dropdown.dropdown-open .dropdown-item {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+    animation: homepageMobileDropdownItemSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .ccb-logo-page .services-dropdown .dropdown-item:nth-child(1),
+  .ccb-logo-page-navbar .services-dropdown .dropdown-item:nth-child(1) {
+    animation-delay: 0.08s;
+  }
+
+  .ccb-logo-page .services-dropdown .dropdown-item:nth-child(2),
+  .ccb-logo-page-navbar .services-dropdown .dropdown-item:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+
+  .ccb-logo-page .services-dropdown .dropdown-item:nth-child(3),
+  .ccb-logo-page-navbar .services-dropdown .dropdown-item:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+
+  .ccb-logo-page .services-dropdown .dropdown-item:nth-child(4),
+  .ccb-logo-page-navbar .services-dropdown .dropdown-item:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  .ccb-logo-page .services-dropdown .dropdown-item:last-child,
+  .ccb-logo-page-navbar .services-dropdown .dropdown-item:last-child {
+    border-bottom: none !important;
+  }
+
+  .ccb-logo-page .services-dropdown .dropdown-item:hover,
+  .ccb-logo-page-navbar .services-dropdown .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    padding-left: 32px !important;
+    transform: translateX(8px) translateY(-2px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .ccb-logo-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .ccb-logo-page .main-nav.with-bg.homepage-nav-section .mobile-secondary-nav .nav-link {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .ccb-logo-page .nav-link.active-nav {
+    background-color: #fff;
+    color: #2d5a2d;
+    font-weight: 600;
+  }
+
+  .ccb-logo-page .nav-link.active-nav:hover {
+    background-color: #f5f5f5;
+    color: #2d5a2d;
+  }
+
+  .ccb-logo-page .mobile-secondary-nav .nav-link.active-nav {
+    background-color: #ff8c00;
+    color: #fff;
+    transform: translateX(8px);
+  }
+}
+
 /* Hero Section */
 .ccb-hero {
   background-image: url('../public/images/ccb.jpg');
