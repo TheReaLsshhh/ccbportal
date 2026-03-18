@@ -1186,9 +1186,9 @@ const HomePage = () => {
                 </div>
               </div>
             ) : newsData.length === 0 ? (
-              <div className="news-grid-layout">
-                <div className="news-grid-item">
-                  <div className="news-card">
+              <div className="news-grid-layout news-grid-layout-empty">
+                <div className="news-grid-item news-empty-grid-item">
+                  <div className="news-card news-empty-state">
                     <p>No announcements yet. Check back soon.</p>
                   </div>
                 </div>
