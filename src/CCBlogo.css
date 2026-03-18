@@ -1,5 +1,17 @@
 /* CCB Logo Page Styles */
 
+.ccb-logo-page .nav-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 50px;
+}
+
 /* Animation Keyframes */
 @keyframes fadeInUp {
   from {
@@ -42,6 +54,15 @@
 .ccb-hero .container {
   position: relative;
   z-index: 2;
+}
+
+.ccb-hero .hero-content {
+  max-width: 800px;
+  margin: -100px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -100px;
 }
 
 .ccb-hero .hero-title {
@@ -436,9 +457,25 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .ccb-logo-page .mobile-menu-btn {
+    background-color: transparent !important;
+    padding: 12px !important;
+    right: 15px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .ccb-logo-page .mobile-menu-btn span {
+    width: 26px;
+    height: 3px;
+  }
+
   .ccb-hero {
     padding: 100px 0 60px;
-    height: 445px !important;
+    height: 350px !important;
   }
 
   .ccb-hero .hero-title {
@@ -488,9 +525,31 @@
 }
 
 @media (max-width: 480px) {
+  .ccb-logo-page .nav-container {
+    padding: 0 12px;
+    min-height: 42px;
+    height: 42px;
+  }
+
+  .ccb-logo-page .main-nav {
+    height: 42px;
+  }
+
+  .ccb-logo-page .mobile-menu-btn {
+    padding: 6px !important;
+    right: 12px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .ccb-logo-page .mobile-menu-btn span {
+    width: 24px;
+    height: 2.5px;
+  }
+
   .ccb-hero {
-    padding: 100px 0 60px;
-    height: 445px !important;
+    padding: 80px 0 50px;
+    height: 300px !important;
   }
   
   .ccb-hero .hero-title {
