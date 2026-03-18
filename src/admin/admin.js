@@ -36,6 +36,7 @@ const AdminPage = () => {
   const [enrollmentSteps, setEnrollmentSteps] = useState([]);
   const [admissionNotes, setAdmissionNotes] = useState([]);
   const [institutionalInfo, setInstitutionalInfo] = useState(null);
+  const [homepageFeatures, setHomepageFeatures] = useState([]);
   const [downloads, setDownloads] = useState([]);
 
   // Form states
@@ -47,7 +48,7 @@ const AdminPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const [programsRes, eventsRes, achievementsRes, announcementsRes, newsRes, departmentsRes, personnelRes, requirementsRes, stepsRes, notesRes, institutionalInfoRes, downloadsRes] = await Promise.all([
+      const [programsRes, eventsRes, achievementsRes, announcementsRes, newsRes, departmentsRes, personnelRes, requirementsRes, stepsRes, notesRes, institutionalInfoRes, homepageFeaturesRes, downloadsRes] = await Promise.all([
         apiService.getAdminAcademicPrograms(),
         apiService.getAdminEvents(),
         apiService.getAdminAchievements(),
@@ -59,6 +60,7 @@ const AdminPage = () => {
         apiService.getAdminEnrollmentSteps(),
         apiService.getAdminAdmissionNotes(),
         apiService.getAdminInstitutionalInfo(),
+        apiService.getAdminHomepageFeatures(),
         apiService.getAdminDownloads()
       ]);
 
@@ -73,6 +75,7 @@ const AdminPage = () => {
       setEnrollmentSteps(stepsRes.steps || []);
       setAdmissionNotes(notesRes.notes || []);
       setInstitutionalInfo(institutionalInfoRes.institutional_info || null);
+      setHomepageFeatures(homepageFeaturesRes.features || []);
       setDownloads(downloadsRes.downloads || []);
 
       showAlert('info', 'Data Loaded', 'All data has been loaded successfully.');
@@ -360,6 +363,9 @@ const AdminPage = () => {
         defaultFormData.core_values = '';
         defaultFormData.is_active = true;
       }
+    } else if (activeTab === 'homepage-features') {
+      defaultFormData.is_active = true;
+      defaultFormData.display_order = 0;
     } else if (activeTab === 'downloads') {
       defaultFormData.category = 'other';
       defaultFormData.is_active = true;
@@ -508,6 +514,10 @@ const AdminPage = () => {
           // Institutional info cannot be deleted, only edited
           showAlert('warning', 'Cannot Delete', 'Institutional information cannot be deleted. You can only edit it.');
           return;
+        case 'homepage-features':
+          await apiService.deleteHomepageFeature(item.id);
+          setHomepageFeatures(prev => prev.filter(feature => feature.id !== item.id));
+          break;
         case 'downloads':
           await apiService.deleteDownload(item.id);
           setDownloads(prev => prev.filter(d => d.id !== item.id));
@@ -775,6 +785,22 @@ const AdminPage = () => {
           result = await apiService.updateInstitutionalInfo(institutionalData);
           setInstitutionalInfo(result.institutional_info);
           break;
+        case 'homepage-features':
+          const homepageFeatureData = {
+            title: formData.title || '',
+            description: formData.description || '',
+            is_active: !!formData.is_active,
+            display_order: Number(formData.display_order) || 0
+          };
+
+          if (isEditing) {
+            result = await apiService.updateHomepageFeature(editingItem.id, homepageFeatureData);
+            setHomepageFeatures(prev => prev.map(feature => feature.id === editingItem.id ? result.feature : feature));
+          } else {
+            result = await apiService.createHomepageFeature(homepageFeatureData);
+            setHomepageFeatures(prev => [...prev, result.feature]);
+          }
+          break;
         case 'news':
           // Prepare FormData for file upload
           const newsFormData = new FormData();
@@ -959,6 +985,13 @@ const AdminPage = () => {
           </div>
         </div>
         <div className="stat-card">
+          <div className="stat-icon"><i className="fas fa-list"></i></div>
+          <div className="stat-content">
+            <h3>{homepageFeatures.length}</h3>
+            <p>Homepage Features</p>
+          </div>
+        </div>
+        <div className="stat-card">
           <div className="stat-icon"><i className="fas fa-download"></i></div>
           <div className="stat-content">
             <h3>{downloads.length}</h3>
@@ -1087,6 +1120,8 @@ const AdminPage = () => {
         return ['Category', 'Step', 'Title', 'Status'];
       case 'admission-notes':
         return ['Title', 'Status'];
+      case 'homepage-features':
+        return ['Title', 'Description', 'Status'];
       case 'downloads':
         return ['Title', 'Category', 'File Type', 'Status'];
       default:
@@ -1171,6 +1206,12 @@ const AdminPage = () => {
           item.title || 'N/A',
           item.is_active ? 'Active' : 'Inactive'
         ];
+      case 'homepage-features':
+        return [
+          item.title || 'N/A',
+          item.description || 'N/A',
+          item.is_active ? 'Active' : 'Inactive'
+        ];
       case 'downloads':
         return [
           item.title || 'N/A',
@@ -1223,6 +1264,7 @@ const AdminPage = () => {
       { key: 'enrollment-steps', label: 'Enrollment Steps', icon: 'fas fa-list-ol' },
       { key: 'admission-notes', label: 'Admission Notes', icon: 'fas fa-sticky-note' },
       { key: 'institutional-info', label: 'Institutional Info', icon: 'fas fa-university' },
+      { key: 'homepage-features', label: 'Homepage Features', icon: 'fas fa-list' },
       { key: 'downloads', label: 'Downloads', icon: 'fas fa-download' }
     ];
 
@@ -2536,6 +2578,55 @@ const AdminPage = () => {
             </div>
           </>
         );
+      case 'homepage-features':
+        return (
+          <>
+            <div className="form-group">
+              <label>Title *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title || ''}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Description *</label>
+              <textarea
+                name="description"
+                value={formData.description || ''}
+                onChange={handleInputChange}
+                required
+                rows="5"
+                placeholder="Enter homepage feature description"
+              />
+            </div>
+            <div className="form-row-inline">
+              <div className="form-group">
+                <label>Display Order</label>
+                <input
+                  type="number"
+                  name="display_order"
+                  value={formData.display_order || 0}
+                  onChange={handleInputChange}
+                  min="0"
+                />
+              </div>
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    checked={formData.is_active || false}
+                    onChange={handleInputChange}
+                  />
+                  Active
+                </label>
+              </div>
+            </div>
+          </>
+        );
       case 'downloads':
         return (
           <>
@@ -2865,6 +2956,7 @@ const AdminPage = () => {
             {activeTab === 'enrollment-steps' && renderDataTable(enrollmentSteps, 'enrollment-steps')}
             {activeTab === 'admission-notes' && renderDataTable(admissionNotes, 'admission-notes')}
             {activeTab === 'institutional-info' && renderInstitutionalInfoForm()}
+            {activeTab === 'homepage-features' && renderDataTable(homepageFeatures, 'homepage-features')}
             {activeTab === 'downloads' && renderDataTable(downloads, 'downloads')}
           </div>
         </div>

@@ -52,3 +52,13 @@
 {"level":"info","message":"Environment: development","service":"ccb-backend","timestamp":"2026-03-18 10:03:42"}
 {"level":"info","message":"Health check available at: http://localhost:5000/health","service":"ccb-backend","timestamp":"2026-03-18 10:03:42"}
 {"level":"info","message":"Connected to PostgreSQL database successfully.","service":"ccb-backend","timestamp":"2026-03-18 10:03:43"}
+{"level":"info","message":"Server running on port 5000","service":"ccb-backend","timestamp":"2026-03-18 10:50:33"}
+{"level":"info","message":"Environment: development","service":"ccb-backend","timestamp":"2026-03-18 10:50:33"}
+{"level":"info","message":"Health check available at: http://localhost:5000/health","service":"ccb-backend","timestamp":"2026-03-18 10:50:33"}
+{"level":"info","message":"Connected to PostgreSQL database successfully.","service":"ccb-backend","timestamp":"2026-03-18 10:50:34"}
+{"action":"create","id":"1","level":"info","message":"Data change notification","service":"ccb-backend","timestamp":"2026-03-18 10:50:50","type":"homepage-features"}
+{"action":"create","id":"2","level":"info","message":"Data change notification","service":"ccb-backend","timestamp":"2026-03-18 10:51:03","type":"homepage-features"}
+{"action":"create","id":"3","level":"info","message":"Data change notification","service":"ccb-backend","timestamp":"2026-03-18 10:51:20","type":"homepage-features"}
+{"action":"update","id":"3","level":"info","message":"Data change notification","service":"ccb-backend","timestamp":"2026-03-18 10:54:54","type":"homepage-features"}
+{"action":"update","id":"3","level":"info","message":"Data change notification","service":"ccb-backend","timestamp":"2026-03-18 10:56:26","type":"homepage-features"}
+{"action":"update","id":"2","level":"info","message":"Data change notification","service":"ccb-backend","timestamp":"2026-03-18 10:59:09","type":"homepage-features"}

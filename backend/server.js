@@ -382,6 +382,18 @@ async function initDb() {
     `);
 
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS homepage_features (
+        id BIGSERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS downloads (
         id BIGSERIAL PRIMARY KEY,
         title TEXT NOT NULL,
@@ -1061,6 +1073,22 @@ app.get('/api/admissions-info/', async (req, res) => {
   } catch (err) {
     logger.error('Failed to fetch admissions info:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch admissions info' });
+  }
+});
+
+app.get('/api/homepage-features/', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM homepage_features
+      WHERE is_active = TRUE
+      ORDER BY display_order, created_at DESC
+    `);
+
+    res.json({ status: 'success', features: result.rows });
+  } catch (err) {
+    logger.error('Failed to fetch homepage features:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch homepage features' });
   }
 });
 
@@ -2340,6 +2368,99 @@ app.post('/api/admin/institutional-info/update/', requireAdmin, async (req, res)
     }
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to update institutional info' });
+  }
+});
+
+// Homepage Features endpoints
+app.get('/api/admin/homepage-features/', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM homepage_features ORDER BY display_order, created_at DESC');
+    res.json({ status: 'success', features: result.rows });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch homepage features' });
+  }
+});
+
+app.post('/api/admin/homepage-features/create/', requireAdmin, async (req, res) => {
+  try {
+    const { title, description, is_active, display_order } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({ status: 'error', message: 'Title and description are required' });
+    }
+
+    const featureData = {
+      title: title.trim(),
+      description: description.trim(),
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await insertIntoDatabase('homepage_features', featureData);
+    broadcastDataChange('homepage-features', 'create', result.rows[0]);
+
+    res.status(201).json({
+      status: 'success',
+      feature: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Homepage feature creation error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to create homepage feature: ' + err.message });
+  }
+});
+
+app.put('/api/admin/homepage-features/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, is_active, display_order } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({ status: 'error', message: 'Title and description are required' });
+    }
+
+    const featureData = {
+      title: title.trim(),
+      description: description.trim(),
+      is_active: parseBoolean(is_active, true),
+      display_order: parseInt(display_order) || 0
+    };
+
+    const result = await updateDatabase('homepage_features', featureData, 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Homepage feature not found or update failed' });
+    }
+
+    broadcastDataChange('homepage-features', 'update', result.rows[0]);
+
+    res.json({
+      status: 'success',
+      feature: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Homepage feature update error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update homepage feature: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/homepage-features/:id/', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteFromDatabase('homepage_features', 'id = $1', [parseInt(id)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Homepage feature not found or already deleted' });
+    }
+
+    broadcastDataChange('homepage-features', 'delete', { id: parseInt(id) });
+
+    res.json({
+      status: 'success',
+      deleted_feature: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Homepage feature deletion error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to delete homepage feature: ' + err.message });
   }
 });
 

@@ -542,6 +542,11 @@ class ApiService {
         return this.makeRequest('/institutional-info/');
     }
 
+    // Get homepage features (public)
+    async getHomepageFeatures() {
+        return this.makeRequest('/homepage-features/');
+    }
+
     // Admin: Get institutional information
     async getAdminInstitutionalInfo() {
         return this.makeRequest('/admin/institutional-info/');
@@ -552,6 +557,31 @@ class ApiService {
         return this.makeRequest('/admin/institutional-info/update/', {
             method: 'POST',
             body: JSON.stringify(payload),
+        });
+    }
+
+    // Admin: Homepage Features CRUD
+    async getAdminHomepageFeatures() {
+        return this.makeRequest('/admin/homepage-features/');
+    }
+
+    async createHomepageFeature(payload) {
+        return this.makeRequest('/admin/homepage-features/create/', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+    }
+
+    async updateHomepageFeature(featureId, payload) {
+        return this.makeRequest(`/admin/homepage-features/${featureId}/`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        });
+    }
+
+    async deleteHomepageFeature(featureId) {
+        return this.makeRequest(`/admin/homepage-features/${featureId}/`, {
+            method: 'DELETE',
         });
     }
 

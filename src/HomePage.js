@@ -8,11 +8,35 @@ import apiService from "./services/api";
 import audioManager from "./services/audioManager";
 import { normalizeImageUrl } from "./utils/imageUtils";
 
+const fallbackHomepageFeatures = [
+  {
+    id: "fallback-quality-education",
+    title: "Quality Education",
+    description: "Committed to providing excellent education that prepares students for their future careers."
+  },
+  {
+    id: "fallback-expert-faculty",
+    title: "Expert Faculty",
+    description: "Learn from experienced and qualified instructors dedicated to student success."
+  },
+  {
+    id: "fallback-modern-facilities",
+    title: "Modern Facilities",
+    description: "State-of-the-art facilities and resources to support your learning journey."
+  },
+  {
+    id: "fallback-community-focus",
+    title: "Community Focus",
+    description: "Rooted in the community, serving Bayawan and the surrounding areas."
+  }
+];
+
 const HomePage = () => {
   // State for responsive behavior
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [showAudioButton, setShowAudioButton] = useState(false);
+  const [homepageFeatures, setHomepageFeatures] = useState(fallbackHomepageFeatures);
 
   // Animation states
   const [isFeaturesGridVisible, setIsFeaturesGridVisible] = useState(false);
@@ -297,6 +321,24 @@ const HomePage = () => {
       }
     };
     loadAll();
+  }, []);
+
+  useEffect(() => {
+    const loadHomepageFeatures = async () => {
+      try {
+        const response = await apiService.getHomepageFeatures();
+        if (response.status === "success" && Array.isArray(response.features) && response.features.length > 0) {
+          setHomepageFeatures(response.features);
+        } else {
+          setHomepageFeatures(fallbackHomepageFeatures);
+        }
+      } catch (error) {
+        console.error("Error fetching homepage features:", error);
+        setHomepageFeatures(fallbackHomepageFeatures);
+      }
+    };
+
+    loadHomepageFeatures();
   }, []);
 
   // Intersection Observer for features-grid section
@@ -1080,82 +1122,14 @@ const HomePage = () => {
                 isFeaturesGridVisible ? "fade-in-visible" : ""
               }`}
             >
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                  >
-                    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
-                  </svg>
+              {homepageFeatures.map((feature) => (
+                <div className="feature-item" key={feature.id}>
+                  <div className="feature-content">
+                    <h4>{feature.title}</h4>
+                    <p>{feature.description}</p>
+                  </div>
                 </div>
-                <div className="feature-content">
-                  <h4>Quality Education</h4>
-                  <p>
-                    Committed to providing excellent education that prepares
-                    students for their future careers.
-                  </p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                  >
-                    <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.8 0-1.54.37-2.01.99L14 10.5h-.5l-1.5-1.5c-.47-.62-1.21-.99-2.01-.99H8.46a1.5 1.5 0 0 0-1.42 1.37L4.5 16H7v6h2v-6h2v6h2v-6h2v6h2z" />
-                  </svg>
-                </div>
-                <div className="feature-content">
-                  <h4>Expert Faculty</h4>
-                  <p>
-                    Learn from experienced and qualified instructors dedicated
-                    to student success.
-                  </p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
-                  </svg>
-                </div>
-                <div className="feature-content">
-                  <h4>Modern Facilities</h4>
-                  <p>
-                    State-of-the-art facilities and resources to support your
-                    learning journey.
-                  </p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                  >
-                    <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75S7 14 17 14s11 2 11 2-1-1.5-1-3.5-1.75-3.25-1.75-3.25S19 8 17 8z" />
-                  </svg>
-                </div>
-                <div className="feature-content">
-                  <h4>Community Focus</h4>
-                  <p>
-                    Rooted in the community, serving Bayawan and the surrounding
-                    areas.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
