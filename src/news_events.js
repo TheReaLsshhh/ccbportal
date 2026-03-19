@@ -41,6 +41,15 @@ const NewsEvents = () => {
   const [isAchievementsVisible, setIsAchievementsVisible] = useState(false);
   const [isEventsVisible, setIsEventsVisible] = useState(false);
   const [isNewsVisible, setIsNewsVisible] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [currentEventSlide, setCurrentEventSlide] = useState(0);
+  const [isEventCarouselPaused, setIsEventCarouselPaused] = useState(false);
+  const [currentNewsSlide, setCurrentNewsSlide] = useState(0);
+  const [isNewsCarouselPaused, setIsNewsCarouselPaused] = useState(false);
+  const [currentAnnouncementSlide, setCurrentAnnouncementSlide] = useState(0);
+  const [isAnnouncementCarouselPaused, setIsAnnouncementCarouselPaused] = useState(false);
+  const [currentAchievementSlide, setCurrentAchievementSlide] = useState(0);
+  const [isAchievementCarouselPaused, setIsAchievementCarouselPaused] = useState(false);
   const [deepLinkHandled, setDeepLinkHandled] = useState(false);
   const [isDateDetailModalOpen, setIsDateDetailModalOpen] = useState(false);
   const [selectedDateItems, setSelectedDateItems] = useState(null);
@@ -355,6 +364,19 @@ const NewsEvents = () => {
       }
     };
     loadNews();
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsMobileViewport(window.innerWidth <= 768);
+    };
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => {
+      window.removeEventListener('resize', updateViewport);
+    };
   }, []);
 
   // Helper function to clear URL parameters
@@ -848,6 +870,308 @@ const NewsEvents = () => {
   const pagedNews = news.slice((newsPage - 1) * itemsPerPage, newsPage * itemsPerPage);
   const pagedAnnouncements = announcements.slice((announcementsPage - 1) * itemsPerPage, announcementsPage * itemsPerPage);
   const pagedAchievements = achievements.slice((achievementsPage - 1) * itemsPerPage, achievementsPage * itemsPerPage);
+  const eventsGridCountClass =
+    pagedEvents.length === 1
+      ? 'events-grid-count-1'
+      : pagedEvents.length === 2
+      ? 'events-grid-count-2'
+      : pagedEvents.length === 3
+      ? 'events-grid-count-3'
+      : '';
+  const newsGridCountClass =
+    pagedNews.length === 1
+      ? 'news-grid-count-1'
+      : pagedNews.length === 2
+      ? 'news-grid-count-2'
+      : pagedNews.length === 3
+      ? 'news-grid-count-3'
+      : '';
+  const announcementsGridCountClass =
+    pagedAnnouncements.length === 1
+      ? 'announcements-grid-count-1'
+      : pagedAnnouncements.length === 2
+      ? 'announcements-grid-count-2'
+      : pagedAnnouncements.length === 3
+      ? 'announcements-grid-count-3'
+      : '';
+  const achievementsGridCountClass =
+    pagedAchievements.length === 1
+      ? 'achievements-grid-count-1'
+      : pagedAchievements.length === 2
+      ? 'achievements-grid-count-2'
+      : pagedAchievements.length === 3
+      ? 'achievements-grid-count-3'
+      : '';
+  const showMobileEventCarousel = isMobileViewport && pagedEvents.length > 1;
+  const showMobileNewsCarousel = isMobileViewport && pagedNews.length > 1;
+  const showMobileAnnouncementsCarousel = isMobileViewport && pagedAnnouncements.length > 1;
+  const showMobileAchievementsCarousel = isMobileViewport && pagedAchievements.length > 1;
+
+  useEffect(() => {
+    setCurrentEventSlide(0);
+    setIsEventCarouselPaused(false);
+  }, [eventsPage, pagedEvents.length, isMobileViewport]);
+
+  useEffect(() => {
+    setCurrentNewsSlide(0);
+    setIsNewsCarouselPaused(false);
+  }, [newsPage, pagedNews.length, isMobileViewport]);
+
+  useEffect(() => {
+    setCurrentAnnouncementSlide(0);
+    setIsAnnouncementCarouselPaused(false);
+  }, [announcementsPage, pagedAnnouncements.length, isMobileViewport]);
+
+  useEffect(() => {
+    setCurrentAchievementSlide(0);
+    setIsAchievementCarouselPaused(false);
+  }, [achievementsPage, pagedAchievements.length, isMobileViewport]);
+
+  useEffect(() => {
+    if (!showMobileEventCarousel || isEventCarouselPaused) {
+      return undefined;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentEventSlide((prev) => (prev + 1) % pagedEvents.length);
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [showMobileEventCarousel, isEventCarouselPaused, pagedEvents.length]);
+
+  useEffect(() => {
+    if (!showMobileNewsCarousel || isNewsCarouselPaused) {
+      return undefined;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentNewsSlide((prev) => (prev + 1) % pagedNews.length);
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [showMobileNewsCarousel, isNewsCarouselPaused, pagedNews.length]);
+
+  useEffect(() => {
+    if (!showMobileAnnouncementsCarousel || isAnnouncementCarouselPaused) {
+      return undefined;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentAnnouncementSlide((prev) => (prev + 1) % pagedAnnouncements.length);
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [showMobileAnnouncementsCarousel, isAnnouncementCarouselPaused, pagedAnnouncements.length]);
+
+  useEffect(() => {
+    if (!showMobileAchievementsCarousel || isAchievementCarouselPaused) {
+      return undefined;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentAchievementSlide((prev) => (prev + 1) % pagedAchievements.length);
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [showMobileAchievementsCarousel, isAchievementCarouselPaused, pagedAchievements.length]);
+
+  const handleEventSlideChange = (nextSlide) => {
+    setIsEventCarouselPaused(true);
+    setCurrentEventSlide(nextSlide);
+    setTimeout(() => {
+      setIsEventCarouselPaused(false);
+    }, 8000);
+  };
+
+  const handleNewsSlideChange = (nextSlide) => {
+    setIsNewsCarouselPaused(true);
+    setCurrentNewsSlide(nextSlide);
+    setTimeout(() => {
+      setIsNewsCarouselPaused(false);
+    }, 8000);
+  };
+
+  const handleAnnouncementSlideChange = (nextSlide) => {
+    setIsAnnouncementCarouselPaused(true);
+    setCurrentAnnouncementSlide(nextSlide);
+    setTimeout(() => {
+      setIsAnnouncementCarouselPaused(false);
+    }, 8000);
+  };
+
+  const handleAchievementSlideChange = (nextSlide) => {
+    setIsAchievementCarouselPaused(true);
+    setCurrentAchievementSlide(nextSlide);
+    setTimeout(() => {
+      setIsAchievementCarouselPaused(false);
+    }, 8000);
+  };
+
+  const renderEventCard = (event) => (
+    <div key={event.id} className={`event-item ${event.image ? 'has-image' : ''}`}>
+      {event.image ? (
+        <div className="event-image-wrapper">
+          <img src={normalizeImageUrl(event.image)} srcSet={buildSrcSet(event.image)} sizes="(max-width: 768px) 100vw, 50vw" alt={event.title} loading="lazy" />
+          <div className="event-date-overlay">
+            <div className="event-date">
+              <span className="day">{formatEventDate(event.event_date).day}</span>
+              <span className="month">{formatEventDate(event.event_date).month}</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="event-image-placeholder">
+          <div className="event-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+            </svg>
+          </div>
+          <div className="event-date-overlay">
+            <div className="event-date">
+              <span className="day">{formatEventDate(event.event_date).day}</span>
+              <span className="month">{formatEventDate(event.event_date).month}</span>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="event-content">
+        <h4>{event.title}</h4>
+        <p className="event-time">{event.formatted_time || `${event.start_time || ''} - ${event.end_time || ''}`}</p>
+        {event.location && <p className="event-location">ðŸ“ {event.location}</p>}
+        <p>{event.description}</p>
+        <button className="event-link" onClick={() => openEventModal(event)}>Read More</button>
+      </div>
+    </div>
+  );
+
+  const renderNewsCard = (item) => (
+    <div key={item.id} className={`news-item ${item.image ? 'has-image' : ''}`}>
+      {item.image ? (
+        <div className="news-image-wrapper">
+          <img src={normalizeImageUrl(item.image)} srcSet={buildSrcSet(item.image)} sizes="(max-width: 768px) 100vw, 33vw" alt={item.title} loading="lazy" />
+        </div>
+      ) : (
+        <div className="news-image-placeholder">
+          <div className="news-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+          </div>
+        </div>
+      )}
+      <div className="news-item-content">
+        <h4>{item.title}</h4>
+        <p className="news-date">{formatDate(item.date)}</p>
+        <p>{item.body}</p>
+        <button className="read-more" onClick={() => openNewsModal(item)}>Read More</button>
+      </div>
+    </div>
+  );
+
+  const renderAnnouncementCard = (item) => (
+    <div key={item.id} className={`announcement-item ${item.image ? 'has-image' : ''}`}>
+      {item.image ? (
+        <div className="announcement-image-wrapper">
+          <img src={normalizeImageUrl(item.image)} srcSet={buildSrcSet(item.image)} sizes="(max-width: 768px) 100vw, 33vw" alt={item.title} loading="lazy" />
+        </div>
+      ) : (
+        <div className="announcement-image-placeholder">
+          <div className="announcement-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </div>
+        </div>
+      )}
+      <div className="announcement-content">
+        <h4>{item.title}</h4>
+        <p className="announcement-date">{formatDate(item.date)}</p>
+        <p>{item.body}</p>
+        <button className="read-more" onClick={() => openModal(item)}>Read More</button>
+      </div>
+    </div>
+  );
+
+  const renderAchievementCard = (achievement) => (
+    <div key={achievement.id} className={`achievement-item ${achievement.image ? 'has-image' : ''}`}>
+      {achievement.image ? (
+        <div className="achievement-image-wrapper">
+          <img src={normalizeImageUrl(achievement.image)} alt={achievement.title} loading="lazy" />
+        </div>
+      ) : (
+        <div className="achievement-image-placeholder">
+          <div className="achievement-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+        </div>
+      )}
+      <div className="achievement-content">
+        <h4>{achievement.title}</h4>
+        <p className="achievement-date">{achievement.formatted_date}</p>
+        {achievement.category && <p className="achievement-category">ðŸ† {achievement.category}</p>}
+        <p>{achievement.description}</p>
+        <button className="read-more" onClick={() => openAchievementModal(achievement)}>Read Full Story</button>
+      </div>
+    </div>
+  );
+
+  const renderMobileCarousel = ({
+    items,
+    currentSlide,
+    onSlideChange,
+    onPause,
+    onResume,
+    renderCard,
+    itemLabel,
+    isVisible
+  }) => (
+    <div
+      className={`events-carousel-wrapper ${isVisible ? 'fade-in-visible' : ''}`}
+      onMouseEnter={onPause}
+      onMouseLeave={onResume}
+    >
+      <div className="events-carousel-slide-container">
+        <div className="events-grid events-grid-carousel events-grid-count-1 fade-in-visible">
+          {renderCard(items[currentSlide])}
+        </div>
+      </div>
+      <div className="events-carousel-controls">
+        <button
+          className="events-carousel-btn events-carousel-btn-prev"
+          onClick={() => onSlideChange((currentSlide - 1 + items.length) % items.length)}
+          aria-label={`Previous ${itemLabel}`}
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+          </svg>
+        </button>
+        <div className="events-carousel-dots">
+          {items.map((item, index) => (
+            <button
+              key={item.id}
+              className={`events-carousel-dot ${currentSlide === index ? 'active' : ''}`}
+              onClick={() => onSlideChange(index)}
+              aria-label={`Go to ${itemLabel} ${index + 1}`}
+            />
+          ))}
+        </div>
+        <button
+          className="events-carousel-btn events-carousel-btn-next"
+          onClick={() => onSlideChange((currentSlide + 1) % items.length)}
+          aria-label={`Next ${itemLabel}`}
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+          </svg>
+        </button>
+      </div>
+      <div className="events-carousel-page-indicator">
+        {itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)} {currentSlide + 1} of {items.length}
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     const animationTimeout = setTimeout(() => {
@@ -1103,7 +1427,53 @@ const NewsEvents = () => {
                     </div>
                   ) : (
                     <>
-                      <div className={`events-grid ${isEventsVisible ? 'fade-in-visible' : ''}`}>
+                      {showMobileEventCarousel ? (
+                        <div
+                          className={`events-carousel-wrapper ${isEventsVisible ? 'fade-in-visible' : ''}`}
+                          onMouseEnter={() => setIsEventCarouselPaused(true)}
+                          onMouseLeave={() => setIsEventCarouselPaused(false)}
+                        >
+                          <div className="events-carousel-slide-container">
+                            <div className="events-grid events-grid-carousel events-grid-count-1 fade-in-visible">
+                              {renderEventCard(pagedEvents[currentEventSlide])}
+                            </div>
+                          </div>
+                          <div className="events-carousel-controls">
+                            <button
+                              className="events-carousel-btn events-carousel-btn-prev"
+                              onClick={() => handleEventSlideChange((currentEventSlide - 1 + pagedEvents.length) % pagedEvents.length)}
+                              aria-label="Previous event"
+                            >
+                              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                              </svg>
+                            </button>
+                            <div className="events-carousel-dots">
+                              {pagedEvents.map((event, index) => (
+                                <button
+                                  key={event.id}
+                                  className={`events-carousel-dot ${currentEventSlide === index ? 'active' : ''}`}
+                                  onClick={() => handleEventSlideChange(index)}
+                                  aria-label={`Go to event ${index + 1}`}
+                                />
+                              ))}
+                            </div>
+                            <button
+                              className="events-carousel-btn events-carousel-btn-next"
+                              onClick={() => handleEventSlideChange((currentEventSlide + 1) % pagedEvents.length)}
+                              aria-label="Next event"
+                            >
+                              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                              </svg>
+                            </button>
+                          </div>
+                          <div className="events-carousel-page-indicator">
+                            Event {currentEventSlide + 1} of {pagedEvents.length}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={`events-grid ${eventsGridCountClass} ${isEventsVisible ? 'fade-in-visible' : ''}`}>
                         {pagedEvents.map(event => (
                           <div key={event.id} className={`event-item ${event.image ? 'has-image' : ''}`}>
                             {event.image ? (
@@ -1141,6 +1511,7 @@ const NewsEvents = () => {
                           </div>
                         ))}
                       </div>
+                      )}
                       {renderPagination('events', events.length, eventsPage, setEventsPage)}
                     </>
                   )}
@@ -1161,31 +1532,20 @@ const NewsEvents = () => {
                     </div>
                   ) : (
                     <>
-                      <div className={`news-grid ${isNewsVisible ? 'fade-in-visible' : ''}`}>
-                        {pagedNews.map(item => (
-                          <div key={item.id} className={`news-item ${item.image ? 'has-image' : ''}`}>
-                            {item.image ? (
-                              <div className="news-image-wrapper">
-                                <img src={normalizeImageUrl(item.image)} srcSet={buildSrcSet(item.image)} sizes="(max-width: 768px) 100vw, 33vw" alt={item.title} loading="lazy" />
-                              </div>
-                            ) : (
-                              <div className="news-image-placeholder">
-                                <div className="news-icon">
-                                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                                  </svg>
-                                </div>
-                              </div>
-                            )}
-                            <div className="news-item-content">
-                              <h4>{item.title}</h4>
-                              <p className="news-date">{formatDate(item.date)}</p>
-                              <p>{item.body}</p>
-                              <button className="read-more" onClick={() => openNewsModal(item)}>Read More</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      {showMobileNewsCarousel ? renderMobileCarousel({
+                        items: pagedNews,
+                        currentSlide: currentNewsSlide,
+                        onSlideChange: handleNewsSlideChange,
+                        onPause: () => setIsNewsCarouselPaused(true),
+                        onResume: () => setIsNewsCarouselPaused(false),
+                        renderCard: renderNewsCard,
+                        itemLabel: 'news',
+                        isVisible: isNewsVisible
+                      }) : (
+                        <div className={`news-grid ${newsGridCountClass} ${isNewsVisible ? 'fade-in-visible' : ''}`}>
+                          {pagedNews.map((item) => renderNewsCard(item))}
+                        </div>
+                      )}
                       {renderPagination('news', news.length, newsPage, setNewsPage)}
                     </>
                   )}
@@ -1206,31 +1566,20 @@ const NewsEvents = () => {
                     </div>
                   ) : (
                     <>
-                      <div className={`announcements-grid ${isAnnouncementsVisible ? 'fade-in-visible' : ''}`}>
-                        {pagedAnnouncements.map(item => (
-                          <div key={item.id} className={`announcement-item ${item.image ? 'has-image' : ''}`}>
-                            {item.image ? (
-                              <div className="announcement-image-wrapper">
-                                <img src={normalizeImageUrl(item.image)} srcSet={buildSrcSet(item.image)} sizes="(max-width: 768px) 100vw, 33vw" alt={item.title} loading="lazy" />
-                              </div>
-                            ) : (
-                              <div className="announcement-image-placeholder">
-                                <div className="announcement-icon">
-                                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                  </svg>
-                                </div>
-                              </div>
-                            )}
-                            <div className="announcement-content">
-                              <h4>{item.title}</h4>
-                              <p className="announcement-date">{formatDate(item.date)}</p>
-                              <p>{item.body}</p>
-                              <button className="read-more" onClick={() => openModal(item)}>Read More</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      {showMobileAnnouncementsCarousel ? renderMobileCarousel({
+                        items: pagedAnnouncements,
+                        currentSlide: currentAnnouncementSlide,
+                        onSlideChange: handleAnnouncementSlideChange,
+                        onPause: () => setIsAnnouncementCarouselPaused(true),
+                        onResume: () => setIsAnnouncementCarouselPaused(false),
+                        renderCard: renderAnnouncementCard,
+                        itemLabel: 'announcement',
+                        isVisible: isAnnouncementsVisible
+                      }) : (
+                        <div className={`announcements-grid ${announcementsGridCountClass} ${isAnnouncementsVisible ? 'fade-in-visible' : ''}`}>
+                          {pagedAnnouncements.map((item) => renderAnnouncementCard(item))}
+                        </div>
+                      )}
                       {renderPagination('announcements', announcements.length, announcementsPage, setAnnouncementsPage)}
                     </>
                   )}
@@ -1251,7 +1600,17 @@ const NewsEvents = () => {
                     </div>
                   ) : (
                     <>
-                      <div className={`achievements-grid ${isAchievementsVisible ? 'fade-in-visible' : ''}`}>
+                      {showMobileAchievementsCarousel ? renderMobileCarousel({
+                        items: pagedAchievements,
+                        currentSlide: currentAchievementSlide,
+                        onSlideChange: handleAchievementSlideChange,
+                        onPause: () => setIsAchievementCarouselPaused(true),
+                        onResume: () => setIsAchievementCarouselPaused(false),
+                        renderCard: renderAchievementCard,
+                        itemLabel: 'achievement',
+                        isVisible: isAchievementsVisible
+                      }) : (
+                        <div className={`achievements-grid ${achievementsGridCountClass} ${isAchievementsVisible ? 'fade-in-visible' : ''}`}>
                         {pagedAchievements.map(achievement => (
                           <div key={achievement.id} className={`achievement-item ${achievement.image ? 'has-image' : ''}`}>
                             {achievement.image ? (
@@ -1277,6 +1636,7 @@ const NewsEvents = () => {
                           </div>
                         ))}
                       </div>
+                      )}
                       {renderPagination('achievements', achievements.length, achievementsPage, setAchievementsPage)}
                     </>
                   )}
