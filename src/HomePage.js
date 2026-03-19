@@ -8,35 +8,13 @@ import apiService from "./services/api";
 import audioManager from "./services/audioManager";
 import { normalizeImageUrl } from "./utils/imageUtils";
 
-const fallbackHomepageFeatures = [
-  {
-    id: "fallback-quality-education",
-    title: "Quality Education",
-    description: "Committed to providing excellent education that prepares students for their future careers."
-  },
-  {
-    id: "fallback-expert-faculty",
-    title: "Expert Faculty",
-    description: "Learn from experienced and qualified instructors dedicated to student success."
-  },
-  {
-    id: "fallback-modern-facilities",
-    title: "Modern Facilities",
-    description: "State-of-the-art facilities and resources to support your learning journey."
-  },
-  {
-    id: "fallback-community-focus",
-    title: "Community Focus",
-    description: "Rooted in the community, serving Bayawan and the surrounding areas."
-  }
-];
-
 const HomePage = () => {
   // State for responsive behavior
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [showAudioButton, setShowAudioButton] = useState(false);
-  const [homepageFeatures, setHomepageFeatures] = useState(fallbackHomepageFeatures);
+  const [homepageFeatures, setHomepageFeatures] = useState([]);
+  const [homepageFeaturesLoading, setHomepageFeaturesLoading] = useState(true);
 
   // Animation states
   const [isFeaturesGridVisible, setIsFeaturesGridVisible] = useState(false);
@@ -326,15 +304,27 @@ const HomePage = () => {
   useEffect(() => {
     const loadHomepageFeatures = async () => {
       try {
+        setHomepageFeaturesLoading(true);
         const response = await apiService.getHomepageFeatures();
-        if (response.status === "success" && Array.isArray(response.features) && response.features.length > 0) {
-          setHomepageFeatures(response.features);
-        } else {
-          setHomepageFeatures(fallbackHomepageFeatures);
-        }
+        const features =
+          response.status === "success" && Array.isArray(response.features)
+            ? response.features.filter((feature) => {
+                const title = typeof feature.title === "string" ? feature.title.trim() : "";
+                const description =
+                  typeof feature.description === "string"
+                    ? feature.description.trim()
+                    : "";
+
+                return title.length > 0 && description.length > 0;
+              })
+            : [];
+
+        setHomepageFeatures(features);
       } catch (error) {
         console.error("Error fetching homepage features:", error);
-        setHomepageFeatures(fallbackHomepageFeatures);
+        setHomepageFeatures([]);
+      } finally {
+        setHomepageFeaturesLoading(false);
       }
     };
 
@@ -1122,14 +1112,22 @@ const HomePage = () => {
                 isFeaturesGridVisible ? "fade-in-visible" : ""
               }`}
             >
-              {homepageFeatures.map((feature) => (
-                <div className="feature-item" key={feature.id}>
-                  <div className="feature-content">
-                    <h4>{feature.title}</h4>
-                    <p>{feature.description}</p>
+              {!homepageFeaturesLoading && homepageFeatures.length === 0 ? (
+                <div className="feature-item feature-item-empty">
+                  <div className="feature-content feature-empty-state">
+                    <p>No contents yet. Check back soon.</p>
                   </div>
                 </div>
-              ))}
+              ) : (
+                homepageFeatures.map((feature) => (
+                  <div className="feature-item" key={feature.id}>
+                    <div className="feature-content">
+                      <h4>{feature.title}</h4>
+                      <p>{feature.description}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

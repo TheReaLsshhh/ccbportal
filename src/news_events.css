@@ -471,7 +471,7 @@ html.modal-open {
   font-size: 2.5rem;
   font-weight: bold;
   color: #2d5a2d;
-  margin-bottom: -20px;
+  margin-bottom: 30px;
   position: relative;
 }
 
@@ -511,6 +511,41 @@ html.modal-open {
 .announcements-grid.fade-in-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.announcements-grid.empty-state-grid,
+.events-grid.empty-state-grid,
+.news-grid.empty-state-grid,
+.achievements-grid.empty-state-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-height: 140px;
+}
+
+.empty-state-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 460px);
+  min-height: 140px;
+  padding: 18px 24px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  border: 2px solid rgba(45, 90, 45, 0.12);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.empty-state-card p {
+  margin: 0;
+  width: 100%;
+  color: #666;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .announcement-item {

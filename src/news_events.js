@@ -1095,6 +1095,12 @@ const NewsEvents = () => {
                     <div className="loading-container"><div className="loading-spinner"></div><p>Loading events...</p></div>
                   ) : eventsError ? (
                     <div className="error-container"><p className="error-message">{eventsError}</p></div>
+                  ) : events.length === 0 ? (
+                    <div className={`events-grid empty-state-grid ${isEventsVisible ? 'fade-in-visible' : ''}`}>
+                      <div className="empty-state-card">
+                        <p>No events available yet. Check back soon.</p>
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <div className={`events-grid ${isEventsVisible ? 'fade-in-visible' : ''}`}>
@@ -1147,6 +1153,12 @@ const NewsEvents = () => {
                     <div className="loading-container"><div className="loading-spinner"></div><p>Loading news...</p></div>
                   ) : newsError ? (
                     <div className="error-container"><p className="error-message">{newsError}</p></div>
+                  ) : news.length === 0 ? (
+                    <div className={`news-grid empty-state-grid ${isNewsVisible ? 'fade-in-visible' : ''}`}>
+                      <div className="empty-state-card">
+                        <p>No news available yet. Check back soon.</p>
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <div className={`news-grid ${isNewsVisible ? 'fade-in-visible' : ''}`}>
@@ -1186,6 +1198,12 @@ const NewsEvents = () => {
                     <div className="loading-container"><div className="loading-spinner"></div><p>Loading announcements...</p></div>
                   ) : annError ? (
                     <div className="error-container"><p className="error-message">{annError}</p></div>
+                  ) : announcements.length === 0 ? (
+                    <div className={`announcements-grid empty-state-grid ${isAnnouncementsVisible ? 'fade-in-visible' : ''}`}>
+                      <div className="empty-state-card">
+                        <p>No announcements available yet. Check back soon.</p>
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <div className={`announcements-grid ${isAnnouncementsVisible ? 'fade-in-visible' : ''}`}>
@@ -1225,6 +1243,12 @@ const NewsEvents = () => {
                     <div className="loading-container"><div className="loading-spinner"></div><p>Loading achievements...</p></div>
                   ) : achievementsError ? (
                     <div className="error-container"><p className="error-message">{achievementsError}</p></div>
+                  ) : achievements.length === 0 ? (
+                    <div className={`achievements-grid empty-state-grid ${isAchievementsVisible ? 'fade-in-visible' : ''}`}>
+                      <div className="empty-state-card">
+                        <p>No achievements available yet. Check back soon.</p>
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <div className={`achievements-grid ${isAchievementsVisible ? 'fade-in-visible' : ''}`}>

@@ -287,27 +287,33 @@ const Downloads = () => {
   const policiesData = getPagedData(['hr-policies', 'hr-forms'], policiesPage);
   const documentsData = getPagedData(['syllabi', 'manuals', 'handbooks', 'other'], documentsPage);
 
-  const renderGrid = (data) => (
-    <div className="downloads-grid">
-      {data.items.map(item => (
-        <div key={item.id} className="download-item">
-          <div className="download-icon-wrapper">
-             <div className="download-icon">
-               <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                 <path d={item.categoryIcon} />
-               </svg>
-             </div>
-          </div>
-          <div className="download-content">
-            <h4>{item.title}</h4>
-            <p className="download-category-tag">{item.categoryTitle}</p>
-            <p>{item.description || 'Click below to download this resource.'}</p>
-            <button className="read-more" onClick={() => handleDownload(item.file_url)}>
-              Download File
-            </button>
-          </div>
+  const renderGrid = (data, emptyMessage) => (
+    <div className={`downloads-grid ${data.items.length === 0 ? 'downloads-grid-empty' : ''}`}>
+      {data.items.length === 0 ? (
+        <div className="downloads-empty-state">
+          <p>{emptyMessage}</p>
         </div>
-      ))}
+      ) : (
+        data.items.map(item => (
+          <div key={item.id} className="download-item">
+            <div className="download-icon-wrapper">
+               <div className="download-icon">
+                 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                   <path d={item.categoryIcon} />
+                 </svg>
+               </div>
+            </div>
+            <div className="download-content">
+              <h4>{item.title}</h4>
+              <p className="download-category-tag">{item.categoryTitle}</p>
+              <p>{item.description || 'Click below to download this resource.'}</p>
+              <button className="read-more" onClick={() => handleDownload(item.file_url)}>
+                Download File
+              </button>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 
@@ -359,7 +365,7 @@ const Downloads = () => {
                 <div className="error-container"><p className="error-message">{error}</p></div>
               ) : (
                 <>
-                  {renderGrid(formsData)}
+                  {renderGrid(formsData, 'No forms available yet. Check back soon.')}
                   {renderPagination('forms-section', formsData.total, formsPage, setFormsPage)}
                 </>
               )}
@@ -372,7 +378,7 @@ const Downloads = () => {
                 <div className="loading-container"><div className="loading-spinner"></div><p>Loading policies...</p></div>
               ) : !error && (
                 <>
-                  {renderGrid(policiesData)}
+                  {renderGrid(policiesData, 'No HR policies or forms available yet. Check back soon.')}
                   {renderPagination('policies-section', policiesData.total, policiesPage, setPoliciesPage)}
                 </>
               )}
@@ -385,7 +391,7 @@ const Downloads = () => {
                  <div className="loading-container"><div className="loading-spinner"></div><p>Loading documents...</p></div>
               ) : !error && (
                 <>
-                  {renderGrid(documentsData)}
+                  {renderGrid(documentsData, 'No syllabi, manuals, or handbooks available yet. Check back soon.')}
                   {renderPagination('documents-section', documentsData.total, documentsPage, setDocumentsPage)}
                 </>
               )}

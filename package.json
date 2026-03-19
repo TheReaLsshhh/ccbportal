@@ -30,6 +30,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-backend": "cd backend && node server.js",
+    "create-admin": "node create_admin.js",
     "db-health": "powershell -NoProfile -Command \"Start-Process 'http://localhost:5000/api/health/db'\"",
     "build:prod": "cross-env NODE_ENV=production npm run build",
     "serve": "serve -s build -l 3000",

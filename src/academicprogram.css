@@ -579,6 +579,36 @@ html, body {
   text-align: center;
 }
 
+.programs-grid-empty {
+  justify-items: center;
+}
+
+.program-card-empty {
+  width: min(100%, 420px);
+  min-height: 140px;
+  padding: 18px 24px;
+  margin: 0 auto;
+  justify-content: center;
+  gap: 0;
+  border: 2px solid rgba(45, 90, 45, 0.12);
+}
+
+.program-card-empty:hover {
+  border-color: rgba(45, 90, 45, 0.12);
+}
+
+.program-empty-state {
+  width: 100%;
+}
+
+.program-empty-state p {
+  margin: 0;
+  width: 100%;
+  color: #666;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .program-card:hover {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   border-color: rgba(45, 90, 45, 0.55);
@@ -702,6 +732,10 @@ html, body {
   gap: 32px;
 }
 
+.descriptions-content-empty {
+  align-items: center;
+}
+
 .description-card {
   background: #fff;
   padding: 28px 32px;
@@ -711,6 +745,40 @@ html, body {
   border-left: 4px solid #2d5a2d;
   transition: all 0.3s ease;
   text-align: left;
+}
+
+.description-card-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 420px);
+  min-height: 140px;
+  padding: 18px 24px;
+  border: 2px solid rgba(45, 90, 45, 0.12);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border-left: 2px solid rgba(45, 90, 45, 0.12);
+  text-align: center;
+}
+
+.description-card-empty:hover {
+  border-color: rgba(45, 90, 45, 0.12);
+  border-left-color: rgba(45, 90, 45, 0.12);
+}
+
+.description-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+}
+
+.description-empty-state p {
+  margin: 0;
+  width: 100%;
+  color: #666;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .description-card:hover {

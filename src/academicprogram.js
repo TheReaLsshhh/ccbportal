@@ -216,6 +216,14 @@ const AcademicPrograms = () => {
                     Try Again
                   </button>
                 </div>
+              ) : programs.length === 0 ? (
+                <div className="programs-grid programs-grid-empty">
+                  <div className="program-card program-card-empty">
+                    <div className="program-empty-state">
+                      <p>No degree programs available yet. Check back soon.</p>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="programs-grid">
                   {programs.map((program) => (
@@ -262,6 +270,14 @@ const AcademicPrograms = () => {
               ) : error ? (
                 <div className="error-container">
                   <p className="error-message">{error}</p>
+                </div>
+              ) : programs.length === 0 ? (
+                <div className={`descriptions-content descriptions-content-empty ${isDescriptionsVisible ? 'fade-in-visible' : ''}`}>
+                  <div className="description-card description-card-empty">
+                    <div className="description-empty-state">
+                      <p>No program descriptions or course outlines available yet. Check back soon.</p>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className={`descriptions-content ${isDescriptionsVisible ? 'fade-in-visible' : ''}`}>

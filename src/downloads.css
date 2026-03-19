@@ -436,6 +436,35 @@ html, body {
   transform: translateY(0);
 }
 
+.downloads-grid-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.downloads-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 460px);
+  min-height: 140px;
+  padding: 18px 24px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  border: 2px solid rgba(45, 90, 45, 0.12);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.downloads-empty-state p {
+  margin: 0;
+  width: 100%;
+  color: #666;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .download-item {
   display: flex;
   flex-direction: column;
