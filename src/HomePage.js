@@ -1117,11 +1117,6 @@ const HomePage = () => {
                   <div className="feature-content feature-empty-state">
                     <p>No contentsxvccvvccvvvvcvvcvvcvvvvc
                        yet. Check back soon.</p>
-
-                  \\
-             cccccccc ccccccccccccccc  
-               \
-               e            \
                   </div>
                 </div>
               ) : (
