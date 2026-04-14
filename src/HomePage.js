@@ -1115,8 +1115,7 @@ const HomePage = () => {
               {!homepageFeaturesLoading && homepageFeatures.length === 0 ? (
                 <div className="feature-item feature-item-empty">
                   <div className="feature-content feature-empty-state">
-                    <p>No contentsxvccvvccvvvvcvvcvvcvvvvc
-                       yet. Check back soon.</p>
+                    <p>No contents yet. Check back soon.</p>
                   </div>
                 </div>
               ) : (
