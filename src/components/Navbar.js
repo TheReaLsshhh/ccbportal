@@ -314,13 +314,9 @@ const Navbar = ({ isTopBarVisible = true, isHomePage = false }) => {
           <div className="brand">
             <div className="logo">
               <img
-                src="/images/ccbimage.png"
+                src="/images/ccb-logo.png"
                 alt="City College of Bayawan logo"
                 className="brand-logo"
-                width="60"
-                height="60"
-                fetchPriority="high"
-                decoding="async"
               />
             </div>
             <div className="brand-text">

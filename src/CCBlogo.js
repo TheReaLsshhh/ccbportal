@@ -210,7 +210,7 @@ const CCBlogo = () => {
               {/* Profile Card */}
               <div className={`profile-card ${isProfileCardVisible ? 'fade-in-visible' : ''}`}>
                 <div className="profile-image">
-                  <img src="/images/ccbimage.png" alt="CCB President" className="profile-photo" loading="lazy" decoding="async" />
+                  <img src="/images/ccb-logo.png" alt="CCB President" className="profile-photo" loading="lazy" />
                 </div>
                 <div className="profile-info">
                   <h3>Dr. [President Name]</h3>
@@ -265,7 +265,7 @@ const CCBlogo = () => {
               <div className="logo-section">
                 <h2>CCB Logo</h2>
                 <div className="logo-container">
-                  <img src="/images/ccbimage.png" alt="CCB Logo" className={`ccb-logo ${isCcbLogoVisible ? 'fade-in-visible' : ''}`} loading="lazy" decoding="async" />
+                  <img src="/images/ccb-logo.png" alt="CCB Logo" className={`ccb-logo ${isCcbLogoVisible ? 'fade-in-visible' : ''}`} />
                 </div>
                 
                 <div className={`logo-explanation ${isExplanationItemVisible ? 'fade-in-visible' : ''}`}>
