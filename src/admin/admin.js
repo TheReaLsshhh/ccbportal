@@ -5,6 +5,25 @@ import AdminLogin from './login';
 import { normalizeImageUrl } from '../utils/imageUtils';
 
 const AdminPage = () => {
+  useEffect(() => {
+    const fontAwesomeHref = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+    const existing = document.querySelector(`link[href="${fontAwesomeHref}"]`);
+    if (existing) return undefined;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = fontAwesomeHref;
+    link.integrity = 'sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==';
+    link.crossOrigin = 'anonymous';
+    link.referrerPolicy = 'no-referrer';
+    link.dataset.adminOnly = 'true';
+    document.head.appendChild(link);
+
+    return () => {
+      link.remove();
+    };
+  }, []);
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);

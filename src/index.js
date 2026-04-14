@@ -52,8 +52,7 @@ if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
 // Preload critical resources
 const preloadCriticalResources = () => {
   const criticalResources = [
-    '/images/ccb.c0ca0ca63b3fdc15330b.jpg',
-    '/images/bg.png'
+    '/images/ccbimage.png'
   ];
 
   criticalResources.forEach(resource => {
@@ -99,7 +98,7 @@ if ('requestIdleCallback' in window) {
   requestIdleCallback(() => {
     // Preload non-critical resources during idle time
     const nonCriticalResources = [
-      '/images/fblogo.png'
+      '/images/wreath.png'
     ];
     
     nonCriticalResources.forEach(resource => {

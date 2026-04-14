@@ -14,7 +14,7 @@ const SEO = ({
   title = 'City College of Bayawan',
   description = 'City College of Bayawan - Honor and Excellence for the Highest Good. Quality education in Bayawan City, Negros Oriental.',
   keywords = 'City College of Bayawan, CCB, Bayawan City, Negros Oriental, Higher Education, College, University, Academic Programs',
-  image = '/images/ccb-logo.png',
+  image = '/images/ccbimage.png',
   url,
   type = 'website'
 }) => {

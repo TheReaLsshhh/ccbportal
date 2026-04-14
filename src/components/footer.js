@@ -30,7 +30,12 @@ const Footer = () => {
           <div className="footer-section">
             <h4>Follow Us</h4>
             <a href="https://www.facebook.com/profile.php?id=61574582660823">
-              <img src="/images/fblogo.png" alt="Facebook" className="social-icon" loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} /> City College of Bayawan
+              <span className="social-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.23.2 2.23.2v2.46h-1.25c-1.24 0-1.62.77-1.62 1.55V12h2.77l-.44 2.89h-2.33v6.99A10 10 0 0 0 22 12Z" />
+                </svg>
+              </span>{' '}
+              City College of Bayawan
             </a>
           </div>
           <div className="footer-section">
