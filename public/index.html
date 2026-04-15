@@ -10,15 +10,25 @@
       name="description"
       content="City College of Bayawan Portal"
     />
+    <!-- Same-origin hero video: start download early so HomePage can play as soon as the <video> mounts -->
+    <link rel="preload" href="%PUBLIC_URL%/images/bgvideo.mp4" as="video" type="video/mp4" />
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <!-- <link rel="preconnect" href="https://ccb-portal-backend.onrender.com" crossorigin> -->
     <!-- <link rel="dns-prefetch" href="https://ccb-portal-backend.onrender.com"> -->
-    <!-- Font Awesome CDN for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-          crossorigin="anonymous" 
-          referrerpolicy="no-referrer" />
+    <!-- Font Awesome: non-blocking so first paint is not waiting on the CDN stylesheet -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </noscript>
     <title>City College of Bayawan</title>
   </head>
   <body>

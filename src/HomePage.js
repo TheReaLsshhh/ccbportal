@@ -6,7 +6,9 @@ import ScrollToTop from "./components/ScrollToTop";
 import SEO from "./components/SEO";
 import apiService from "./services/api";
 import audioManager from "./services/audioManager";
-import { normalizeImageUrl } from "./utils/imageUtils";
+import { normalizeImageUrl, buildSrcSet } from "./utils/imageUtils";
+
+const HERO_BACKGROUND_VIDEO_SRC = "/images/bgvideo.mp4";
 
 const HomePage = () => {
   // State for responsive behavior
@@ -27,6 +29,7 @@ const HomePage = () => {
   const [currentNewsPage, setCurrentNewsPage] = useState(0);
   const [isCarouselPaused, setIsCarouselPaused] = useState(false);
   const [slideDirection, setSlideDirection] = useState('right'); // 'left' or 'right'
+  const [heroBackgroundVideoSrc, setHeroBackgroundVideoSrc] = useState(null);
 
   // Initialize audio on component mount
   useEffect(() => {
@@ -46,6 +49,38 @@ const HomePage = () => {
     }, 1500);
 
     return () => clearTimeout(animationTimeout);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => {
+      if (!cancelled) setHeroBackgroundVideoSrc(HERO_BACKGROUND_VIDEO_SRC);
+    };
+
+    if (process.env.NODE_ENV === "production") {
+      let rafId2;
+      const rafId1 = window.requestAnimationFrame(() => {
+        rafId2 = window.requestAnimationFrame(load);
+      });
+      return () => {
+        cancelled = true;
+        window.cancelAnimationFrame(rafId1);
+        if (rafId2 != null) window.cancelAnimationFrame(rafId2);
+      };
+    }
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(load, { timeout: 2800 });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(id);
+      };
+    }
+    const t = window.setTimeout(load, 600);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
   }, []);
 
   // Track scroll progress
@@ -1083,9 +1118,19 @@ const HomePage = () => {
           </svg>
         </div>
       </div>
-      <video className="video-overlay" autoPlay loop muted playsInline>
-        <source src="/images/bgvideo.mp4" type="video/mp4" />
-      </video>
+      {heroBackgroundVideoSrc ? (
+        <video
+          className="video-overlay"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          fetchPriority="high"
+        >
+          <source src={heroBackgroundVideoSrc} type="video/mp4" />
+        </video>
+      ) : null}
       <Navbar isHomePage={true} />
       <div className="homepage-content">
         {/* Hero/Banner Section */}
@@ -1202,7 +1247,10 @@ const HomePage = () => {
                     // This ensures uniformity - all cards without images will be text cards
                     const hasImage = news.image && news.image.trim().length > 0;
                     const isImageNews = hasImage;
-                    
+                    const newsImgSrc = news.image ? normalizeImageUrl(news.image) : null;
+                    const newsImgSrcSet = news.image ? buildSrcSet(news.image) : "";
+                    const newsSlotsVisible = isMobile ? 1 : isTablet ? 2 : 3;
+
                     return (
                       <div
                         key={news.id}
@@ -1214,9 +1262,13 @@ const HomePage = () => {
                           <div className="news-card-image">
                             <div className="news-image-wrapper">
                               {news.image ? (
-                                <img 
-                                  src={normalizeImageUrl(news.image)}
-                                  loading="lazy" 
+                                <img
+                                  src={newsImgSrc}
+                                  srcSet={newsImgSrcSet || undefined}
+                                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                  loading="lazy"
+                                  decoding="async"
+                                  fetchPriority={index < newsSlotsVisible ? "high" : "low"}
                                   alt={news.title}
                                   style={{
                                     width: '100%',
