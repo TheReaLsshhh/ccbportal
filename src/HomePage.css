@@ -1476,6 +1476,41 @@
   z-index: -2;
 }
 
+.hero-background-media {
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-background-media .hero-background-poster,
+.hero-background-media .hero-background-poster img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-background-media .hero-background-poster {
+  z-index: 0;
+}
+
+.hero-background-media .hero-background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.65s ease;
+}
+
+.hero-background-media .hero-background-video.hero-background-video--visible {
+  opacity: 1;
+}
+
 .homepage::before {
   content: "";
   position: fixed;

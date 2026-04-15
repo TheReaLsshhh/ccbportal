@@ -8,7 +8,10 @@ import apiService from "./services/api";
 import audioManager from "./services/audioManager";
 import { normalizeImageUrl, buildSrcSet } from "./utils/imageUtils";
 
-const HERO_BACKGROUND_VIDEO_SRC = "/images/bgvideo.mp4";
+const assetPath = (path) => `${process.env.PUBLIC_URL || ""}${path}`;
+const HERO_VIDEO_MP4 = assetPath("/images/bgvideo.mp4");
+const HERO_POSTER_WEBP = assetPath("/images/bg-hero-poster.webp");
+const HERO_POSTER_JPG = assetPath("/images/bg-hero-poster.jpg");
 
 const HomePage = () => {
   // State for responsive behavior
@@ -29,7 +32,8 @@ const HomePage = () => {
   const [currentNewsPage, setCurrentNewsPage] = useState(0);
   const [isCarouselPaused, setIsCarouselPaused] = useState(false);
   const [slideDirection, setSlideDirection] = useState('right'); // 'left' or 'right'
-  const [heroBackgroundVideoSrc, setHeroBackgroundVideoSrc] = useState(null);
+  /** When true, hero MP4 has first frame / playback so we fade it over the static poster (NORSU-style). */
+  const [heroVideoVisible, setHeroVideoVisible] = useState(false);
 
   // Initialize audio on component mount
   useEffect(() => {
@@ -49,38 +53,6 @@ const HomePage = () => {
     }, 1500);
 
     return () => clearTimeout(animationTimeout);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = () => {
-      if (!cancelled) setHeroBackgroundVideoSrc(HERO_BACKGROUND_VIDEO_SRC);
-    };
-
-    if (process.env.NODE_ENV === "production") {
-      let rafId2;
-      const rafId1 = window.requestAnimationFrame(() => {
-        rafId2 = window.requestAnimationFrame(load);
-      });
-      return () => {
-        cancelled = true;
-        window.cancelAnimationFrame(rafId1);
-        if (rafId2 != null) window.cancelAnimationFrame(rafId2);
-      };
-    }
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(load, { timeout: 2800 });
-      return () => {
-        cancelled = true;
-        window.cancelIdleCallback(id);
-      };
-    }
-    const t = window.setTimeout(load, 600);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(t);
-    };
   }, []);
 
   // Track scroll progress
@@ -1118,19 +1090,32 @@ const HomePage = () => {
           </svg>
         </div>
       </div>
-      {heroBackgroundVideoSrc ? (
+      <div className="video-overlay hero-background-media" aria-hidden="true">
+        <picture className="hero-background-poster">
+          <source srcSet={HERO_POSTER_WEBP} type="image/webp" />
+          <img
+            src={HERO_POSTER_JPG}
+            alt=""
+            decoding="async"
+            fetchPriority="high"
+            width={1920}
+            height={1080}
+          />
+        </picture>
         <video
-          className="video-overlay"
+          className={`hero-background-video${heroVideoVisible ? " hero-background-video--visible" : ""}`}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
           fetchPriority="high"
+          onLoadedData={() => setHeroVideoVisible(true)}
+          onPlaying={() => setHeroVideoVisible(true)}
         >
-          <source src={heroBackgroundVideoSrc} type="video/mp4" />
+          <source src={HERO_VIDEO_MP4} type="video/mp4" />
         </video>
-      ) : null}
+      </div>
       <Navbar isHomePage={true} />
       <div className="homepage-content">
         {/* Hero/Banner Section */}

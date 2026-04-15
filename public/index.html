@@ -10,7 +10,8 @@
       name="description"
       content="City College of Bayawan Portal"
     />
-    <!-- Same-origin hero video: start download early so HomePage can play as soon as the <video> mounts -->
+    <!-- Hero: lightweight poster first (preview), then full MP4 (see HomePage hero stack) -->
+    <link rel="preload" href="%PUBLIC_URL%/images/bg-hero-poster.webp" as="image" type="image/webp" />
     <link rel="preload" href="%PUBLIC_URL%/images/bgvideo.mp4" as="video" type="video/mp4" />
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
