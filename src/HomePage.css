@@ -59,7 +59,8 @@
   margin-top: 0;
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .homepage .nav-container {
@@ -744,16 +745,6 @@
   .homepage .mobile-menu-btn.active span:nth-child(3),
   .homepage-navbar .mobile-menu-btn.active span:nth-child(3) {
     transform: rotate(-45deg) translate(6px, -6px) !important;
-  }
-
-  /* Ensure video overlay doesn't interfere with mobile menu */
-  .homepage .video-overlay {
-    z-index: -2 !important;
-  }
-
-  /* Ensure homepage::before doesn't interfere */
-  .homepage::before {
-    z-index: -1 !important;
   }
 
   /* Ensure all decorative elements stay below mobile menu */
@@ -1465,73 +1456,90 @@
   }
 }
 
-/* Video Background Overlay */
-.video-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Hero: nearly full viewport below navbar (reference: tall campus hero on norsu.edu.ph) */
+.homepage-hero {
+  position: relative;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -2;
-}
-
-.hero-background-media {
-  pointer-events: none;
+  display: grid;
+  /* Reserve space for orange + logo + main nav stack; fill remaining viewport */
+  grid-template-rows: minmax(
+    max(260px, calc(97svh - clamp(120px, 16vh, 220px))),
+    auto
+  );
+  grid-template-columns: 1fr;
   overflow: hidden;
+  background: #1a331a;
+  isolation: isolate;
 }
 
-.hero-background-media .hero-background-poster,
-.hero-background-media .hero-background-poster img {
-  position: absolute;
-  top: 0;
-  left: 0;
+.homepage-hero__media {
+  grid-area: 1 / 1;
+  position: relative;
   width: 100%;
+  min-height: 0;
   height: 100%;
-  object-fit: cover;
-}
-
-.hero-background-media .hero-background-poster {
+  pointer-events: none;
   z-index: 0;
 }
 
-.hero-background-media .hero-background-video {
+.homepage-hero__media .hero-background-poster,
+.homepage-hero__media .hero-background-poster img,
+.homepage-hero__media .hero-background-video {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.homepage-hero__media .hero-background-poster {
+  z-index: 0;
+}
+
+.homepage-hero__media .hero-background-video {
   z-index: 1;
   opacity: 0;
   transition: opacity 0.65s ease;
 }
 
-.hero-background-media .hero-background-video.hero-background-video--visible {
+.homepage-hero__media .hero-background-video.hero-background-video--visible {
   opacity: 1;
 }
 
+.homepage-hero__scrim {
+  grid-area: 1 / 1;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: rgba(0, 0, 0, 0.32);
+  pointer-events: none;
+}
+
+.homepage-hero__content {
+  grid-area: 1 / 1;
+  z-index: 3;
+  place-self: center;
+  margin: 0 auto;
+  width: min(960px, 100%);
+  padding: clamp(0.75rem, 3vw, 2rem) clamp(0.75rem, 3vw, 1.25rem);
+  text-align: center;
+  pointer-events: none;
+}
+
 .homepage::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: -1;
+  display: none;
 }
 
 .homepage-content {
   position: relative;
   z-index: 2;
-  margin-top: -20px;
-  padding-top: 165px;
-  /* Account for fixed navbar */
-  min-height: 120vh;
+  margin-top: 0;
+  padding-top: 0;
+  min-height: auto;
 }
 
-/* Hero Banner Section */
+/* Legacy hero block (unused on current HomePage markup; kept for compatibility) */
 .hero-banner-section {
   min-height: 63vh;
   display: flex;
@@ -1542,6 +1550,58 @@
   position: relative;
   margin-bottom: 0;
   padding-bottom: 0;
+}
+
+.hero-rotating-headline {
+  margin: 0;
+  max-width: 100%;
+  font-size: clamp(1.45rem, 3.8vw, 3.15rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  color: #fff;
+  text-align: center;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    0 2px 20px rgba(0, 0, 0, 0.55);
+}
+
+.hero-rotating-headline__static {
+  color: rgba(255, 255, 255, 0.98);
+}
+
+.hero-rotating-headline__dynamic-wrap {
+  display: inline;
+  color: #ffffff;
+  -webkit-text-stroke: max(1px, 0.035em) #000000;
+  paint-order: stroke fill;
+}
+
+.hero-rotating-headline__dynamic {
+  display: inline;
+  color: inherit;
+}
+
+.hero-rotating-headline__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.82em;
+  margin-left: 3px;
+  vertical-align: -0.08em;
+  background: currentColor;
+  animation: heroTypeCursorBlink 0.85s steps(1, end) infinite;
+}
+
+@keyframes heroTypeCursorBlink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .hero-banner-content {
@@ -1574,37 +1634,8 @@
     margin-top: 0;
     min-height: 100vh;
     position: relative;
-    overflow: hidden;
-  }
-
-  /* Video Background Overlay */
-  .video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -2;
-  }
-
-  .homepage::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: -1;
-  }
-
-  .homepage-content {
-    position: relative;
-    z-index: 2;
-    margin-top: -20px;
-    padding-top: 165px;
-    /* Account for fixed navbar */
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 }
 
@@ -2754,8 +2785,11 @@
 
 /* Responsive Design - Tablet (769px - 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .homepage-content {
-    padding-top: 140px;
+  .homepage-hero {
+    grid-template-rows: minmax(
+      max(260px, calc(100svh - clamp(115px, 15vh, 210px))),
+      auto
+    );
   }
 
   .hero-banner-section {
@@ -2871,36 +2905,23 @@
     margin-top: 0;
     min-height: 100vh;
     position: relative;
-    overflow: hidden;
-  }
-
-  .video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -2;
-  }
-
-  .homepage::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: -1;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .homepage-content {
-    margin-top: -20px;
-    padding-top: 120px;
+    margin-top: 0;
+    padding-top: 0;
     position: relative;
     z-index: 2;
-    min-height: 100vh;
+    min-height: auto;
+  }
+
+  .homepage-hero {
+    grid-template-rows: minmax(
+      max(240px, calc(100svh - clamp(105px, 14vh, 195px))),
+      auto
+    );
   }
 
   .hero-banner-section {
@@ -3134,36 +3155,23 @@
     margin-top: 0;
     min-height: 100vh;
     position: relative;
-    overflow: hidden;
-  }
-
-  .video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -2;
-  }
-
-  .homepage::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: -1;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .homepage-content {
-    margin-top: -20px;
-    padding-top: 110px;
+    margin-top: 0;
+    padding-top: 0;
     position: relative;
     z-index: 2;
-    min-height: 100vh;
+    min-height: auto;
+  }
+
+  .homepage-hero {
+    grid-template-rows: minmax(
+      max(220px, calc(100svh - clamp(96px, 13vh, 175px))),
+      auto
+    );
   }
 
   .hero-banner-section {
@@ -3316,36 +3324,23 @@
     margin-top: 0;
     min-height: 100vh;
     position: relative;
-    overflow: hidden;
-  }
-
-  .video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -2;
-  }
-
-  .homepage::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: -1;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .homepage-content {
-    margin-top: -20px;
-    padding-top: 120px;
+    margin-top: 0;
+    padding-top: 0;
     position: relative;
     z-index: 2;
-    min-height: 100vh;
+    min-height: auto;
+  }
+
+  .homepage-hero {
+    grid-template-rows: minmax(
+      max(240px, calc(100svh - clamp(108px, 14vh, 200px))),
+      auto
+    );
   }
 
   .hero-banner-section {
@@ -3387,36 +3382,23 @@
     margin-top: 0;
     min-height: 100vh;
     position: relative;
-    overflow: hidden;
-  }
-
-  .video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -2;
-  }
-
-  .homepage::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: -1;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .homepage-content {
-    margin-top: -20px;
-    padding-top: 120px;
+    margin-top: 0;
+    padding-top: 0;
     position: relative;
     z-index: 2;
-    min-height: 100vh;
+    min-height: auto;
+  }
+
+  .homepage-hero {
+    grid-template-rows: minmax(
+      max(200px, calc(100svh - clamp(92px, 12vh, 170px))),
+      auto
+    );
   }
 
   .hero-banner-section {

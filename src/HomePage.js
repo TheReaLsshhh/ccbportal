@@ -13,6 +13,13 @@ const HERO_VIDEO_MP4 = assetPath("/images/bgvideo.mp4");
 const HERO_POSTER_WEBP = assetPath("/images/bg-hero-poster.webp");
 const HERO_POSTER_JPG = assetPath("/images/bg-hero-poster.jpg");
 
+/** Hero messaging: static lead-in + rotating calls-to-action (prospective & continuing students). */
+const HERO_ROTATING_HIGHLIGHTS = [
+  "explore programs that fit your goals.",
+  "apply easily through our college portal.",
+  "keep advancing toward your degree.",
+];
+
 const HomePage = () => {
   // State for responsive behavior
   const [isMobile, setIsMobile] = useState(false);
@@ -34,6 +41,67 @@ const HomePage = () => {
   const [slideDirection, setSlideDirection] = useState('right'); // 'left' or 'right'
   /** When true, hero MP4 has first frame / playback so we fade it over the static poster (NORSU-style). */
   const [heroVideoVisible, setHeroVideoVisible] = useState(false);
+  const [heroTypedHighlight, setHeroTypedHighlight] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    const pending = new Set();
+
+    const schedule = (fn, ms) => {
+      const id = window.setTimeout(() => {
+        pending.delete(id);
+        if (!cancelled) fn();
+      }, ms);
+      pending.add(id);
+    };
+
+    const TYPE_MS = 48;
+    const DELETE_MS = 36;
+    const PAUSE_AT_FULL_MS = 1500;
+    const PAUSE_AT_EMPTY_MS = 480;
+
+    let phraseIndex = 0;
+
+    const runPhrase = () => {
+      const full =
+        HERO_ROTATING_HIGHLIGHTS[
+          phraseIndex % HERO_ROTATING_HIGHLIGHTS.length
+        ];
+      let i = 0;
+
+      const typeStep = () => {
+        if (cancelled) return;
+        setHeroTypedHighlight(full.slice(0, i));
+        if (i < full.length) {
+          i += 1;
+          schedule(typeStep, TYPE_MS);
+        } else {
+          schedule(() => deleteStep(full.length), PAUSE_AT_FULL_MS);
+        }
+      };
+
+      const deleteStep = (len) => {
+        if (cancelled) return;
+        setHeroTypedHighlight(full.slice(0, len));
+        if (len > 0) {
+          schedule(() => deleteStep(len - 1), DELETE_MS);
+        } else {
+          phraseIndex += 1;
+          schedule(runPhrase, PAUSE_AT_EMPTY_MS);
+        }
+      };
+
+      typeStep();
+    };
+
+    runPhrase();
+
+    return () => {
+      cancelled = true;
+      pending.forEach((id) => window.clearTimeout(id));
+      pending.clear();
+    };
+  }, []);
 
   // Initialize audio on component mount
   useEffect(() => {
@@ -1090,36 +1158,53 @@ const HomePage = () => {
           </svg>
         </div>
       </div>
-      <div className="video-overlay hero-background-media" aria-hidden="true">
-        <picture className="hero-background-poster">
-          <source srcSet={HERO_POSTER_WEBP} type="image/webp" />
-          <img
-            src={HERO_POSTER_JPG}
-            alt=""
-            decoding="async"
-            fetchPriority="high"
-            width={1920}
-            height={1080}
-          />
-        </picture>
-        <video
-          className={`hero-background-video${heroVideoVisible ? " hero-background-video--visible" : ""}`}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          fetchPriority="high"
-          onLoadedData={() => setHeroVideoVisible(true)}
-          onPlaying={() => setHeroVideoVisible(true)}
-        >
-          <source src={HERO_VIDEO_MP4} type="video/mp4" />
-        </video>
-      </div>
       <Navbar isHomePage={true} />
+      <section className="homepage-hero" aria-label="Welcome to City College of Bayawan">
+        <div className="homepage-hero__media" aria-hidden="true">
+          <picture className="hero-background-poster">
+            <source srcSet={HERO_POSTER_WEBP} type="image/webp" />
+            <img
+              src={HERO_POSTER_JPG}
+              alt=""
+              decoding="async"
+              fetchPriority="high"
+              width={1920}
+              height={1080}
+            />
+          </picture>
+          <video
+            className={`hero-background-video${heroVideoVisible ? " hero-background-video--visible" : ""}`}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            fetchPriority="high"
+            onLoadedData={() => setHeroVideoVisible(true)}
+            onPlaying={() => setHeroVideoVisible(true)}
+          >
+            <source src={HERO_VIDEO_MP4} type="video/mp4" />
+          </video>
+        </div>
+        <div className="homepage-hero__scrim" aria-hidden="true" />
+        <div className="homepage-hero__content">
+          <p className="hero-rotating-headline">
+            <span className="hero-rotating-headline__static">
+              At City College of Bayawan, you can{" "}
+            </span>
+            <span className="hero-rotating-headline__dynamic-wrap">
+              <span className="hero-rotating-headline__dynamic">
+                {heroTypedHighlight}
+              </span>
+              <span
+                className="hero-rotating-headline__cursor"
+                aria-hidden="true"
+              />
+            </span>
+          </p>
+        </div>
+      </section>
       <div className="homepage-content">
-        {/* Hero/Banner Section */}
-        <div className="hero-banner-section"></div>
 
         {/* Snow Stacking Effect Overlay - Only in December */}
         {isDecember && (
