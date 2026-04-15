@@ -3,13 +3,11 @@ import './LoadingSpinner.css';
 
 const LoadingSpinner = ({ message = 'Loading...' }) => {
   return (
-    <div className="loading-container">
-      <div className="loading-spinner">
-        <div className="spinner-circle"></div>
-        <div className="spinner-circle"></div>
-        <div className="spinner-circle"></div>
+    <div className="app-page-loader" role="status" aria-live="polite">
+      <div className="app-page-loader__inner">
+        <div className="app-page-loader__spinner" aria-hidden="true" />
+        <p className="app-page-loader__message">{message}</p>
       </div>
-      <p className="loading-message">{message}</p>
     </div>
   );
 };
