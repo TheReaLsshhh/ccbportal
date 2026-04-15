@@ -1,4 +1,4 @@
-/* Full-viewport overlay above the app — blue scrim + centered spinner */
+/* Viewport overlay: blurs whatever the user is currently seeing; spinner centered */
 
 .app-page-loader {
   position: fixed;
@@ -9,17 +9,20 @@
   justify-content: center;
   padding: 1.5rem;
   box-sizing: border-box;
+  width: 100%;
   min-height: 100dvh;
-  /* Blue scrim over the viewport; slight transparency when content still shows underneath */
-  background: linear-gradient(
-    160deg,
-    rgba(18, 52, 112, 0.88) 0%,
-    rgba(12, 38, 88, 0.9) 45%,
-    rgba(22, 64, 130, 0.88) 100%
-  );
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  min-height: 100svh;
+  /* Light frost + strong blur so the page behind reads through, blurred */
+  background: rgba(255, 255, 255, 0.34);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
   pointer-events: auto;
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .app-page-loader {
+    background: rgba(248, 250, 252, 0.94);
+  }
 }
 
 .app-page-loader__inner {
@@ -35,18 +38,18 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.28);
-  border-top-color: #ffffff;
+  border: 3px solid rgba(45, 90, 45, 0.22);
+  border-top-color: #2d5a2d;
   animation: app-page-loader-spin 0.85s linear infinite;
-  box-shadow: 0 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .app-page-loader__message {
   margin: 0;
   font-size: 1rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  font-weight: 600;
+  color: rgba(22, 38, 26, 0.92);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
 }
 
 @keyframes app-page-loader-spin {
@@ -55,7 +58,30 @@
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  .app-page-loader {
+    background: rgba(14, 20, 18, 0.45);
+    -webkit-backdrop-filter: blur(20px) saturate(1.15);
+    backdrop-filter: blur(20px) saturate(1.15);
+  }
+
+  .app-page-loader__spinner {
+    border-color: rgba(255, 255, 255, 0.22);
+    border-top-color: #ff8c00;
+  }
+
+  .app-page-loader__message {
+    color: rgba(255, 250, 245, 0.95);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .app-page-loader {
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    backdrop-filter: blur(12px) saturate(1.2);
+  }
+
   .app-page-loader__spinner {
     animation-duration: 2.4s;
   }

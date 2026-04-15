@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import './LoadingSpinner.css';
 
 const LoadingSpinner = ({ message = 'Loading...' }) => {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   const node = (
     <div className="app-page-loader" role="status" aria-live="polite">
       <div className="app-page-loader__inner">
