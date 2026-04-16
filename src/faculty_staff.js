@@ -6,6 +6,8 @@ import SEO from './components/SEO';
 import apiService from './services/api';
 import './faculty_staff.css';
 
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; Faculty & Staff dark styles live at the end of faculty_staff.css */
+
 const FacultyStaff = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -268,8 +270,12 @@ const FacultyStaff = () => {
                 <p className="error-message">{departmentsError}</p>
               </div>
             ) : departments.length === 0 ? (
-              <div className="empty-state-container">
-                <p>No departments available.</p>
+              <div className="directory-content-empty">
+                <div className="directory-empty-card">
+                  <div className="directory-empty-state">
+                    <p>No departments or personnel listed yet. Check back soon.</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className={`departments-grid ${isDepartmentsVisible ? 'fade-in-visible' : ''}`}>

@@ -484,7 +484,7 @@ html, body {
 .admissions-section {
   padding-top: 1px;
   background: #fff;
-  min-height: 100vh;
+  min-height: 90vh;
 }
 
 .admissions-page .admissions-section {
@@ -614,6 +614,32 @@ html, body {
 
 .requirements-content:hover .detail-card h3 {
   color: #ff8c00;
+}
+
+/* Light mode: keep green treatment on requirements card + empty process card (not orange hover) */
+.general-requirements.detail-card:hover {
+  border: 1px solid rgba(45, 90, 45, 0.55);
+  border-left: 5px solid #2d5a2d;
+  box-shadow: 0 12px 30px rgba(45, 90, 45, 0.12);
+}
+
+[data-theme="light"] .requirements-content:hover .general-requirements.detail-card h3 {
+  color: #2d5a2d;
+}
+
+.admissions-page .detail-card.empty-state-card:hover {
+  border: 1px solid rgba(45, 90, 45, 0.55);
+  border-left: 5px solid #2d5a2d;
+  box-shadow: 0 12px 30px rgba(45, 90, 45, 0.12);
+}
+
+[data-theme="light"] .admissions-page .detail-card.empty-state-card > p:nth-child(1) {
+  color: #1a472a !important;
+}
+
+[data-theme="light"] .admissions-page .detail-card.empty-state-card > p:nth-child(2) {
+  color: #2d5a2d !important;
+  opacity: 0.92;
 }
 
 .enrollment-requirements ul {
@@ -1001,5 +1027,228 @@ html, body {
   .admissions-page-navbar .mobile-menu-btn span {
     width: 24px;
     height: 2.5px;
+  }
+}
+
+/* =============================================================================
+   Admissions — dark mode (html[data-theme="dark"])
+   Scoped under .admissions-page (same approach as academicprogram.css).
+   ============================================================================= */
+
+[data-theme="dark"] .admissions-page {
+  background-color: var(--theme-page-bg, #0f1410);
+  color: var(--theme-page-text, #e4eae4);
+}
+
+[data-theme="dark"] .admissions-page .scroll-progress-bar {
+  background-color: #5cb878;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .admissions-page .header-top.homepage-nav-section {
+  background-color: #1a231c !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .admissions-page .header-top.homepage-nav-section .brand-text-part1 {
+  color: #8fd4a0 !important;
+}
+
+[data-theme="dark"] .admissions-page .header-top.homepage-nav-section .brand-text-part2 {
+  color: #ffb84d !important;
+}
+
+[data-theme="dark"] .admissions-page .header-top.homepage-nav-section .brand-tagline {
+  color: #b0c4b0 !important;
+}
+
+[data-theme="dark"] .admissions-page .secondary-nav-bar.homepage-nav-section {
+  background: linear-gradient(180deg, #9a5808 0%, #7a4506 100%) !important;
+}
+
+[data-theme="dark"] .admissions-page .main-nav.with-bg.homepage-nav-section {
+  background-color: #152a15 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .admissions-page .admissions-hero::before {
+  background-color: rgba(0, 0, 0, 0.48);
+}
+
+[data-theme="dark"] .admissions-page .admissions-navigation {
+  background: #111814;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .admissions-page .admissions-navigation .nav-tab {
+  background: #1f2a22;
+  border-color: rgba(127, 180, 140, 0.28);
+  color: #b8c8b8;
+}
+
+[data-theme="dark"] .admissions-page .admissions-navigation .nav-tab:hover {
+  border-color: rgba(255, 140, 0, 0.45);
+  color: #ffb84d;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .admissions-page .admissions-navigation .nav-tab.active {
+  background: linear-gradient(135deg, #2d5a2d, #3d7a45);
+  border-color: #7abf8f;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .admissions-page .section-admissions,
+[data-theme="dark"] .admissions-page .admissions-section {
+  background: linear-gradient(160deg, #151c17 0%, #0f1512 100%) !important;
+  color: var(--theme-page-text, #e4eae4);
+}
+
+[data-theme="dark"] .admissions-page .section-title {
+  color: #c8e8d4 !important;
+}
+
+[data-theme="dark"] .admissions-page .section-title::after {
+  background: linear-gradient(90deg, #7abf8f, #ff8c00) !important;
+}
+
+[data-theme="dark"] .admissions-page .section-subtitle {
+  color: #a8c4b0 !important;
+}
+
+[data-theme="dark"] .admissions-page .loading-spinner {
+  border-color: #2a352c;
+  border-top-color: #7abf8f;
+}
+
+[data-theme="dark"] .admissions-page .error-message {
+  color: #f0a8a8;
+}
+
+/* theme.css uses !important on .detail-card / .general-requirements / .empty-state-card */
+[data-theme="dark"] .admissions-page .detail-card,
+[data-theme="dark"] .admissions-page .general-requirements,
+[data-theme="dark"] .admissions-page .empty-state-card {
+  background-color: #1f2a22 !important;
+  border: 1px solid rgba(127, 180, 140, 0.22) !important;
+  border-left: 5px solid #7abf8f !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  color: var(--theme-page-text, #e4eae4);
+}
+
+[data-theme="dark"] .admissions-page .detail-card:hover,
+[data-theme="dark"] .admissions-page .general-requirements:hover,
+[data-theme="dark"] .admissions-page .empty-state-card:hover {
+  border: 1px solid rgba(255, 140, 0, 0.45) !important;
+  border-left: 5px solid rgba(255, 140, 0, 0.45) !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .admissions-page .detail-card h3,
+[data-theme="dark"] .admissions-page .general-requirements h3 {
+  color: #c8e8d4;
+  border-bottom-color: rgba(127, 180, 140, 0.2);
+}
+
+[data-theme="dark"] .admissions-page .requirements-content:hover .detail-card h3,
+[data-theme="dark"] .admissions-page .requirements-content:hover .general-requirements.detail-card h3 {
+  color: #ffb84d;
+}
+
+[data-theme="dark"] .admissions-page .enrollment-requirements li {
+  color: #b8c8b8;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .admissions-page .requirement-checkmark {
+  color: #9fd4ae;
+}
+
+[data-theme="dark"] .admissions-page .empty-state-message {
+  color: #c8e8d4 !important;
+}
+
+[data-theme="dark"] .admissions-page .detail-card.empty-state-card > p:nth-child(1) {
+  color: #e4f2e8 !important;
+}
+
+[data-theme="dark"] .admissions-page .detail-card.empty-state-card > p:nth-child(2) {
+  color: #c8e8d4 !important;
+  opacity: 0.95;
+}
+
+[data-theme="dark"] .admissions-page .card-section h4 {
+  color: #9fd4ae;
+}
+
+[data-theme="dark"] .admissions-page .requirements-note {
+  background: linear-gradient(135deg, rgba(127, 180, 140, 0.12), rgba(255, 140, 0, 0.08));
+  border-color: rgba(127, 180, 140, 0.22);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .admissions-page .note-content h5 {
+  color: #c8e8d4;
+}
+
+[data-theme="dark"] .admissions-page .note-content ul,
+[data-theme="dark"] .admissions-page .note-content li {
+  color: #b8c8b8;
+}
+
+[data-theme="dark"] .admissions-page .timeline-item:not(:last-child)::after {
+  background: #2a352c;
+}
+
+[data-theme="dark"] .admissions-page .timeline-content h4 {
+  color: #c8e8d4;
+}
+
+[data-theme="dark"] .admissions-page .timeline-content p {
+  color: #a8b8a8;
+}
+
+[data-theme="dark"] .admissions-page .timeline-item:hover .timeline-content h4 {
+  color: #ffb84d;
+}
+
+[data-theme="dark"] .admissions-page .btn-primary {
+  background: linear-gradient(135deg, #2d5a2d, #3d7a3d);
+  border-color: #a8e6bc;
+  color: #f8fff8;
+}
+
+[data-theme="dark"] .admissions-page .btn-primary:hover {
+  background: linear-gradient(135deg, #3d7a3d, #4a904a);
+}
+
+[data-theme="dark"] .admissions-page .footer-section-admissions .footer,
+[data-theme="dark"] .admissions-page .footer {
+  background-color: #0a120a;
+}
+
+[data-theme="dark"] .admissions-page .footer-wave .shape-fill-1 {
+  fill: #a8841c;
+}
+
+[data-theme="dark"] .admissions-page .footer-wave .shape-fill-2 {
+  fill: #1a6b28;
+}
+
+[data-theme="dark"] .admissions-page .footer-wave .shape-fill-3 {
+  fill: #0f1512;
+}
+
+@media (max-width: 1024px) {
+  [data-theme="dark"] .admissions-page .nav-link.active-nav {
+    background-color: #ecf4ec;
+    color: #152a15;
+  }
+
+  [data-theme="dark"] .admissions-page .mobile-secondary-nav .nav-link.active-nav {
+    background-color: #c86a0a;
+    color: #fff;
   }
 }

@@ -7,6 +7,8 @@ import apiService from './services/api';
 import { normalizeImageUrl, buildSrcSet } from './utils/imageUtils';
 import './news_events.css';
 
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; News & Events dark styles live at the end of news_events.css (scoped under `.news-events-page`). */
+
 const NewsEvents = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);

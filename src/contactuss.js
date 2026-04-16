@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import './contactuss.css';
 import Navbar from './components/Navbar';
 import Footer from './components/footer';
 import ScrollToTop from './components/ScrollToTop';
 import SEO from './components/SEO';
 import apiService from './services/api';
+import './contactuss.css';
+
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; Contact Us dark styles live at the end of contactuss.css */
 
 const ContactUs = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);

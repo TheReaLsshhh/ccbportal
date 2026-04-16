@@ -8,6 +8,8 @@ import apiService from "./services/api";
 import audioManager from "./services/audioManager";
 import { normalizeImageUrl, buildSrcSet } from "./utils/imageUtils";
 
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; homepage dark styles live at the end of HomePage.css */
+
 const assetPath = (path) => `${process.env.PUBLIC_URL || ""}${path}`;
 const HERO_VIDEO_MP4 = assetPath("/images/bgvideo.mp4");
 const HERO_POSTER_WEBP = assetPath("/images/bg-hero-poster.webp");
@@ -17,7 +19,7 @@ const HERO_POSTER_JPG = assetPath("/images/bg-hero-poster.jpg");
 const HERO_ROTATING_HIGHLIGHTS = [
   "explore programs that fit your goals.",
   "apply easily through our college portal.",
-  "keep advancing toward your degree.",
+  "keep advancing towards your degree.",
 ];
 
 const HomePage = () => {
@@ -1260,7 +1262,7 @@ const HomePage = () => {
               <div className="news-grid-layout">
                 <div className="news-grid-item">
                   <div className="news-card">
-                    <p style={{ color: "#fff" }}>Loading latest news...</p>
+                    <p className="news-card-loading-text">Loading latest news...</p>
                   </div>
                 </div>
               </div>

@@ -405,7 +405,7 @@ html, body {
 
 /* Main Contact Section */
 .contact-section {
-  padding: 38px 0;
+  padding: 0 0;
   background: #f8fafc;
   min-height: 60vh;
 }
@@ -441,8 +441,8 @@ html, body {
   bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
+  width: 80px;
+  height: 4px;
   background: linear-gradient(90deg, #2d5a2d, #ff8c00);
   border-radius: 2px;
 }
@@ -541,8 +541,8 @@ html, body {
   bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
+  width: 80px;
+  height: 4px;
   background: linear-gradient(90deg, #2d5a2d, #ff8c00);
   border-radius: 2px;
 }
@@ -728,8 +728,8 @@ html, body {
   bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
+  width: 80px;
+  height: 4px;
   background: linear-gradient(90deg, #2d5a2d, #ff8c00);
   border-radius: 2px;
 }
@@ -822,30 +822,6 @@ html, body {
   }
 }
 
-@media (max-width: 768px) {
-  .contact-hero {
-    padding: 100px 0 60px;
-    height: 445px;
-  }
-
-  .contact-hero .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .contact-hero .hero-subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .contact-hero .hero-motto {
-    font-size: 1rem;
-  }
-
-  .contact-content {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-}
-
 /* Dedicated Wave Footer Styles for Contact Us Page */
 .contactus-page .footer-wave .shape-fill-1 { fill: #fbde6c; }
 .contactus-page .footer-wave .shape-fill-2 { fill: #2ec43a; }
@@ -854,19 +830,6 @@ html, body {
 /* Responsive Design */
 /* Responsive Design - Tablet (769px - 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .contact-hero {
-    padding: 110px 0 70px;
-    height: 400px !important;
-  }
-
-  .contact-hero .hero-title {
-    font-size: 3rem;
-  }
-
-  .contact-hero .hero-subtitle {
-    font-size: 1.15rem;
-  }
-
   .contact-content {
     gap: 50px;
   }
@@ -889,12 +852,11 @@ html, body {
 @media (max-width: 768px) {
   .contact-hero {
     padding: 100px 0 60px;
-    height: 380px !important;
+    height: 350px !important;
   }
 
   .contact-hero .hero-title {
     font-size: 2.5rem;
-    line-height: 1.2;
   }
   
   .contact-hero .hero-subtitle {
@@ -915,6 +877,13 @@ html, body {
   .contact-form-section h2,
   .map-section h2 {
     font-size: 1.8rem;
+  }
+
+  .contact-info-section h2::after,
+  .contact-form-section h2::after,
+  .map-section h2::after {
+    width: 60px;
+    height: 3px;
   }
 
   .form-row {
@@ -954,13 +923,12 @@ html, body {
 /* Responsive Design - Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
   .contact-hero {
-    padding: 90px 0 50px;
-    height: 350px !important;
+    padding: 80px 0 50px;
+    height: 300px !important;
   }
   
   .contact-hero .hero-title {
-    font-size: 1.8rem;
-    line-height: 1.1;
+    font-size: 2rem;
   }
   
   .contact-hero .hero-subtitle {
@@ -980,6 +948,13 @@ html, body {
   .contact-form-section h2,
   .map-section h2 {
     font-size: 1.6rem;
+  }
+
+  .contact-info-section h2::after,
+  .contact-form-section h2::after,
+  .map-section h2::after {
+    width: 50px;
+    height: 3px;
   }
 
   .contact-card,
@@ -1205,5 +1180,201 @@ html, body {
   .contactus-footer .footer-content {
     grid-template-columns: 1fr;
     text-align: center;
+  }
+}
+
+/* =============================================================================
+   Contact Us — dark mode (html[data-theme="dark"])
+   Scoped under .contactus-page (same pattern as HomePage.css + .homepage).
+   !important on contact-card / contact-form beats theme.css.
+   ============================================================================= */
+
+[data-theme="dark"] .contactus-page {
+  background-color: var(--theme-page-bg, #0f1410);
+  color: var(--theme-page-text, #e4eae4);
+}
+
+[data-theme="dark"] .contactus-page .scroll-progress-bar {
+  background-color: #5cb878;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .contactus-page .header-top.homepage-nav-section {
+  background-color: #1a231c !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .contactus-page .header-top.homepage-nav-section .brand-text-part1 {
+  color: #8fd4a0 !important;
+}
+
+[data-theme="dark"] .contactus-page .header-top.homepage-nav-section .brand-text-part2 {
+  color: #ffb84d !important;
+}
+
+[data-theme="dark"] .contactus-page .header-top.homepage-nav-section .brand-tagline {
+  color: #b0c4b0 !important;
+}
+
+[data-theme="dark"] .contactus-page .secondary-nav-bar.homepage-nav-section {
+  background: linear-gradient(180deg, #9a5808 0%, #7a4506 100%) !important;
+}
+
+[data-theme="dark"] .contactus-page .main-nav.with-bg.homepage-nav-section {
+  background-color: #152a15 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .contactus-page .contact-hero::before {
+  background-color: rgba(8, 14, 10, 0.72);
+}
+
+[data-theme="dark"] .contactus-page .contact-section {
+  background: linear-gradient(160deg, #0f1512 0%, #0f1512 100%) !important;
+  color: var(--theme-page-text, #e4eae4);
+}
+
+[data-theme="dark"] .contactus-page .contact-info-section h2,
+[data-theme="dark"] .contactus-page .contact-form-section h2,
+[data-theme="dark"] .contactus-page .map-section h2 {
+  color: #c8e8d4 !important;
+}
+
+[data-theme="dark"] .contactus-page .contact-info-section h2::after,
+[data-theme="dark"] .contactus-page .contact-form-section h2::after,
+[data-theme="dark"] .contactus-page .map-section h2::after {
+  background: linear-gradient(90deg, #7abf8f, #ff8c00) !important;
+}
+
+[data-theme="dark"] .contactus-page .contact-card {
+  background-color: #1f2a22 !important;
+  border-color: rgba(127, 180, 140, 0.28) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .contactus-page .contact-card:hover {
+  border-color: rgba(255, 140, 0, 0.45) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .contactus-page .contact-card h3 {
+  color: #c8e8d4;
+}
+
+[data-theme="dark"] .contactus-page .contact-card p {
+  color: #b8c8b8 !important;
+}
+
+[data-theme="dark"] .contactus-page .contact-form {
+  background-color: #1f2a22 !important;
+  border-color: rgba(127, 180, 140, 0.28) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .contactus-page .contact-form:hover {
+  border-color: rgba(255, 140, 0, 0.45) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .contactus-page .form-group label {
+  color: #9fd4ae;
+}
+
+[data-theme="dark"] .contactus-page .form-group input,
+[data-theme="dark"] .contactus-page .form-group select,
+[data-theme="dark"] .contactus-page .form-group textarea {
+  background: #1a231c;
+  border-color: rgba(127, 180, 140, 0.25);
+  color: #e8f0e8;
+}
+
+[data-theme="dark"] .contactus-page .form-group input:focus,
+[data-theme="dark"] .contactus-page .form-group select:focus,
+[data-theme="dark"] .contactus-page .form-group textarea:focus {
+  border-color: #7abf8f;
+  box-shadow: 0 0 0 3px rgba(127, 180, 140, 0.2);
+}
+
+[data-theme="dark"] .contactus-page .form-group select option {
+  background: #1f2a22;
+  color: #e4eae4;
+}
+
+[data-theme="dark"] .contactus-page .form-message.success {
+  background: rgba(45, 90, 45, 0.35);
+  color: #c8f0d4;
+  border-color: rgba(127, 180, 140, 0.45);
+}
+
+[data-theme="dark"] .contactus-page .form-message.error {
+  background: rgba(60, 24, 24, 0.55);
+  color: #f0c4c4;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+[data-theme="dark"] .contactus-page .submit-btn {
+  background: linear-gradient(135deg, #2d5a2d, #3d7a3d);
+  color: #f8fff8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .contactus-page .submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3d7a3d, #4a904a);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .contactus-page .map-container {
+  border-color: rgba(127, 180, 140, 0.35);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .contactus-page .map-container:hover {
+  border-color: rgba(255, 140, 0, 0.45);
+}
+
+[data-theme="dark"] .contactus-page .contact-form input:focus,
+[data-theme="dark"] .contactus-page .contact-form select:focus,
+[data-theme="dark"] .contactus-page .contact-form textarea:focus,
+[data-theme="dark"] .contactus-page .submit-btn:focus,
+[data-theme="dark"] .contactus-page .map-btn:focus {
+  outline: 2px solid #7abf8f;
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .contactus-page .contactus-footer {
+  background-color: #0f1512;
+}
+
+[data-theme="dark"] .contactus-page .contactus-footer .footer {
+  background-color: #0a120a;
+  color: #e8f0e8 !important;
+}
+
+[data-theme="dark"] .contactus-page .footer-wave .shape-fill-1 {
+  fill: #a8841c;
+}
+
+[data-theme="dark"] .contactus-page .footer-wave .shape-fill-2 {
+  fill: #1a6b28;
+}
+
+[data-theme="dark"] .contactus-page .footer-wave .shape-fill-3 {
+  fill: #0f1512;
+}
+
+@media (max-width: 1024px) {
+  [data-theme="dark"] .contactus-page .nav-link.active-nav {
+    background-color: #ecf4ec;
+    color: #152a15;
+  }
+
+  [data-theme="dark"] .contactus-page .nav-link.active-nav:hover {
+    background-color: #dce8dc;
+    color: #152a15;
+  }
+
+  [data-theme="dark"] .contactus-page .mobile-secondary-nav .nav-link.active-nav {
+    background-color: #c86a0a;
+    color: #fff;
   }
 }

@@ -6,6 +6,8 @@ import SEO from './components/SEO';
 import apiService from './services/api';
 import './academicprogram.css';
 
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; academics dark styles live at the end of academicprogram.css (scoped under `.academics-page`). */
+
 const getCoreCoursesList = (coreCourses) => {
   if (Array.isArray(coreCourses)) {
     return coreCourses.filter((course) => typeof course === 'string' && course.trim());
@@ -169,7 +171,7 @@ const AcademicPrograms = () => {
   }, []);
 
   return (
-    <div className={`App academic-page ${navAnimationsComplete ? 'nav-animations-complete' : ''}`}>
+    <div className={`App academic-page academics-page ${navAnimationsComplete ? 'nav-animations-complete' : ''}`}>
       {/* Dynamic Scroll Progress Bar */}
       <div 
         className="scroll-progress-bar" 

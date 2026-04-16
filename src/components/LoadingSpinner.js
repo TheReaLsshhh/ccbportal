@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import './LoadingSpinner.css';
 
+/* Overlay is portaled to document.body; styles use html[data-theme] from ThemeProvider (see LoadingSpinner.css). */
+
 const LoadingSpinner = ({ message = 'Loading...' }) => {
   useEffect(() => {
     const root = document.getElementById('root');

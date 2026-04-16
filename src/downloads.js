@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/footer';
 import SEO from './components/SEO';
 import apiService from './services/api';
 import './downloads.css';
+
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; downloads dark styles live at the end of downloads.css (scoped under `.downloads-page`). */
 
 const Downloads = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);

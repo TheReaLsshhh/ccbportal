@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './theme.css';
 import App from './App';
+import { ThemeProvider } from './context/ThemeContext';
+import ThemeToggle from './components/ThemeToggle';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initPerformanceMonitor } from './utils/PerformanceMonitor';
 import { trackSEOPerformance } from './utils/SEOEnhancer';
@@ -114,8 +117,11 @@ if ('requestIdleCallback' in window) {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <App />
+        <ThemeToggle />
+      </QueryClientProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

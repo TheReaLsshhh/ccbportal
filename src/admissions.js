@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/footer';
 import SEO from './components/SEO';
 import apiService from './services/api';
 import './admissions.css';
+
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; admissions dark styles live at the end of admissions.css (scoped under `.admissions-page`). */
 
 const categoryLabels = {
   'new-scholar': 'Requirements for Enrollment of New Students (Scholarship)',
@@ -440,16 +441,12 @@ const Admissions = () => {
                     <div className="detail-card empty-state-card" style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
                       <p>No enrollment process steps available for this category at this time.</p>
                       <p style={{ fontSize: '0.9rem', marginTop: '10px', color: '#999' }}>
-                        Please check back later or contact the admissions office for more information.
+                        Please check back later for updates.
                       </p>
                     </div>
                   );
                 }
               })()}
-              
-              <div className="section-cta">
-                <Link to="/contact" className="btn btn-secondary">Contact Admissions Office</Link>
-              </div>
             </div>
 
 

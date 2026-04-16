@@ -6,6 +6,8 @@ import SEO from './components/SEO';
 import apiService from './services/api';
 import './students.css';
 
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; Students dark styles live at the end of students.css */
+
 const Students = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);

@@ -6,6 +6,8 @@ import SEO from './components/SEO';
 import apiService from './services/api';
 import './aboutus.css';
 
+/* Dark/light: `html[data-theme]` comes from ThemeProvider; About Us dark styles live at the end of aboutus.css */
+
 const AboutUs = () => {
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
