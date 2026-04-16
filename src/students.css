@@ -586,9 +586,6 @@ html, body {
   transition: transform 0.3s ease;
 }
 
-.calendar-card:hover::before {
-}
-
 .calendar-card:hover {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   border: 1px solid #2d5a2d;
