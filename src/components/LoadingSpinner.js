@@ -4,18 +4,33 @@ import './LoadingSpinner.css';
 
 const LoadingSpinner = ({ message = 'Loading...' }) => {
   useEffect(() => {
-    const prev = document.body.style.overflow;
+    const root = document.getElementById('root');
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    if (root) {
+      root.setAttribute('inert', '');
+    }
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
+      if (root) {
+        root.removeAttribute('inert');
+      }
     };
   }, []);
 
   const node = (
-    <div className="app-page-loader" role="status" aria-live="polite">
+    <div
+      className="app-page-loader"
+      role="dialog"
+      aria-modal="true"
+      aria-busy="true"
+      aria-labelledby="app-page-loader-msg"
+    >
       <div className="app-page-loader__inner">
-        <div className="app-page-loader__spinner" aria-hidden="true" />
-        <p className="app-page-loader__message">{message}</p>
+        <div className="loader" aria-hidden="true" />
+        <p id="app-page-loader-msg" className="app-page-loader__message">
+          {message}
+        </p>
       </div>
     </div>
   );
