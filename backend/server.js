@@ -152,15 +152,37 @@ function sslOptionsForDatabaseUrl(databaseUrl) {
   return { rejectUnauthorized: false };
 }
 
+/** Render secrets sometimes include leading/trailing spaces or wrapping quotes — breaks `pg` URL parsing. */
+function normalizeConnectionString(raw) {
+  if (raw == null || typeof raw !== 'string') return raw;
+  let s = raw.trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
+/** True if URI already has user:password@host (do not also set PGPASSWORD). Password must be URL-encoded if it contains @ ? # : etc. */
+function connectionStringHasPassword(databaseUrl) {
+  const rest = databaseUrl.replace(/^postgres(ql)?:\/\//i, '');
+  const at = rest.indexOf('@');
+  if (at <= 0) return false;
+  const userInfo = rest.slice(0, at);
+  return userInfo.includes(':');
+}
+
 function getPgConfig() {
-  const databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = normalizeConnectionString(process.env.DATABASE_URL);
   if (databaseUrl) {
     const cfg = {
       connectionString: databaseUrl,
       ssl: sslOptionsForDatabaseUrl(databaseUrl)
     };
-    const pwd = process.env.PGPASSWORD;
-    if (typeof pwd === 'string' && pwd.length > 0) cfg.password = pwd;
+    // Mixing PGPASSWORD with a full URI can break auth; only pass when URL has no embedded password.
+    if (!connectionStringHasPassword(databaseUrl)) {
+      const pwd = process.env.PGPASSWORD;
+      if (typeof pwd === 'string' && pwd.length > 0) cfg.password = pwd.trim();
+    }
     return cfg;
   }
 
@@ -434,6 +456,11 @@ async function initDb() {
     if (/ENOTFOUND|ETIMEDOUT|ECONNREFUSED|no pg_hba/i.test(msg)) {
       logger.error(
         'Hosted Postgres from Render: if using Supabase, try Session pooler URI (port 6543) — direct db.*.supabase.co:5432 often fails on IPv4. Dashboard → Connect → Session pooler.'
+      );
+    }
+    if (/invalid url/i.test(msg)) {
+      logger.error(
+        'DATABASE_URL is not a valid connection URI: remove square brackets around the password, strip wrapping quotes, URL-encode special characters in the password (? # @ : / %), and use postgresql://postgres:ENCODED@host:5432/postgres'
       );
     }
     dbReady = false;
