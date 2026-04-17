@@ -137,12 +137,27 @@ let pool = null;
 let dbReady = false;
 
 
+/** TLS for hosted Postgres (e.g. Supabase). Render → Supabase needs this; sslmode= in URL alone is not always enough for `pg`. */
+function sslOptionsForDatabaseUrl(databaseUrl) {
+  if (!databaseUrl || typeof databaseUrl !== 'string') return undefined;
+  if (process.env.PGSSL === 'false') return undefined;
+  const u = databaseUrl.toLowerCase();
+  const useSsl =
+    process.env.PGSSL === 'true' ||
+    u.includes('supabase.co') ||
+    u.includes('sslmode=require') ||
+    u.includes('sslmode=verify-full') ||
+    u.includes('amazonaws.com');
+  if (!useSsl) return undefined;
+  return { rejectUnauthorized: false };
+}
+
 function getPgConfig() {
   const databaseUrl = process.env.DATABASE_URL;
   if (databaseUrl) {
     const cfg = {
       connectionString: databaseUrl,
-      ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined
+      ssl: sslOptionsForDatabaseUrl(databaseUrl)
     };
     const pwd = process.env.PGPASSWORD;
     if (typeof pwd === 'string' && pwd.length > 0) cfg.password = pwd;
@@ -412,8 +427,14 @@ async function initDb() {
 
   } catch (err) {
     logger.error('Error initializing database:', err);
-    if (String(err?.message || '').includes('client password must be a string')) {
+    const msg = String(err?.message || '');
+    if (msg.includes('client password must be a string')) {
       logger.error('Set DATABASE_URL (with password) or set PGPASSWORD in your local .env.');
+    }
+    if (/ENOTFOUND|ETIMEDOUT|ECONNREFUSED|no pg_hba/i.test(msg)) {
+      logger.error(
+        'Hosted Postgres from Render: if using Supabase, try Session pooler URI (port 6543) — direct db.*.supabase.co:5432 often fails on IPv4. Dashboard → Connect → Session pooler.'
+      );
     }
     dbReady = false;
   }

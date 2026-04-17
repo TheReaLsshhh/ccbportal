@@ -26,14 +26,25 @@ const logger = winston.createLogger({
   ]
 });
 
-// If we're not in production, log to the console with a simple format
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    )
-  }));
+// Development: colorized console. Production (e.g. Render): plain stdout so log tail shows DB errors and startup.
+if (process.env.NODE_ENV === 'production') {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.errors({ stack: true }),
+        winston.format.printf(({ level, message, timestamp, stack }) =>
+          stack ? `${timestamp} [${level}]: ${message}\n${stack}` : `${timestamp} [${level}]: ${message}`
+        )
+      )
+    })
+  );
+} else {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple())
+    })
+  );
 }
 
 module.exports = logger;
