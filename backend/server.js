@@ -19,6 +19,23 @@ const { broadcastDataChange } = require('./utils/realtimeUtils');
 // Load env vars from root .env BEFORE importing services
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
+const admin = require('firebase-admin');
+
+// Initialize Firebase using the service account JSON from the environment (e.g. Render secret)
+if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+    }
+    console.log('Firebase Admin initialized successfully!');
+  } catch (e) {
+    logger.error('Firebase Admin initialization failed:', e.message);
+  }
+}
+
 const brevoService = require('./services/brevoService');
 
 const app = express();
@@ -211,8 +228,25 @@ async function ensureDatabaseExists() {
   await adminClient.end();
 }
 
+function hasExplicitPostgresUrl() {
+  return Boolean(normalizeConnectionString(process.env.DATABASE_URL));
+}
+
 async function initDb() {
   try {
+    // Firebase Data Connect / Admin path: no socket-style PG URL on the host (e.g. Render without DATABASE_URL)
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY && !hasExplicitPostgresUrl()) {
+      if (!admin.apps.length) {
+        logger.warn(
+          'FIREBASE_SERVICE_ACCOUNT_KEY is set but Firebase Admin did not initialize (check JSON secret).'
+        );
+      } else {
+        console.log('Database layer ready via Firebase Data Connect');
+      }
+      dbReady = false;
+      return;
+    }
+
     await ensureDatabaseExists();
     pool = new Pool(getPgConfig());
     await pool.query('SELECT 1');
