@@ -2893,9 +2893,6 @@ app.listen(PORT, () => {
   logger.info(`Health check available at: http://localhost:${PORT}/health`);
 });
 
-import pkg from "pg";
-const { Pool } = pkg;
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
